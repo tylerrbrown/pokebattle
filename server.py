@@ -28,7 +28,7 @@ PORT = int(os.environ.get("POKEBATTLE_PORT", 5060))
 ADMIN_SECRET = os.environ.get("POKEBATTLE_ADMIN_SECRET", "pb-x9f2k7m4-admin-2024")
 
 # Global state
-room_manager = RoomManager()
+room_manager = RoomManager(on_game_end=record_game)
 account_mgr = None  # Initialized in main()
 
 
@@ -431,11 +431,6 @@ async def handler(websocket):
         print(f"[!] Error handling player {player.id}: {e}")
     finally:
         print(f"[-] Player disconnected: {player.id}")
-        # Record game if it just ended
-        room = room_manager.get_room(player)
-        if room and room.state == "GAME_OVER":
-            # Game was already recorded
-            pass
         await room_manager.remove_player(player)
 
 
