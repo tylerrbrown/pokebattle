@@ -82,6 +82,7 @@ class GameRoom:
         self.created_at = time.time()
         self.turn_count = 0
         self.battle_log = []
+        self.on_game_end = None  # callback(room, winner_idx, summary)
 
         # Async event coordination
         self._action_events = [None, None]
@@ -689,6 +690,13 @@ class GameRoom:
                     "opponent_team_status": self.players[1 - i].team_status(full=True),
                 })
 
+        # Persist game to database
+        if self.on_game_end:
+            try:
+                self.on_game_end(self, winner_idx, summary)
+            except Exception as e:
+                print(f"Error in on_game_end callback: {e}")
+
         return summary
 
     async def handle_rematch(self, player):
@@ -739,9 +747,10 @@ class GameRoom:
 class RoomManager:
     """Manages all active game rooms."""
 
-    def __init__(self):
+    def __init__(self, on_game_end=None):
         self.rooms = {}  # code -> GameRoom
         self.player_rooms = {}  # player.id -> room_code
+        self.on_game_end = on_game_end  # callback for all rooms
 
     def generate_code(self):
         """Generate a unique 4-letter room code."""
@@ -755,6 +764,7 @@ class RoomManager:
         """Create a new room and add the player."""
         code = self.generate_code()
         room = GameRoom(code)
+        room.on_game_end = self.on_game_end
         self.rooms[code] = room
         await room.add_player(player)
         self.player_rooms[player.id] = code
