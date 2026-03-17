@@ -1,0 +1,15 @@
+[Unit]
+Description=PokeBattle
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/pokebattle
+ExecStart=/usr/bin/python3 /opt/pokebattle/server.py
+Restart=always
+RestartSec=3
+Environment=POKEBATTLE_PORT=5060
+Environment=POKEBATTLE_ADMIN_SECRET=pb-x9f2k7m4-admin-2024
+
+[Install]
+WantedBy=multi-user.target
