@@ -20,6 +20,7 @@ class Player:
         self.ws = ws
         self.id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
         self.name = None
+        self.account_id = None  # Linked player account (if logged in)
         self.room_code = None
         self.team = None           # List of PokemonInstance
         self.team_name = None
