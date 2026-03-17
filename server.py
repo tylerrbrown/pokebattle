@@ -27,11 +27,6 @@ DB_PATH = APP_DIR / "pokebattle.db"
 PORT = int(os.environ.get("POKEBATTLE_PORT", 5060))
 ADMIN_SECRET = os.environ.get("POKEBATTLE_ADMIN_SECRET", "pb-x9f2k7m4-admin-2024")
 
-# Global state
-room_manager = RoomManager(on_game_end=record_game)
-account_mgr = None  # Initialized in main()
-
-
 # ─── SQLite ─────────────────────────────────────────────
 
 def init_db():
@@ -87,6 +82,11 @@ def record_game(room, winner_idx, summary):
         conn.close()
     except Exception as e:
         print(f"Error recording game: {e}")
+
+
+# Global state
+room_manager = RoomManager(on_game_end=record_game)
+account_mgr = None  # Initialized in main()
 
 
 # ─── HTTP Static File Server ───────────────────────────
