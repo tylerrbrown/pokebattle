@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PokeBattle Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Press Start 2P', monospace;
+  background: #0d0d1a;
+  color: #e0e0e0;
+  padding: 20px;
+  font-size: 10px;
+  line-height: 1.8;
+}
+h1 { color: #e94560; font-size: 18px; margin-bottom: 20px; }
+h2 { color: #4a9eff; font-size: 12px; margin: 20px 0 10px; }
+.card {
+  background: #151528;
+  border: 2px solid #2a2a50;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; text-align: left; border-bottom: 1px solid #2a2a50; }
+th { color: #8888aa; }
+.stat { font-size: 20px; color: #4ade80; }
+.stat-label { color: #8888aa; font-size: 8px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 8px;
+  cursor: pointer;
+  color: #fff;
+}
+.btn-red { background: #ef4444; }
+.btn-blue { background: #4a9eff; }
+.btn:hover { opacity: 0.8; }
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 7px;
+}
+.badge-lobby { background: #4a9eff; }
+.badge-team { background: #f97316; }
+.badge-battle { background: #e94560; }
+.badge-over { background: #8888aa; }
+.error { color: #ef4444; }
+.refresh { float: right; }
+#auth-form { max-width: 300px; margin: 100px auto; text-align: center; }
+#auth-form input {
+  font-family: inherit;
+  background: #0d0d1a;
+  color: #e0e0e0;
+  border: 2px solid #2a2a50;
+  padding: 10px;
+  font-size: 10px;
+  width: 100%;
+  margin: 10px 0;
+  border-radius: 6px;
+}
+</style>
+</head>
+<body>
+<div id="auth-form">
+  <h1>ADMIN</h1>
+  <input id="admin-key" type="password" placeholder="Admin Key">
+  <br>
+  <button class="btn btn-blue" onclick="authenticate()">LOGIN</button>
+</div>
+
+<div id="admin-panel" style="display:none">
+  <h1>PokeBattle Admin <button class="btn btn-blue refresh" onclick="loadAll()">REFRESH</button></h1>
+
+  <h2>Stats</h2>
+  <div class="card stats-grid" id="stats-panel"></div>
+
+  <h2>Active Rooms</h2>
+  <div class="card"><table id="rooms-table"><thead><tr><th>Code</th><th>State</th><th>Players</th><th>Turn</th><th>Age</th><th></th></tr></thead><tbody></tbody></table></div>
+
+  <h2>Game History (Last 50)</h2>
+  <div class="card"><table id="history-table"><thead><tr><th>Room</th><th>P1</th><th>P2</th><th>Winner</th><th>Turns</th><th>Duration</th><th>Date</th></tr></thead><tbody></tbody></table></div>
+
+  <h2>Top Pokemon</h2>
+  <div class="card" id="top-pokemon"></div>
+</div>
+
+<script>
+let adminKey = '';
+
+function authenticate() {
+  adminKey = document.getElementById('admin-key').value.trim();
+  // Also check URL param
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('k')) adminKey = params.get('k');
+
+  if (!adminKey) return;
+  document.getElementById('auth-form').style.display = 'none';
+  document.getElementById('admin-panel').style.display = '';
+  loadAll();
+}
+
+// Auto-auth from URL
+window.onload = () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('k')) {
+    adminKey = params.get('k');
+    document.getElementById('auth-form').style.display = 'none';
+    document.getElementById('admin-panel').style.display = '';
+    loadAll();
+  }
+};
+
+async function apiFetch(path) {
+  const resp = await fetch(`${path}${path.includes('?') ? '&' : '?'}k=${encodeURIComponent(adminKey)}`);
+  if (!resp.ok) throw new Error(`API error: ${resp.status}`);
+  return resp.json();
+}
+
+async function loadAll() {
+  try {
+    const [stats, rooms, history] = await Promise.all([
+      apiFetch('/api/admin/stats'),
+      apiFetch('/api/admin/rooms'),
+      apiFetch('/api/admin/history'),
+    ]);
+    renderStats(stats);
+    renderRooms(rooms);
+    renderHistory(history);
+    renderTopPokemon(stats.top_pokemon || []);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderStats(s) {
+  document.getElementById('stats-panel').innerHTML = `
+    <div><div class="stat">${s.total_games}</div><div class="stat-label">Total Games</div></div>
+    <div><div class="stat">${s.active_rooms}</div><div class="stat-label">Active Rooms</div></div>
+    <div><div class="stat">${s.avg_turns}</div><div class="stat-label">Avg Turns</div></div>
+    <div><div class="stat">${formatDuration(Math.round(s.avg_duration_sec))}</div><div class="stat-label">Avg Duration</div></div>
+  `;
+}
+
+function renderRooms(rooms) {
+  const tbody = document.querySelector('#rooms-table tbody');
+  if (!rooms.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:#8888aa">No active rooms</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rooms.map(r => `
+    <tr>
+      <td>${r.code}</td>
+      <td><span class="badge badge-${r.state.toLowerCase()}">${r.state}</span></td>
+      <td>${r.players.map(p => p.name).join(' vs ')}</td>
+      <td>${r.turn}</td>
+      <td>${formatDuration(r.age_seconds)}</td>
+      <td><button class="btn btn-red" onclick="closeRoom('${r.code}')">CLOSE</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderHistory(games) {
+  const tbody = document.querySelector('#history-table tbody');
+  if (!games.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:#8888aa">No games yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = games.map(g => {
+    const date = new Date(g.finished_at * 1000);
+    const winner = g.winner === 1 ? g.player1_name : g.player2_name;
+    return `
+      <tr>
+        <td>${g.room_code}</td>
+        <td>${g.player1_name}${g.player1_team_name ? ` (${g.player1_team_name})` : ''}</td>
+        <td>${g.player2_name}${g.player2_team_name ? ` (${g.player2_team_name})` : ''}</td>
+        <td style="color:#4ade80">${winner}</td>
+        <td>${g.turns}</td>
+        <td>${formatDuration(g.duration_sec)}</td>
+        <td>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderTopPokemon(list) {
+  const el = document.getElementById('top-pokemon');
+  if (!list.length) {
+    el.innerHTML = '<span style="color:#8888aa">No data yet</span>';
+    return;
+  }
+  el.innerHTML = list.map((p, i) =>
+    `<div style="display:inline-flex;align-items:center;gap:6px;margin:4px 10px">
+      <img src="/sprites/front/${String(p.id).padStart(3,'0')}.png" style="width:32px;height:32px;image-rendering:pixelated">
+      <span>${i+1}. ${p.name} (${p.count})</span>
+    </div>`
+  ).join('');
+}
+
+async function closeRoom(code) {
+  if (!confirm(`Close room ${code}?`)) return;
+  try {
+    await apiFetch(`/api/admin/rooms/${code}?action=close`);
+    loadAll();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+function formatDuration(sec) {
+  if (!sec || sec < 0) return '0s';
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
+// Auto-refresh every 15s
+setInterval(loadAll, 15000);
+</script>
+</body>
+</html>

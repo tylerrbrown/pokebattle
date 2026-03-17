@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>PokeBattle</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ──────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0d1a;
+  --bg2: #151528;
+  --bg3: #1c1c3a;
+  --panel: #1a1a35;
+  --border: #2a2a50;
+  --text: #e0e0e0;
+  --text-dim: #8888aa;
+  --accent: #e94560;
+  --accent2: #ff6b6b;
+  --blue: #4a9eff;
+  --green: #4ade80;
+  --yellow: #facc15;
+  --red: #ef4444;
+  --orange: #f97316;
+  --hp-green: #4ade80;
+  --hp-yellow: #facc15;
+  --hp-red: #ef4444;
+  --type-normal: #a8a878; --type-fire: #f08030; --type-water: #6890f0;
+  --type-electric: #f8d030; --type-grass: #78c850; --type-ice: #98d8d8;
+  --type-fighting: #c03028; --type-poison: #a040a0; --type-ground: #e0c068;
+  --type-flying: #a890f0; --type-psychic: #f85888; --type-bug: #a8b820;
+  --type-rock: #b8a038; --type-ghost: #705898; --type-dragon: #7038f8;
+}
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Press Start 2P', monospace;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+input {
+  font-family: inherit;
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  padding: 10px 14px;
+  font-size: 10px;
+  border-radius: 6px;
+}
+input:focus { border-color: var(--accent); }
+input.invalid { border-color: var(--red); }
+
+#app {
+  width: 100%;
+  max-width: 900px;
+  height: 100vh;
+  max-height: 700px;
+  position: relative;
+  overflow: hidden;
+}
+.screen { display: none; width: 100%; height: 100%; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ─── Title Screen ──────────────────────────────── */
+.title-screen {
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%);
+  padding: 20px;
+}
+.title-logo {
+  font-size: 28px;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(233,69,96,0.5), 0 4px 0 #8b1a2b;
+  text-align: center;
+  line-height: 1.6;
+}
+.title-subtitle {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: center;
+}
+.title-instructions {
+  font-size: 8px;
+  color: var(--text-dim);
+  line-height: 2.2;
+  text-align: left;
+  width: 300px;
+  max-width: 90%;
+}
+.title-instructions p { margin: 0; }
+.title-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+  max-width: 90%;
+}
+.title-form input { width: 100%; text-align: center; }
+.title-btns { display: flex; gap: 10px; }
+.btn {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 10px;
+  transition: all 0.15s;
+  flex: 1;
+}
+.btn:active { transform: scale(0.95); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-secondary { background: var(--bg3); color: var(--text); border: 2px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.error-text { color: var(--red); font-size: 8px; min-height: 16px; text-align: center; }
+
+/* ─── Lobby Screen ──────────────────────────────── */
+.lobby-screen {
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+.room-code {
+  font-size: 48px;
+  letter-spacing: 12px;
+  color: var(--accent);
+  text-shadow: 0 0 30px rgba(233,69,96,0.4);
+  cursor: pointer;
+}
+.room-code:hover { text-shadow: 0 0 40px rgba(233,69,96,0.7); }
+.lobby-status { font-size: 10px; color: var(--text-dim); }
+.dots-anim::after {
+  content: '';
+  animation: dots 1.5s infinite;
+}
+@keyframes dots {
+  0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; }
+}
+
+/* ─── Team Select Screen ────────────────────────── */
+.team-screen { padding: 10px; gap: 8px; }
+.team-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.team-header input { flex: 1; font-size: 8px; padding: 6px 10px; }
+.team-timer { font-size: 12px; color: var(--yellow); min-width: 50px; text-align: right; }
+.team-search { width: 100%; font-size: 8px; padding: 6px 10px; }
+
+.pokemon-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--bg);
+}
+.pokemon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 2px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--bg2);
+}
+.pokemon-card:hover { border-color: var(--blue); background: var(--bg3); }
+.pokemon-card.selected { border-color: var(--accent); background: rgba(233,69,96,0.15); }
+.pokemon-card img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+.pokemon-card .pname { font-size: 6px; text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+.team-bar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  background: var(--bg2);
+  border-radius: 8px;
+  border: 2px solid var(--border);
+}
+.team-slot {
+  width: 48px;
+  height: 48px;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.team-slot.filled { border-style: solid; border-color: var(--accent); background: var(--bg3); }
+.team-slot img { width: 40px; height: 40px; image-rendering: pixelated; }
+.team-slot .remove-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.team-footer { display: flex; gap: 8px; align-items: center; }
+.team-footer .btn { font-size: 9px; padding: 10px 16px; }
+.opponent-status { font-size: 8px; color: var(--text-dim); flex: 1; text-align: right; }
+
+/* ─── Battle Screen ─────────────────────────────── */
+.battle-screen { background: var(--bg); position: relative; }
+.battle-arena {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg3) 50%, var(--bg) 100%);
+}
+
+/* Opponent (top-right) */
+.opponent-side {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.opponent-info {
+  text-align: right;
+}
+.opponent-sprite {
+  width: 120px;
+  height: 120px;
+  image-rendering: pixelated;
+  transition: opacity 0.5s, transform 0.5s;
+}
+.opponent-sprite.faint { animation: faint-anim 0.8s forwards; }
+
+/* Player (bottom-left) */
+.player-side {
+  position: absolute;
+  bottom: 10px;
+  left: 20px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.player-info { text-align: left; }
+.player-sprite {
+  width: 140px;
+  height: 140px;
+  image-rendering: pixelated;
+  transition: opacity 0.5s, transform 0.5s;
+}
+.player-sprite.faint { animation: faint-anim 0.8s forwards; }
+
+.poke-name { font-size: 10px; margin-bottom: 4px; }
+.poke-status-badge {
+  display: inline-block;
+  font-size: 7px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+.status-burn { background: var(--type-fire); color: #fff; }
+.status-poison { background: var(--type-poison); color: #fff; }
+.status-paralyze { background: var(--type-electric); color: #000; }
+.status-sleep { background: var(--text-dim); color: #fff; }
+.status-freeze { background: var(--type-ice); color: #000; }
+
+.hp-bar-container { width: 160px; }
+.hp-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.hp-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease-out, background-color 0.3s;
+}
+.hp-text { font-size: 7px; color: var(--text-dim); margin-top: 2px; }
+
+/* Pokeball team indicators */
+.team-balls {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.ball {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+.ball.alive { background: var(--red); border-color: #fff; }
+.ball.fainted { background: var(--bg); opacity: 0.3; }
+
+/* Battle text box */
+.battle-text-box {
+  padding: 10px 16px;
+  background: var(--panel);
+  border-top: 2px solid var(--border);
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+}
+.battle-text {
+  font-size: 10px;
+  line-height: 1.6;
+  min-height: 20px;
+}
+
+/* Move panel */
+.move-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 8px;
+  background: var(--bg2);
+  border-top: 2px solid var(--border);
+}
+.move-btn {
+  padding: 10px 8px;
+  border-radius: 6px;
+  text-align: left;
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  color: var(--text);
+  transition: all 0.15s;
+}
+.move-btn:hover:not(:disabled) { border-color: var(--blue); }
+.move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.move-btn .move-name { font-size: 9px; display: block; }
+.move-btn .move-meta { font-size: 7px; color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
+.move-type-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 6px;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+/* Action bar (switch button + waiting) */
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--bg2);
+}
+.action-bar .btn { font-size: 8px; padding: 6px 12px; flex: none; }
+.action-timer { font-size: 8px; color: var(--yellow); }
+.waiting-text { font-size: 9px; color: var(--text-dim); text-align: center; padding: 20px; }
+
+/* Switch panel (replaces move panel) */
+.switch-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  padding: 8px;
+  background: var(--bg2);
+  border-top: 2px solid var(--border);
+}
+.switch-btn {
+  padding: 8px 6px;
+  border-radius: 6px;
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  color: var(--text);
+  text-align: center;
+  transition: all 0.15s;
+}
+.switch-btn:hover:not(:disabled) { border-color: var(--green); }
+.switch-btn:disabled { opacity: 0.3; }
+.switch-btn img { width: 32px; height: 32px; image-rendering: pixelated; }
+.switch-btn .sw-name { font-size: 7px; display: block; margin-top: 2px; }
+.switch-btn .sw-hp { font-size: 6px; color: var(--text-dim); }
+
+/* ─── Tap Phase Overlay ─────────────────────────── */
+.tap-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.tap-overlay.active { display: flex; }
+.tap-move-name { font-size: 12px; color: var(--accent); }
+.tap-timer { font-size: 20px; color: var(--yellow); }
+.tap-meter-container {
+  width: 60px;
+  height: 200px;
+  background: var(--bg);
+  border: 3px solid var(--border);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.tap-meter-fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, var(--green), var(--yellow), var(--red));
+  transition: height 0.05s;
+  border-radius: 0 0 5px 5px;
+}
+.tap-prompt {
+  font-size: 16px;
+  color: #fff;
+  animation: pulse 0.3s infinite alternate;
+}
+.tap-multiplier { font-size: 14px; color: var(--green); }
+.tap-area {
+  position: absolute;
+  inset: 0;
+  z-index: 101;
+  cursor: pointer;
+}
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+/* ─── Game Over Screen ──────────────────────────── */
+.gameover-screen {
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+}
+.gameover-title {
+  font-size: 24px;
+  text-align: center;
+}
+.gameover-title.win { color: var(--green); text-shadow: 0 0 20px rgba(74,222,128,0.5); }
+.gameover-title.lose { color: var(--red); text-shadow: 0 0 20px rgba(239,68,68,0.5); }
+.gameover-summary { font-size: 9px; color: var(--text-dim); text-align: center; line-height: 2; }
+.gameover-btns { display: flex; gap: 10px; }
+
+/* ─── Animations ────────────────────────────────── */
+@keyframes faint-anim {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(50px); opacity: 0; }
+}
+@keyframes shake {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-5px, 3px); }
+  40% { transform: translate(5px, -3px); }
+  60% { transform: translate(-3px, 5px); }
+  80% { transform: translate(3px, -5px); }
+}
+@keyframes flash-white {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.4; }
+}
+.shaking { animation: shake 0.4s ease-in-out; }
+.flash-overlay {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+.flash-overlay.active { animation: flash-white 0.3s; }
+
+@keyframes hit-flash {
+  0%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.2; }
+}
+.hit-flash { animation: hit-flash 0.4s; }
+
+@keyframes slide-in-right {
+  from { transform: translateX(100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slide-in-left {
+  from { transform: translateX(-100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ─── Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TITLE SCREEN -->
+  <div id="screen-title" class="screen title-screen active">
+    <div class="title-logo">POKÉ<br>BATTLE</div>
+    <div class="title-subtitle">Gen 1 • Multiplayer • Real-time</div>
+    <div class="title-instructions">
+      <p>1. Enter your name</p>
+      <p>2. CREATE a room and share the 4-letter code</p>
+      <p>3. Or JOIN with a friend's code</p>
+      <p>4. Pick 6 Pokemon, then battle!</p>
+    </div>
+    <div class="title-form">
+      <input id="player-name" type="text" placeholder="Your Name" maxlength="16" autocomplete="off">
+      <div class="title-btns">
+        <button class="btn btn-primary" onclick="createRoom()">CREATE</button>
+        <button class="btn btn-secondary" onclick="showJoinInput()">JOIN</button>
+      </div>
+      <input id="join-code" type="text" placeholder="Room Code (4 letters)" maxlength="4" style="display:none" autocomplete="off">
+      <button id="join-btn" class="btn btn-primary" style="display:none" onclick="joinRoom()">JOIN ROOM</button>
+      <div id="title-error" class="error-text"></div>
+    </div>
+  </div>
+
+  <!-- LOBBY SCREEN -->
+  <div id="screen-lobby" class="screen lobby-screen">
+    <div class="title-logo" style="font-size:18px">WAITING</div>
+    <div class="room-code" id="lobby-code" onclick="copyCode()" title="Click to copy"></div>
+    <div class="lobby-status">Share this code with your opponent</div>
+    <div class="lobby-status dots-anim" id="lobby-waiting">Waiting for opponent</div>
+    <button class="btn btn-secondary" style="width:200px" onclick="leaveRoom()">LEAVE</button>
+  </div>
+
+  <!-- TEAM SELECT SCREEN -->
+  <div id="screen-team" class="screen team-screen">
+    <div class="team-header">
+      <input id="team-name-input" type="text" placeholder="Team Name" maxlength="20">
+      <span class="team-timer" id="team-timer">90</span>
+    </div>
+    <input class="team-search" id="team-search" type="text" placeholder="Search Pokemon..." autocomplete="off">
+    <div class="pokemon-grid" id="pokemon-grid"></div>
+    <div class="team-bar" id="team-bar"></div>
+    <div class="team-footer">
+      <button class="btn btn-primary" id="lock-team-btn" onclick="lockTeam()" disabled>LOCK IN (0/6)</button>
+      <span class="opponent-status" id="opponent-status"></span>
+    </div>
+    <div id="team-error" class="error-text"></div>
+  </div>
+
+  <!-- BATTLE SCREEN -->
+  <div id="screen-battle" class="screen battle-screen">
+    <div class="battle-arena" id="battle-arena">
+      <div class="flash-overlay" id="flash-overlay"></div>
+      <!-- Opponent side -->
+      <div class="opponent-side">
+        <div class="opponent-info">
+          <div class="poke-name" id="opp-name"></div>
+          <div class="hp-bar-container">
+            <div class="hp-bar-bg"><div class="hp-bar-fill" id="opp-hp-bar"></div></div>
+            <div class="hp-text" id="opp-hp-text"></div>
+          </div>
+          <div class="team-balls" id="opp-balls"></div>
+        </div>
+        <img id="opp-sprite" class="opponent-sprite" src="" alt="">
+      </div>
+      <!-- Player side -->
+      <div class="player-side">
+        <img id="player-sprite" class="player-sprite" src="" alt="">
+        <div class="player-info">
+          <div class="poke-name" id="player-name-battle"></div>
+          <div class="hp-bar-container">
+            <div class="hp-bar-bg"><div class="hp-bar-fill" id="player-hp-bar"></div></div>
+            <div class="hp-text" id="player-hp-text"></div>
+          </div>
+          <div class="team-balls" id="player-balls"></div>
+        </div>
+      </div>
+    </div>
+    <div class="battle-text-box" id="battle-text-box">
+      <div class="battle-text" id="battle-text"></div>
+    </div>
+    <div id="battle-controls">
+      <!-- Dynamic: move panel, switch panel, or waiting -->
+    </div>
+    <!-- Tap overlay -->
+    <div class="tap-overlay" id="tap-overlay">
+      <div class="tap-area" id="tap-area"></div>
+      <div class="tap-move-name" id="tap-move-name"></div>
+      <div class="tap-meter-container">
+        <div class="tap-meter-fill" id="tap-meter-fill"></div>
+      </div>
+      <div class="tap-timer" id="tap-timer">3.0</div>
+      <div class="tap-prompt">TAP!</div>
+      <div class="tap-multiplier" id="tap-multiplier"></div>
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="screen-gameover" class="screen gameover-screen">
+    <div class="gameover-title" id="gameover-title"></div>
+    <div class="gameover-summary" id="gameover-summary"></div>
+    <div class="gameover-btns">
+      <button class="btn btn-primary" onclick="requestRematch()">REMATCH</button>
+      <button class="btn btn-secondary" onclick="backToTitle()">NEW GAME</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── State ─────────────────────────────────────── */
+const S = {
+  ws: null,
+  screen: 'title',
+  roomCode: null,
+  playerName: null,
+  opponentName: null,
+  pokemonList: [],
+  selectedTeam: [],  // dex IDs
+  teamName: '',
+  myTeam: [],
+  oppTeam: [],
+  myActive: 0,
+  oppActive: 0,
+  showingSwitch: false,
+  timerInterval: null,
+  animating: false,
+};
+
+/* ─── WebSocket ─────────────────────────────────── */
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  S.ws = new WebSocket(`${proto}//${location.host}/ws`);
+  S.ws.onopen = () => console.log('WS connected');
+  S.ws.onclose = () => {
+    console.log('WS disconnected');
+    setTimeout(connect, 2000);
+  };
+  S.ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    handleMessage(msg);
+  };
+}
+
+function send(msg) {
+  if (S.ws && S.ws.readyState === WebSocket.OPEN) {
+    S.ws.send(JSON.stringify(msg));
+  }
+}
+
+/* ─── Message Handler ───────────────────────────── */
+function handleMessage(msg) {
+  // console.log('<<', msg.type, msg);
+  switch (msg.type) {
+    case 'room_created':
+      S.roomCode = msg.code;
+      showScreen('lobby');
+      document.getElementById('lobby-code').textContent = msg.code;
+      break;
+    case 'room_joined':
+      S.roomCode = msg.code;
+      S.opponentName = msg.opponent_name;
+      // Will get team_select_start soon
+      break;
+    case 'opponent_joined':
+      S.opponentName = msg.opponent_name;
+      document.getElementById('lobby-waiting').textContent = `${msg.opponent_name} joined!`;
+      break;
+    case 'team_select_start':
+      S.pokemonList = msg.pokemon_list;
+      S.selectedTeam = [];
+      showScreen('team');
+      renderTeamSelect();
+      startTimer(msg.time_limit, 'team-timer');
+      break;
+    case 'opponent_ready':
+      document.getElementById('opponent-status').textContent = 'Opponent locked in!';
+      break;
+    case 'team_locked':
+      document.getElementById('lock-team-btn').disabled = true;
+      document.getElementById('lock-team-btn').textContent = 'LOCKED IN';
+      break;
+    case 'team_auto_assigned':
+      showTeamError(msg.text);
+      break;
+    case 'battle_start':
+      S.myTeam = msg.your_team;
+      S.oppTeam = msg.opponent_team;
+      S.myActive = msg.your_active || 0;
+      S.oppActive = msg.opponent_active || 0;
+      S.myTeamName = msg.your_team_name;
+      S.oppTeamName = msg.opponent_team_name;
+      clearTimer();
+      showScreen('battle');
+      renderBattle();
+      setBattleText(`${S.opponentName}'s ${S.oppTeamName} wants to battle!`);
+      break;
+    case 'turn_request':
+      S.myTeam = msg.your_team_status;
+      S.oppTeam = msg.opponent_team_status;
+      S.myActive = msg.your_active;
+      S.oppActive = msg.opponent_active;
+      S.animating = false;
+      renderBattle();
+      showMovePanel();
+      startTimer(msg.time_limit, 'action-timer');
+      break;
+    case 'action_confirmed':
+      clearTimer();
+      showWaiting('Waiting for opponent...');
+      break;
+    case 'opponent_action_locked':
+      // Optional: show indicator
+      break;
+    case 'tap_phase':
+      startTapPhase(msg.duration_ms, msg.move_name);
+      break;
+    case 'turn_result':
+      clearTimer();
+      S.animating = true;
+      playTurnEvents(msg.events).then(() => {
+        S.myTeam = msg.your_team_status;
+        S.oppTeam = msg.opponent_team_status;
+        S.myActive = msg.your_active;
+        S.oppActive = msg.opponent_active;
+        S.animating = false;
+        renderBattleSprites();
+        renderHpBars();
+        renderTeamBalls();
+      });
+      break;
+    case 'force_switch_request':
+      S.myTeam = msg.team_status;
+      showSwitchPanel(msg.available, true);
+      startTimer(msg.time_limit, 'action-timer');
+      break;
+    case 'switch_in':
+      // Update team after switch
+      if (msg.player_index === 0) {
+        // Could be me or opponent depending on perspective
+        // Server sends from each player's perspective, so handled in turn_request
+      }
+      setBattleText(msg.text);
+      break;
+    case 'game_over':
+      clearTimer();
+      S.myTeam = msg.your_team_status;
+      S.oppTeam = msg.opponent_team_status;
+      setTimeout(() => showGameOver(msg.winner, msg.summary), 1500);
+      break;
+    case 'opponent_disconnected':
+      setBattleText(msg.text || 'Opponent disconnected.');
+      setTimeout(() => backToTitle(), 3000);
+      break;
+    case 'rematch_request':
+      setBattleText(msg.text);
+      break;
+    case 'rematch_start':
+      // Will get team_select_start
+      break;
+    case 'room_closed':
+      alert(msg.text);
+      backToTitle();
+      break;
+    case 'left_room':
+      backToTitle();
+      break;
+    case 'error':
+      showError(msg.message);
+      break;
+  }
+}
+
+/* ─── Screen Management ─────────────────────────── */
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  S.screen = name;
+}
+
+function showError(msg) {
+  if (S.screen === 'title') {
+    document.getElementById('title-error').textContent = msg;
+  } else if (S.screen === 'team') {
+    showTeamError(msg);
+  } else {
+    setBattleText(msg);
+  }
+}
+
+/* ─── Title Screen ──────────────────────────────── */
+function createRoom() {
+  const name = document.getElementById('player-name').value.trim();
+  if (!validateName(name)) return;
+  S.playerName = name;
+  send({ type: 'create_room', name });
+}
+
+function showJoinInput() {
+  document.getElementById('join-code').style.display = '';
+  document.getElementById('join-btn').style.display = '';
+  document.getElementById('join-code').focus();
+}
+
+function joinRoom() {
+  const name = document.getElementById('player-name').value.trim();
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  if (!validateName(name)) return;
+  if (!/^[A-Z]{4}$/.test(code)) {
+    document.getElementById('title-error').textContent = 'Code must be 4 letters';
+    return;
+  }
+  S.playerName = name;
+  send({ type: 'join_room', name, code });
+}
+
+function validateName(name) {
+  const el = document.getElementById('title-error');
+  if (!name || name.length < 2 || name.length > 16) {
+    el.textContent = 'Name must be 2-16 characters';
+    document.getElementById('player-name').classList.add('invalid');
+    return false;
+  }
+  if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
+    el.textContent = 'Letters, numbers, and spaces only';
+    document.getElementById('player-name').classList.add('invalid');
+    return false;
+  }
+  el.textContent = '';
+  document.getElementById('player-name').classList.remove('invalid');
+  return true;
+}
+
+// Enter key support
+document.getElementById('player-name').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('join-code').style.display !== 'none') {
+      document.getElementById('join-code').focus();
+    } else {
+      createRoom();
+    }
+  }
+});
+document.getElementById('join-code').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') joinRoom();
+  // Auto uppercase
+  setTimeout(() => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+  }, 0);
+});
+
+/* ─── Lobby ─────────────────────────────────────── */
+function copyCode() {
+  navigator.clipboard.writeText(S.roomCode);
+  const el = document.getElementById('lobby-code');
+  el.style.color = 'var(--green)';
+  setTimeout(() => el.style.color = '', 500);
+}
+
+function leaveRoom() {
+  send({ type: 'leave' });
+}
+
+/* ─── Team Select ───────────────────────────────── */
+function renderTeamSelect() {
+  const grid = document.getElementById('pokemon-grid');
+  grid.innerHTML = '';
+
+  S.pokemonList.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'pokemon-card';
+    card.dataset.id = p.id;
+    const sel = S.selectedTeam.includes(p.id);
+    if (sel) card.classList.add('selected');
+
+    card.innerHTML = `
+      <img src="/sprites/front/${String(p.id).padStart(3,'0')}.png" alt="${p.name}" loading="lazy">
+      <div class="pname">${p.name}</div>
+    `;
+    card.onclick = () => togglePokemon(p.id);
+    grid.appendChild(card);
+  });
+
+  renderTeamBar();
+
+  // Search
+  document.getElementById('team-search').oninput = (e) => {
+    const q = e.target.value.toLowerCase();
+    grid.querySelectorAll('.pokemon-card').forEach(card => {
+      const id = parseInt(card.dataset.id);
+      const poke = S.pokemonList.find(p => p.id === id);
+      card.style.display = poke && poke.name.toLowerCase().includes(q) ? '' : 'none';
+    });
+  };
+}
+
+function togglePokemon(id) {
+  const idx = S.selectedTeam.indexOf(id);
+  if (idx >= 0) {
+    S.selectedTeam.splice(idx, 1);
+  } else if (S.selectedTeam.length < 6) {
+    S.selectedTeam.push(id);
+    playSound('select');
+  }
+
+  // Update card highlights
+  document.querySelectorAll('.pokemon-card').forEach(card => {
+    const cid = parseInt(card.dataset.id);
+    card.classList.toggle('selected', S.selectedTeam.includes(cid));
+  });
+
+  renderTeamBar();
+  updateLockButton();
+}
+
+function renderTeamBar() {
+  const bar = document.getElementById('team-bar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'team-slot' + (i < S.selectedTeam.length ? ' filled' : '');
+    if (i < S.selectedTeam.length) {
+      const id = S.selectedTeam[i];
+      slot.innerHTML = `
+        <img src="/sprites/front/${String(id).padStart(3,'0')}.png" alt="">
+        <div class="remove-btn" onclick="event.stopPropagation();togglePokemon(${id})">×</div>
+      `;
+    }
+    bar.appendChild(slot);
+  }
+}
+
+function updateLockButton() {
+  const btn = document.getElementById('lock-team-btn');
+  const n = S.selectedTeam.length;
+  btn.textContent = `LOCK IN (${n}/6)`;
+  btn.disabled = n !== 6;
+}
+
+function lockTeam() {
+  const teamName = document.getElementById('team-name-input').value.trim();
+  if (!teamName || teamName.length < 2) {
+    showTeamError('Enter a team name (2+ chars)');
+    return;
+  }
+  if (S.selectedTeam.length !== 6) {
+    showTeamError('Select exactly 6 Pokemon');
+    return;
+  }
+  send({ type: 'select_team', team_name: teamName, pokemon: S.selectedTeam });
+}
+
+function showTeamError(msg) {
+  const el = document.getElementById('team-error');
+  el.textContent = msg;
+  setTimeout(() => el.textContent = '', 3000);
+}
+
+/* ─── Battle Rendering ──────────────────────────── */
+function renderBattle() {
+  renderBattleSprites();
+  renderHpBars();
+  renderTeamBalls();
+}
+
+function renderBattleSprites() {
+  const myPoke = S.myTeam[S.myActive];
+  const oppPoke = S.oppTeam[S.oppActive];
+
+  if (myPoke) {
+    const ps = document.getElementById('player-sprite');
+    ps.src = `/sprites/back/${String(myPoke.dex_id).padStart(3,'0')}.png`;
+    ps.classList.remove('faint');
+    ps.style.display = myPoke.is_fainted ? 'none' : '';
+
+    let nameHtml = myPoke.name;
+    if (myPoke.status) nameHtml += ` <span class="poke-status-badge status-${myPoke.status}">${myPoke.status.toUpperCase().slice(0,3)}</span>`;
+    document.getElementById('player-name-battle').innerHTML = nameHtml;
+  }
+
+  if (oppPoke) {
+    const os = document.getElementById('opp-sprite');
+    os.src = `/sprites/front/${String(oppPoke.dex_id).padStart(3,'0')}.png`;
+    os.classList.remove('faint');
+    os.style.display = oppPoke.is_fainted ? 'none' : '';
+
+    let nameHtml = oppPoke.name;
+    if (oppPoke.status) nameHtml += ` <span class="poke-status-badge status-${oppPoke.status}">${oppPoke.status.toUpperCase().slice(0,3)}</span>`;
+    document.getElementById('opp-name').innerHTML = nameHtml;
+  }
+}
+
+function renderHpBars() {
+  const myPoke = S.myTeam[S.myActive];
+  const oppPoke = S.oppTeam[S.oppActive];
+
+  if (myPoke) {
+    setHpBar('player-hp-bar', 'player-hp-text', myPoke.current_hp, myPoke.max_hp, true);
+  }
+  if (oppPoke) {
+    setHpBar('opp-hp-bar', 'opp-hp-text', oppPoke.current_hp, oppPoke.max_hp, false);
+  }
+}
+
+function setHpBar(barId, textId, hp, maxHp, showNumbers) {
+  const pct = Math.max(0, (hp / maxHp) * 100);
+  const bar = document.getElementById(barId);
+  bar.style.width = pct + '%';
+  bar.style.backgroundColor = pct > 50 ? 'var(--hp-green)' : pct > 20 ? 'var(--hp-yellow)' : 'var(--hp-red)';
+  document.getElementById(textId).textContent = showNumbers ? `${hp} / ${maxHp}` : `${Math.round(pct)}%`;
+}
+
+function renderTeamBalls() {
+  ['player', 'opp'].forEach(side => {
+    const team = side === 'player' ? S.myTeam : S.oppTeam;
+    const el = document.getElementById(`${side === 'player' ? 'player' : 'opp'}-balls`);
+    el.innerHTML = '';
+    team.forEach(p => {
+      const ball = document.createElement('div');
+      ball.className = 'ball ' + (p.is_fainted ? 'fainted' : 'alive');
+      el.appendChild(ball);
+    });
+  });
+}
+
+/* ─── Move Panel ────────────────────────────────── */
+function showMovePanel() {
+  const controls = document.getElementById('battle-controls');
+  const myPoke = S.myTeam[S.myActive];
+  if (!myPoke) return;
+
+  let html = '<div class="move-panel">';
+  myPoke.moves.forEach((m, i) => {
+    const disabled = m.current_pp <= 0 ? 'disabled' : '';
+    const typeColor = `var(--type-${m.type})`;
+    html += `
+      <button class="move-btn" ${disabled} onclick="chooseMove(${i})">
+        <span class="move-name">${m.name}</span>
+        <span class="move-meta">
+          <span class="move-type-badge" style="background:${typeColor}">${m.type}</span>
+          <span>PP ${m.current_pp}/${m.pp || '??'}</span>
+        </span>
+      </button>
+    `;
+  });
+  html += '</div>';
+  html += `<div class="action-bar">
+    <button class="btn btn-secondary" onclick="showSwitchPanel()">SWITCH</button>
+    <span class="action-timer" id="action-timer"></span>
+  </div>`;
+  controls.innerHTML = html;
+}
+
+function showSwitchPanel(available, forced) {
+  const controls = document.getElementById('battle-controls');
+  let html = '<div class="switch-panel">';
+
+  S.myTeam.forEach((p, i) => {
+    const isActive = i === S.myActive;
+    const canSwitch = !p.is_fainted && !isActive;
+    const validTarget = forced ? (available || []).includes(i) : canSwitch;
+    const disabled = !validTarget ? 'disabled' : '';
+
+    html += `
+      <button class="switch-btn" ${disabled} onclick="${forced ? 'forceSwitch' : 'chooseSwitch'}(${i})">
+        <img src="/sprites/front/${String(p.dex_id).padStart(3,'0')}.png" alt="${p.name}">
+        <span class="sw-name">${p.name}${isActive ? ' ★' : ''}</span>
+        <span class="sw-hp">${p.is_fainted ? 'FAINTED' : `${p.current_hp}/${p.max_hp}`}</span>
+      </button>
+    `;
+  });
+  html += '</div>';
+
+  if (!forced) {
+    html += `<div class="action-bar">
+      <button class="btn btn-secondary" onclick="showMovePanel()">MOVES</button>
+      <span class="action-timer" id="action-timer"></span>
+    </div>`;
+  } else {
+    html += `<div class="action-bar">
+      <span style="font-size:8px;color:var(--yellow)">Choose your next Pokemon!</span>
+      <span class="action-timer" id="action-timer"></span>
+    </div>`;
+  }
+
+  controls.innerHTML = html;
+}
+
+function showWaiting(text) {
+  document.getElementById('battle-controls').innerHTML = `<div class="waiting-text">${text}</div>`;
+}
+
+function chooseMove(index) {
+  clearTimer();
+  send({ type: 'choose_action', action_type: 'move', move_index: index });
+  playSound('select');
+}
+
+function chooseSwitch(index) {
+  clearTimer();
+  send({ type: 'choose_action', action_type: 'switch', pokemon_index: index });
+  playSound('select');
+}
+
+function forceSwitch(index) {
+  clearTimer();
+  send({ type: 'force_switch', pokemon_index: index });
+  playSound('select');
+}
+
+/* ─── Battle Text ───────────────────────────────── */
+function setBattleText(text) {
+  document.getElementById('battle-text').textContent = text;
+}
+
+/* ─── Turn Animation ────────────────────────────── */
+async function playTurnEvents(events) {
+  showWaiting('');
+  for (const evt of events) {
+    switch (evt.event) {
+      case 'switch':
+        setBattleText(evt.text);
+        renderBattleSprites();
+        renderHpBars();
+        await delay(1000);
+        break;
+      case 'move_use':
+        setBattleText(`${evt.pokemon} used ${evt.move}!`);
+        await delay(800);
+        break;
+      case 'effectiveness':
+        setBattleText(evt.text);
+        if (evt.multiplier >= 2) {
+          screenShake();
+          screenFlash();
+          playSound('super_effective');
+        }
+        await delay(800);
+        break;
+      case 'critical_hit':
+        setBattleText(evt.text);
+        await delay(600);
+        break;
+      case 'damage': {
+        playSound('hit');
+        // Flash the target sprite
+        const isOpp = isOpponentPokemon(evt.pokemon);
+        const spriteId = isOpp ? 'opp-sprite' : 'player-sprite';
+        document.getElementById(spriteId).classList.add('hit-flash');
+        // Animate HP bar
+        const barId = isOpp ? 'opp-hp-bar' : 'player-hp-bar';
+        const textId = isOpp ? 'opp-hp-text' : 'player-hp-text';
+        setHpBar(barId, textId, evt.new_hp, evt.max_hp, !isOpp);
+        await delay(900);
+        document.getElementById(spriteId).classList.remove('hit-flash');
+        break;
+      }
+      case 'dot_damage': {
+        setBattleText(evt.text);
+        const isOpp2 = isOpponentPokemon(evt.pokemon);
+        const barId2 = isOpp2 ? 'opp-hp-bar' : 'player-hp-bar';
+        const textId2 = isOpp2 ? 'opp-hp-text' : 'player-hp-text';
+        setHpBar(barId2, textId2, evt.new_hp, evt.max_hp, !isOpp2);
+        await delay(800);
+        break;
+      }
+      case 'recoil': {
+        setBattleText(evt.text);
+        const isOpp3 = isOpponentPokemon(evt.pokemon);
+        const barId3 = isOpp3 ? 'opp-hp-bar' : 'player-hp-bar';
+        const textId3 = isOpp3 ? 'opp-hp-text' : 'player-hp-text';
+        setHpBar(barId3, textId3, evt.new_hp, evt.max_hp, !isOpp3);
+        await delay(800);
+        break;
+      }
+      case 'faint': {
+        setBattleText(evt.text);
+        playSound('faint');
+        const isOpp4 = isOpponentPokemon(evt.pokemon);
+        const spriteId4 = isOpp4 ? 'opp-sprite' : 'player-sprite';
+        document.getElementById(spriteId4).classList.add('faint');
+        await delay(1200);
+        break;
+      }
+      case 'miss':
+        setBattleText(evt.text);
+        await delay(800);
+        break;
+      case 'status_apply':
+        setBattleText(evt.text);
+        await delay(800);
+        break;
+      case 'status_prevent':
+        setBattleText(evt.text);
+        await delay(800);
+        break;
+      case 'status_cure':
+        setBattleText(evt.text);
+        await delay(600);
+        break;
+      case 'stat_change':
+        setBattleText(evt.text);
+        await delay(600);
+        break;
+      case 'heal':
+        setBattleText(evt.text);
+        await delay(600);
+        break;
+      case 'no_effect':
+        setBattleText(evt.text);
+        await delay(800);
+        break;
+      case 'turn_end':
+        break;
+    }
+  }
+}
+
+function isOpponentPokemon(name) {
+  const oppPoke = S.oppTeam[S.oppActive];
+  return oppPoke && oppPoke.name === name;
+}
+
+function screenShake() {
+  const arena = document.getElementById('battle-arena');
+  arena.classList.add('shaking');
+  setTimeout(() => arena.classList.remove('shaking'), 400);
+}
+
+function screenFlash() {
+  const flash = document.getElementById('flash-overlay');
+  flash.classList.add('active');
+  setTimeout(() => flash.classList.remove('active'), 300);
+}
+
+function delay(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+/* ─── Tap Phase ─────────────────────────────────── */
+function startTapPhase(durationMs, moveName) {
+  const overlay = document.getElementById('tap-overlay');
+  const area = document.getElementById('tap-area');
+  const fill = document.getElementById('tap-meter-fill');
+  const timerEl = document.getElementById('tap-timer');
+  const nameEl = document.getElementById('tap-move-name');
+  const multEl = document.getElementById('tap-multiplier');
+
+  overlay.classList.add('active');
+  nameEl.textContent = moveName;
+  multEl.textContent = '';
+
+  let tapCount = 0;
+  const maxTaps = 20;
+  const duration = durationMs / 1000;
+  let timeLeft = duration;
+  let active = true;
+
+  fill.style.height = '0%';
+
+  function onTap(e) {
+    e.preventDefault();
+    if (!active) return;
+    tapCount++;
+    const pct = Math.min(tapCount / maxTaps * 100, 100);
+    fill.style.height = pct + '%';
+    playSound('tap');
+  }
+
+  area.addEventListener('pointerdown', onTap);
+  area.addEventListener('touchstart', onTap, { passive: false });
+
+  const interval = setInterval(() => {
+    timeLeft -= 0.1;
+    timerEl.textContent = Math.max(0, timeLeft).toFixed(1);
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      active = false;
+      area.removeEventListener('pointerdown', onTap);
+      area.removeEventListener('touchstart', onTap);
+
+      const score = Math.min(tapCount / maxTaps, 1.0);
+      const mult = (0.85 + score * 0.30).toFixed(2);
+      multEl.textContent = mult + 'x';
+
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        send({ type: 'tap_result', score });
+      }, 800);
+    }
+  }, 100);
+}
+
+/* ─── Game Over ─────────────────────────────────── */
+function showGameOver(isWinner, summary) {
+  showScreen('gameover');
+  const title = document.getElementById('gameover-title');
+  title.textContent = isWinner ? 'YOU WIN!' : 'YOU LOSE';
+  title.className = 'gameover-title ' + (isWinner ? 'win' : 'lose');
+
+  document.getElementById('gameover-summary').innerHTML = `
+    ${summary.winner_name}'s "${summary.winner_team_name}" defeated
+    ${summary.loser_name}'s "${summary.loser_team_name}"<br>
+    Turns: ${summary.turns} • Time: ${formatDuration(summary.duration)}<br>
+    Remaining Pokemon: ${summary.winner_remaining_pokemon}/6
+  `;
+  playSound(isWinner ? 'win' : 'faint');
+}
+
+function requestRematch() {
+  send({ type: 'rematch' });
+}
+
+function backToTitle() {
+  send({ type: 'leave' });
+  S.roomCode = null;
+  S.selectedTeam = [];
+  S.myTeam = [];
+  S.oppTeam = [];
+  clearTimer();
+  showScreen('title');
+  document.getElementById('title-error').textContent = '';
+}
+
+/* ─── Timer ─────────────────────────────────────── */
+function startTimer(seconds, elementId) {
+  clearTimer();
+  let left = seconds;
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.textContent = left;
+  S.timerInterval = setInterval(() => {
+    left--;
+    if (el) el.textContent = Math.max(0, left);
+    if (left <= 0) clearTimer();
+  }, 1000);
+}
+
+function clearTimer() {
+  if (S.timerInterval) {
+    clearInterval(S.timerInterval);
+    S.timerInterval = null;
+  }
+}
+
+/* ─── Audio (Web Audio API) ─────────────────────── */
+let audioCtx;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const t = ctx.currentTime;
+
+    switch (type) {
+      case 'hit':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, t);
+        osc.frequency.exponentialRampToValueAtTime(80, t + 0.15);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+        osc.start(t); osc.stop(t + 0.15);
+        break;
+      case 'super_effective':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(400, t);
+        osc.frequency.setValueAtTime(600, t + 0.1);
+        osc.frequency.setValueAtTime(800, t + 0.2);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+        osc.start(t); osc.stop(t + 0.3);
+        break;
+      case 'faint':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(300, t);
+        osc.frequency.exponentialRampToValueAtTime(50, t + 0.5);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+        osc.start(t); osc.stop(t + 0.5);
+        break;
+      case 'select':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, t);
+        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+        osc.start(t); osc.stop(t + 0.05);
+        break;
+      case 'tap':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(500 + Math.random() * 300, t);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.03);
+        osc.start(t); osc.stop(t + 0.03);
+        break;
+      case 'win':
+        osc.type = 'square';
+        [523, 659, 784, 1047].forEach((freq, i) => {
+          osc.frequency.setValueAtTime(freq, t + i * 0.15);
+        });
+        gain.gain.setValueAtTime(0.15, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+        osc.start(t); osc.stop(t + 0.6);
+        break;
+    }
+  } catch (e) {}
+}
+
+/* ─── Helpers ───────────────────────────────────── */
+function formatDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
+/* ─── Init ──────────────────────────────────────── */
+connect();
+</script>
+</body>
+</html>
