@@ -30,6 +30,7 @@ class Player:
         self.chosen_action = None  # {"type": "move"/"switch", "move_index"/"pokemon_index": int}
         self.tap_score = 0.5       # Default tap score
         self.reconnect_token = None
+        self.is_bot = False
 
     async def send(self, msg):
         """Send JSON message to player. Silently fails on broken connection."""
@@ -157,6 +158,19 @@ class GameRoom:
                     "time_limit": self.TEAM_SELECT_TIMEOUT,
                 })
 
+        # Bot auto-selects team
+        for p in self.players:
+            if p and p.is_bot and not p.ready:
+                p.select_team()
+                opp = self.get_opponent(p)
+                if opp:
+                    await opp.send({"type": "opponent_ready"})
+
+        # Check if both already ready (e.g. both bots, or instant lock-in)
+        if all(p and p.ready for p in self.players):
+            await self._start_battle()
+            return
+
         # Start timeout
         self._timeout_task = asyncio.create_task(
             self._team_select_timeout()
@@ -277,6 +291,13 @@ class GameRoom:
                 "opponent_active": opp.active_pokemon,
                 "time_limit": self.ACTION_SELECT_TIMEOUT,
             })
+
+        # Bot auto-picks action
+        for i, p in enumerate(self.players):
+            if p and p.is_bot:
+                opp = self.players[1 - i]
+                p.chosen_action = p.decide_action(opp.get_active_pokemon())
+                self._action_events[i].set()
 
         # Wait for both actions with timeout
         self._timeout_task = asyncio.create_task(self._action_timeout())
@@ -401,6 +422,12 @@ class GameRoom:
                 # Player switching, no tap needed
                 idx = self.get_player_index(p)
                 self._tap_events[idx].set()
+
+        # Bot auto-taps
+        for i, p in enumerate(self.players):
+            if p and p.is_bot and not self._tap_events[i].is_set():
+                p.tap_score = p.get_tap_score()
+                self._tap_events[i].set()
 
         # Wait for tap results
         try:
@@ -555,12 +582,22 @@ class GameRoom:
         for i in player_indices:
             p = self.players[i]
             available = p.alive_pokemon_indices()
-            await p.send({
-                "type": "force_switch_request",
-                "available": available,
-                "team_status": p.team_status(full=True),
-                "time_limit": self.FORCE_SWITCH_TIMEOUT,
-            })
+            if p.is_bot:
+                # Bot auto-switches
+                opp = self.players[1 - i]
+                target = p.decide_switch(available, opp.get_active_pokemon())
+                if target is not None:
+                    p.active_pokemon = target
+                elif available:
+                    p.active_pokemon = available[0]
+                self._switch_events[i].set()
+            else:
+                await p.send({
+                    "type": "force_switch_request",
+                    "available": available,
+                    "team_status": p.team_status(full=True),
+                    "time_limit": self.FORCE_SWITCH_TIMEOUT,
+                })
 
         # Wait with timeout
         try:
@@ -668,6 +705,22 @@ class GameRoom:
         player.tap_score = 0.5
 
         opponent = self.get_opponent(player)
+
+        # Bot auto-accepts rematch
+        if opponent and opponent.is_bot:
+            opponent.ready = False
+            opponent.team = None
+            opponent.team_name = None
+            opponent.team_dex_ids = None
+            opponent.active_pokemon = 0
+            opponent.chosen_action = None
+            opponent.tap_score = 0.5
+            for p in self.players:
+                p.ready = False
+                await p.send({"type": "rematch_start"})
+            await self._start_team_select()
+            return
+
         if opponent:
             await opponent.send({
                 "type": "rematch_request",
@@ -741,8 +794,14 @@ class RoomManager:
             await room.remove_player(player)
             del self.player_rooms[player.id]
 
-            # Clean up empty rooms
-            if all(p is None for p in room.players):
+            # Clean up empty rooms or bot-only rooms
+            has_human = any(
+                p is not None and not p.is_bot for p in room.players
+            )
+            if not has_human:
+                for p in room.players:
+                    if p and p.id in self.player_rooms:
+                        del self.player_rooms[p.id]
                 del self.rooms[room.code]
 
     def get_active_rooms(self):

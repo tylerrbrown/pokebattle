@@ -18,6 +18,7 @@ import websockets
 from websockets.http11 import Response as HttpResponse, Headers as HttpHeaders
 
 import pokemon_data
+from ai_player import BotPlayer
 from game_room import Player, RoomManager
 from player_accounts import AccountManager
 
@@ -315,6 +316,26 @@ async def handle_message(player, msg, room_mgr):
         return
 
     # ─── Game Messages ─────────────────────────────────
+    if msg_type == "create_ai_battle":
+        if not player.name:
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+
+        bot = BotPlayer()
+        code = await room_mgr.create_room(player)
+        await player.send({
+            "type": "room_created",
+            "code": code,
+            "ai_battle": True,
+            "opponent_name": bot.name,
+        })
+        # Add bot to room — triggers team select
+        room_mgr.player_rooms[bot.id] = code
+        room = room_mgr.rooms.get(code)
+        if room:
+            await room.add_player(bot)
+        return
+
     if msg_type == "create_room":
         name = str(data.get("name", "")).strip()
         if not name or len(name) < 2 or len(name) > 16:

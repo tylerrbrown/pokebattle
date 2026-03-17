@@ -122,6 +122,8 @@ input.invalid { border-color: var(--red); }
 .btn-primary:hover { background: var(--accent2); }
 .btn-secondary { background: var(--bg3); color: var(--text); border: 2px solid var(--border); }
 .btn-secondary:hover { border-color: var(--accent); }
+.btn-ai { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: #1a1a2e; font-weight: bold; }
+.btn-ai:hover { filter: brightness(1.1); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .error-text { color: var(--red); font-size: 10px; min-height: 16px; text-align: center; }
 
@@ -682,6 +684,7 @@ input.invalid { border-color: var(--red); }
       </div>
       <input id="join-code" type="text" placeholder="Room Code (4 letters)" maxlength="4" style="display:none" autocomplete="off">
       <button id="join-btn" class="btn btn-primary" style="display:none" onclick="joinRoom()">JOIN ROOM</button>
+      <button class="btn btn-ai" onclick="createAiBattle()">BATTLE AI</button>
       <div style="display:flex;gap:10px;width:100%">
         <button class="btn btn-secondary" id="myteam-btn" style="flex:1" onclick="showMyTeam()">MY TEAM</button>
         <button class="btn btn-secondary" style="flex:1" onclick="logout()">LOG OUT</button>
@@ -792,6 +795,7 @@ const S = {
   showingSwitch: false,
   timerInterval: null,
   animating: false,
+  isAiBattle: false,
   // Account state
   account: null,  // { id, username, token, starter_dex_id, pokeballs, team, total_pokemon }
 };
@@ -865,8 +869,14 @@ function handleMessage(msg) {
     // ─── Game Messages ──────────────────────────────
     case 'room_created':
       S.roomCode = msg.code;
-      showScreen('lobby');
-      document.getElementById('lobby-code').textContent = msg.code;
+      if (msg.ai_battle) {
+        S.isAiBattle = true;
+        S.opponentName = msg.opponent_name || 'CPU';
+        // Skip lobby — team_select_start arrives immediately
+      } else {
+        showScreen('lobby');
+        document.getElementById('lobby-code').textContent = msg.code;
+      }
       break;
     case 'room_joined':
       S.roomCode = msg.code;
@@ -1051,6 +1061,12 @@ document.getElementById('login-username').addEventListener('keydown', (e) => {
 function createRoom() {
   if (!S.playerName) return;
   send({ type: 'create_room', name: S.playerName });
+}
+
+function createAiBattle() {
+  if (!S.playerName) return;
+  S.isAiBattle = true;
+  send({ type: 'create_ai_battle' });
 }
 
 function showJoinInput() {
@@ -1542,6 +1558,7 @@ function requestRematch() {
 function backToTitle() {
   send({ type: 'leave' });
   S.roomCode = null;
+  S.isAiBattle = false;
   S.selectedTeam = [];
   S.myTeam = [];
   S.oppTeam = [];
