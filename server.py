@@ -107,6 +107,10 @@ async def process_request(connection, request):
     if path == "/":
         path = "/index.html"
 
+    # Strip query string for static file serving
+    if '?' in path:
+        path = path.split('?', 1)[0]
+
     # Security: prevent path traversal
     try:
         file_path = (APP_DIR / path.lstrip("/")).resolve()
