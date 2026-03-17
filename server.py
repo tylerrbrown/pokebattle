@@ -19,6 +19,7 @@ from websockets.http11 import Response as HttpResponse, Headers as HttpHeaders
 
 import pokemon_data
 from game_room import Player, RoomManager
+from player_accounts import AccountManager
 
 APP_DIR = pathlib.Path(__file__).parent
 DB_PATH = APP_DIR / "pokebattle.db"
@@ -27,6 +28,7 @@ ADMIN_SECRET = os.environ.get("POKEBATTLE_ADMIN_SECRET", "pb-x9f2k7m4-admin-2024
 
 # Global state
 room_manager = RoomManager()
+account_mgr = None  # Initialized in main()
 
 
 # ─── SQLite ─────────────────────────────────────────────
@@ -244,6 +246,75 @@ async def handle_message(player, msg, room_mgr):
 
     msg_type = data.get("type", "")
 
+    # ─── Account Messages ─────────────────────────────
+    if msg_type == "register":
+        username = str(data.get("username", "")).strip()
+        result, error = account_mgr.register(username)
+        if error:
+            await player.send({"type": "register_error", "message": error})
+        else:
+            player.name = result["username"]
+            player.account_id = result["id"]
+            await player.send({"type": "register_ok", "profile": result})
+            await player.send({
+                "type": "pokemon_list",
+                "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
+            })
+        return
+
+    if msg_type == "login":
+        token = data.get("token")
+        username = data.get("username")
+        profile = None
+        if token:
+            profile = account_mgr.login_by_token(token)
+        elif username:
+            profile = account_mgr.login_by_username(username.strip())
+
+        if profile:
+            player.name = profile["username"]
+            player.account_id = profile["id"]
+            full = account_mgr.get_profile(profile["id"])
+            await player.send({"type": "login_ok", "profile": full})
+            # Also send pokemon list for My Team screen
+            await player.send({
+                "type": "pokemon_list",
+                "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
+            })
+        else:
+            await player.send({"type": "login_error", "message": "Account not found."})
+        return
+
+    if msg_type == "choose_starter":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        dex_id = data.get("dex_id")
+        if account_mgr.choose_starter(player.account_id, dex_id):
+            full = account_mgr.get_profile(player.account_id)
+            await player.send({"type": "starter_chosen", "profile": full})
+        else:
+            await player.send({"type": "error", "message": "Invalid starter choice."})
+        return
+
+    if msg_type == "get_profile":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        full = account_mgr.get_profile(player.account_id)
+        await player.send({"type": "profile", "profile": full})
+        return
+
+    if msg_type == "get_team":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        team = account_mgr.get_team(player.account_id)
+        all_pokemon = account_mgr.get_all_pokemon(player.account_id)
+        await player.send({"type": "team_data", "team": team, "all_pokemon": all_pokemon})
+        return
+
+    # ─── Game Messages ─────────────────────────────────
     if msg_type == "create_room":
         name = str(data.get("name", "")).strip()
         if not name or len(name) < 2 or len(name) > 16:
@@ -363,6 +434,8 @@ async def main():
 
     # Initialize database
     init_db()
+    global account_mgr
+    account_mgr = AccountManager(DB_PATH)
     print(f"Database initialized at {DB_PATH}")
 
     # Start cleanup task

@@ -45,15 +45,32 @@ Environment variables:
 
 - **Port**: 5060
 - **Domain**: pokebattle.tylerrbrown.com
+- **Repo**: https://github.com/tylerrbrown/pokebattle
+- **Server path**: `/opt/pokebattle/`
 - **Service**: `pokebattle.service` (systemd)
-- **Proxy**: HAProxy with `timeout tunnel 3600s` for WebSocket
+- **Proxy**: HAProxy with `mode http` + `timeout tunnel 3600s` for WebSocket
+- **Python**: 3.10 on EC2 (Ubuntu 22.04 jammy, aarch64)
+- **websockets**: Requires v14+ (`pip3 install 'websockets>=14'`). System apt package is 9.1 (too old — different API for HTTP serving).
 
 ```bash
 # On EC2
-cd /opt && git clone <repo> pokebattle
-pip3 install websockets
+cd /opt && git clone https://github.com/tylerrbrown/pokebattle.git
+pip3 install 'websockets>=14'
 cp pokebattle.service /etc/systemd/system/
 systemctl daemon-reload && systemctl enable --now pokebattle
+```
+
+### HAProxy backend
+```
+backend web-pokebattle
+    mode http
+    timeout tunnel 3600s
+    server pokebattle 127.0.0.1:5060 check fall 3 rise 1
+```
+
+### Deploy updates
+```bash
+cd /opt/pokebattle && git pull && systemctl restart pokebattle
 ```
 
 ## Admin
