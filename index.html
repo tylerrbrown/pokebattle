@@ -706,9 +706,16 @@ input.invalid { border-color: var(--red); }
 .gym-result-dialog { font-size:12px; color:var(--text); text-align:center; line-height:2; max-width:320px; }
 .gym-result-currency { font-size:11px; color:var(--green); margin-top:4px; }
 .journey-level { font-size:10px; color:var(--yellow); margin-left:6px; }
+/* Toast notifications */
+.toast-container { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:9999; pointer-events:none; }
+.toast { background:var(--green); color:#000; padding:8px 20px; border-radius:20px; font-size:13px; font-weight:bold; text-align:center;
+  opacity:0; transform:translateY(-10px); animation:toast-in 0.3s ease forwards, toast-out 0.3s ease 1.8s forwards; }
+@keyframes toast-in { to { opacity:1; transform:translateY(0); } }
+@keyframes toast-out { to { opacity:0; transform:translateY(-10px); } }
 </style>
 </head>
 <body>
+<div class="toast-container" id="toast-container"></div>
 <div id="app">
   <!-- LOGIN SCREEN -->
   <div id="screen-login" class="screen login-screen active">
@@ -972,6 +979,16 @@ const S = {
   pendingXpResults: [],
 };
 
+/* ─── Toast Notifications ──────────────────────── */
+function showToast(text) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = text;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
 /* ─── WebSocket ─────────────────────────────────── */
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -979,6 +996,10 @@ function connect() {
   S.ws.onopen = () => { console.log('WS connected'); tryAutoLogin(); };
   S.ws.onclose = () => {
     console.log('WS disconnected');
+    // Clear battle state on disconnect so reconnect returns to Hub
+    S.journeyMode = false;
+    S.encounter = null;
+    S.roomCode = null;
     setTimeout(connect, 2000);
   };
   S.ws.onmessage = (e) => {
@@ -2005,7 +2026,7 @@ function renderMyTeam(team, allPokemon) {
 }
 
 /* ─── Hub ──────────────────────────────────────── */
-function goHome() {
+function goHome(showSave) {
   S.journeyMode = false;
   S.encounter = null;
   S.encounterType = null;
@@ -2013,6 +2034,7 @@ function goHome() {
   send({ type: 'get_profile' });
   showScreen('hub');
   updateHubProfile();
+  if (showSave) showToast('Progress Saved!');
 }
 
 function showQuickBattle() {
@@ -2031,11 +2053,15 @@ function updateHubProfile() {
     const earned = badges.includes(i + 1);
     badgeHtml += '<div class="hub-badge' + (earned ? ' earned' : '') + '" style="' + (earned ? 'background:' + badgeColors[i] : '') + '" title="Gym ' + (i+1) + '"></div>';
   }
+  // Find highest level on team
+  const team = a.team || [];
+  const maxLv = team.length ? Math.max(...team.map(p => p.level || 1)) : '—';
   el.innerHTML =
     '<span>Welcome, <span class="stat">' + a.username + '</span>!</span>' +
     '<span>$<span class="stat">' + (a.currency || 0) + '</span></span>' +
     '<span>Balls: <span class="stat">' + (a.pokeballs || 0) + '</span></span>' +
-    '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '</span></span>' +
+    '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '/151</span></span>' +
+    '<span>Best Lv: <span class="stat">' + maxLv + '</span></span>' +
     '<div class="hub-badges">' + badgeHtml + '</div>';
 }
 
@@ -2267,10 +2293,10 @@ function showJourneyVictory(msg) {
   setTimeout(() => {
     if (xp.length && xp[0].leveled_up) {
       showLevelUpOverlay(xp[0], () => {
-        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome());
-        else goHome();
+        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome(true));
+        else goHome(true);
       });
-    } else goHome();
+    } else goHome(true);
   }, 2000);
 }
 
@@ -2330,10 +2356,10 @@ function showCaughtResult(msg) {
     const xp = msg.xp_results || [];
     if (xp.length && xp[0].leveled_up) {
       showLevelUpOverlay(xp[0], () => {
-        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome());
-        else goHome();
+        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome(true));
+        else goHome(true);
       });
-    } else goHome();
+    } else goHome(true);
   }, 2500);
 }
 
@@ -2424,6 +2450,7 @@ function handleBuyResult(msg) {
   if (msg.success) {
     playSound('select');
     if (S.account) { S.account.currency = msg.new_currency; S.account.pokeballs = msg.pokeballs; }
+    showToast('Purchased! Progress Saved');
     send({ type: 'get_shop' });
   } else {
     setBattleText(msg.message || 'Purchase failed');
@@ -2508,10 +2535,10 @@ function dismissGymResult() {
   S.pendingXpResults = [];
   if (xp.length && xp[0].leveled_up) {
     showLevelUpOverlay(xp[0], () => {
-      if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome());
-      else goHome();
+      if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome(true));
+      else goHome(true);
     });
-  } else goHome();
+  } else goHome(true);
 }
 
 function startWildEncounter() { send({type:'wild_encounter'}); }
