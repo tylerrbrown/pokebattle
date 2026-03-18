@@ -186,7 +186,7 @@ input.invalid { border-color: var(--red); }
   height: 48px;
   image-rendering: pixelated;
 }
-.pokemon-card .pname { font-size: 10px; text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+.pokemon-card .pname { font-size: 12px; text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
 .team-bar {
   display: flex;
@@ -278,7 +278,7 @@ input.invalid { border-color: var(--red); }
 .poke-name { font-size: 14px; margin-bottom: 4px; }
 .poke-status-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 12px;
   padding: 1px 4px;
   border-radius: 3px;
   margin-left: 4px;
@@ -303,7 +303,7 @@ input.invalid { border-color: var(--red); }
   border-radius: 4px;
   transition: width 0.8s ease-out, background-color 0.3s;
 }
-.hp-text { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.hp-text { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
 /* Pokeball team indicators */
 .team-balls {
@@ -356,12 +356,12 @@ input.invalid { border-color: var(--red); }
 .move-btn:hover:not(:disabled) { border-color: var(--blue); }
 .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .move-btn .move-name { font-size: 13px; display: block; }
-.move-btn .move-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
+.move-btn .move-meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
 .move-type-badge {
   display: inline-block;
   padding: 1px 5px;
   border-radius: 3px;
-  font-size: 10px;
+  font-size: 12px;
   color: #fff;
   text-transform: uppercase;
 }
@@ -399,8 +399,8 @@ input.invalid { border-color: var(--red); }
 .switch-btn:hover:not(:disabled) { border-color: var(--green); }
 .switch-btn:disabled { opacity: 0.3; }
 .switch-btn img { width: 32px; height: 32px; image-rendering: pixelated; }
-.switch-btn .sw-name { font-size: 11px; display: block; margin-top: 2px; }
-.switch-btn .sw-hp { font-size: 10px; color: var(--text-dim); }
+.switch-btn .sw-name { font-size: 12px; display: block; margin-top: 2px; }
+.switch-btn .sw-hp { font-size: 12px; color: var(--text-dim); }
 
 /* ─── Tap Phase Overlay ─────────────────────────── */
 .tap-overlay {
@@ -501,7 +501,7 @@ input.invalid { border-color: var(--red); }
 .starter-card:hover { border-color: var(--accent); background: var(--bg3); transform: scale(1.05); }
 .starter-card img { width: 80px; height: 80px; image-rendering: pixelated; }
 .starter-card .starter-name { font-size: 12px; margin-top: 8px; text-align: center; }
-.starter-card .starter-type { font-size: 10px; margin-top: 4px; }
+.starter-card .starter-type { font-size: 12px; margin-top: 4px; }
 
 /* ─── My Team Screen ───────────────────────────── */
 .myteam-screen {
@@ -533,15 +533,15 @@ input.invalid { border-color: var(--red); }
 .myteam-card img { width: 56px; height: 56px; image-rendering: pixelated; }
 .myteam-info { flex: 1; }
 .myteam-info .pname { font-size: 13px; margin-bottom: 4px; }
-.myteam-info .plevel { font-size: 11px; color: var(--yellow); }
-.myteam-info .ptypes { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.myteam-info .plevel { font-size: 12px; color: var(--yellow); }
+.myteam-info .ptypes { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 .myteam-moves {
   display: flex;
   gap: 4px;
   margin-top: 4px;
   flex-wrap: wrap;
 }
-.myteam-moves .move-type-badge { font-size: 9px; }
+.myteam-moves .move-type-badge { font-size: 10px; }
 .myteam-empty {
   font-size: 13px;
   color: var(--text-dim);
@@ -622,7 +622,7 @@ input.invalid { border-color: var(--red); }
 
 /* ─── Hub Screen ───────────────────────────────── */
 .hub-screen { align-items:center; justify-content:center; gap:16px; padding:20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); }
-.hub-profile { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:11px; color:var(--text-dim); background:var(--bg2); padding:8px 14px; border-radius:8px; border:1px solid var(--border); width:360px; max-width:95%; }
+.hub-profile { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px; color:var(--text-dim); background:var(--bg2); padding:8px 14px; border-radius:8px; border:1px solid var(--border); width:360px; max-width:95%; }
 .hub-profile .stat { color:var(--yellow); }
 .hub-badges { display:flex; gap:4px; align-items:center; }
 .hub-badge { width:14px; height:14px; border-radius:50%; background:var(--bg); border:1px solid var(--border); }
@@ -645,8 +645,8 @@ input.invalid { border-color: var(--red); }
 .shop-items { flex:1; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
 .shop-item { display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; }
 .shop-item-name { font-size:13px; }
-.shop-item-price { font-size:11px; color:var(--green); margin-top:2px; }
-.shop-buy-btn { padding:8px 14px; border-radius:6px; background:var(--green); color:#1a1a2e; font-size:11px; }
+.shop-item-price { font-size:12px; color:var(--green); margin-top:2px; }
+.shop-buy-btn { padding:8px 14px; border-radius:6px; background:var(--green); color:#1a1a2e; font-size:12px; }
 .shop-buy-btn:hover { filter:brightness(1.1); }
 .shop-buy-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
@@ -664,18 +664,18 @@ input.invalid { border-color: var(--red); }
 .gym-card.completed .gym-badge-icon { border-color:var(--green); }
 .gym-card-info { flex:1; }
 .gym-card-name { font-size:12px; margin-bottom:3px; }
-.gym-card-detail { font-size:10px; color:var(--text-dim); }
+.gym-card-detail { font-size:12px; color:var(--text-dim); }
 
 /* ─── Gym Intro ────────────────────────────────── */
 .gymintro-screen { align-items:center; justify-content:center; gap:16px; padding:20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); }
 .gymintro-name { font-size:20px; color:var(--accent); text-shadow:0 0 15px rgba(233,69,96,0.4); }
-.gymintro-title { font-size:11px; color:var(--text-dim); margin-top:4px; }
+.gymintro-title { font-size:12px; color:var(--text-dim); margin-top:4px; }
 .gymintro-dialog { font-size:12px; line-height:2.2; text-align:center; max-width:340px; color:var(--text); background:var(--bg2); padding:14px; border-radius:8px; border:1px solid var(--border); }
-.gymintro-info { font-size:10px; color:var(--text-dim); text-align:center; line-height:2; }
+.gymintro-info { font-size:12px; color:var(--text-dim); text-align:center; line-height:2; }
 
 /* ─── Wild Battle Controls ─────────────────────── */
 .wild-action-bar { display:flex; gap:6px; padding:6px 8px; background:var(--bg2); }
-.wild-action-bar .btn { font-size:11px; padding:8px 10px; flex:1; }
+.wild-action-bar .btn { font-size:12px; padding:8px 10px; flex:1; }
 .btn-ball { background:var(--red); color:#fff; }
 .btn-ball:hover { filter:brightness(1.2); }
 .btn-run { background:var(--bg3); color:var(--text); border:2px solid var(--border); }
@@ -695,7 +695,7 @@ input.invalid { border-color: var(--red); }
 .catch-result.escaped { color:var(--red); }
 .levelup-text { font-size:18px; color:var(--yellow); text-shadow:0 0 20px rgba(250,204,21,0.5); }
 .levelup-pokemon { font-size:14px; color:var(--text); margin-top:4px; }
-.levelup-detail { font-size:11px; color:var(--text-dim); line-height:2.2; text-align:center; margin-top:8px; }
+.levelup-detail { font-size:12px; color:var(--text-dim); line-height:2.2; text-align:center; margin-top:8px; }
 .evo-text { font-size:16px; color:var(--green); text-align:center; }
 .evo-sprites { display:flex; align-items:center; gap:16px; }
 .evo-sprites img { width:96px; height:96px; image-rendering:pixelated; }
@@ -704,8 +704,8 @@ input.invalid { border-color: var(--red); }
 .evo-glowing { animation:evo-glow 0.8s ease-in-out 3; }
 .gym-result-badge { font-size:13px; color:var(--yellow); margin-top:4px; }
 .gym-result-dialog { font-size:12px; color:var(--text); text-align:center; line-height:2; max-width:320px; }
-.gym-result-currency { font-size:11px; color:var(--green); margin-top:4px; }
-.journey-level { font-size:10px; color:var(--yellow); margin-left:6px; }
+.gym-result-currency { font-size:12px; color:var(--green); margin-top:4px; }
+.journey-level { font-size:12px; color:var(--yellow); margin-left:6px; }
 /* Toast notifications */
 .toast-container { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:9999; pointer-events:none; }
 .toast { background:var(--green); color:#000; padding:8px 20px; border-radius:20px; font-size:13px; font-weight:bold; text-align:center;
@@ -762,8 +762,8 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-shop" onclick="showShop()">SHOP</button>
       <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
       <button class="btn btn-ai" onclick="createJourneyBattle()">BATTLE AI</button>
-      <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:11px">QUICK BATTLE</button>
-      <button class="btn btn-secondary" style="font-size:11px" onclick="logout()">LOG OUT</button>
+      <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:12px">QUICK BATTLE</button>
+      <button class="btn btn-secondary" style="font-size:12px" onclick="logout()">LOG OUT</button>
     </div>
   </div>
 
@@ -891,7 +891,7 @@ input.invalid { border-color: var(--red); }
     </div>
     <div class="shop-items" id="shop-items"></div>
     <div class="shop-header" style="margin-top:8px">
-      <span style="font-size:11px;color:var(--text-dim)" id="shop-balls"></span>
+      <span style="font-size:12px;color:var(--text-dim)" id="shop-balls"></span>
     </div>
     <button class="btn btn-secondary" onclick="goHome()">BACK</button>
   </div>
@@ -900,7 +900,7 @@ input.invalid { border-color: var(--red); }
   <div id="screen-gymlist" class="screen gymlist-screen">
     <div class="gymlist-header">
       <span class="gymlist-title">GYM LEADERS</span>
-      <button class="btn btn-secondary" style="flex:none;font-size:11px" onclick="goHome()">BACK</button>
+      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="goHome()">BACK</button>
     </div>
     <div class="gym-list" id="gym-list"></div>
   </div>
@@ -2187,7 +2187,7 @@ function showJourneySwitchPanel(available) {
   if (!forced) {
     html += '<div class="wild-action-bar"><button class="btn btn-secondary" onclick="showJourneyMovePanel()">MOVES</button></div>';
   } else {
-    html += '<div class="wild-action-bar"><span style="font-size:11px;color:var(--yellow);padding:4px">Choose your next Pokemon!</span></div>';
+    html += '<div class="wild-action-bar"><span style="font-size:12px;color:var(--yellow);padding:4px">Choose your next Pokemon!</span></div>';
   }
   controls.innerHTML = html;
 }
@@ -2479,7 +2479,7 @@ function renderGymList(data) {
     card.innerHTML =
       '<div class="gym-badge-icon" style="background:' + (completed ? bc : 'var(--bg)') + ';color:' + (completed ? '#fff' : bc) + '">' + (completed ? 'V' : gym.id) + '</div>' +
       '<div class="gym-card-info"><div class="gym-card-name">' + gym.name +
-      ' <span class="move-type-badge" style="background:var(--type-' + gym.type + ');font-size:9px">' + gym.type + '</span></div>' +
+      ' <span class="move-type-badge" style="background:var(--type-' + gym.type + ');font-size:10px">' + gym.type + '</span></div>' +
       '<div class="gym-card-detail">' + gym.badge + ' | ' + gym.team_size + ' Pokemon (Lv.' + gym.max_level + ')</div>' +
       '<div class="gym-card-detail">' + (completed ? 'DEFEATED' : isNext ? 'CHALLENGE READY' : locked ? 'LOCKED' : '') + '</div></div>';
     if (!locked && !completed) {
