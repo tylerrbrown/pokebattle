@@ -97,8 +97,37 @@ def get_learnset(dex_id):
 
 
 def get_evolution(dex_id):
-    """Get evolution data for a Pokemon. Returns None if no evolution."""
-    return EVOLUTIONS.get(str(dex_id))
+    """Get level-based evolution data for a Pokemon. Returns None if no evolution.
+    For multi-path Pokemon (arrays), returns the first level-based option."""
+    evo = EVOLUTIONS.get(str(dex_id))
+    if evo is None:
+        return None
+    if isinstance(evo, list):
+        # Multi-path: find a level-based evolution
+        for e in evo:
+            if e.get("method") == "level":
+                return e
+        return None  # No level-based evolution
+    return evo
+
+
+def get_all_evolutions(dex_id):
+    """Get all evolution paths for a Pokemon (level, stone, item). Returns list."""
+    evo = EVOLUTIONS.get(str(dex_id))
+    if evo is None:
+        return []
+    if isinstance(evo, list):
+        return evo
+    return [evo]
+
+
+def get_item_evolution(dex_id, item_id):
+    """Find an evolution for a Pokemon using a specific item. Returns dict or None."""
+    evos = get_all_evolutions(dex_id)
+    for e in evos:
+        if e.get("method") in ("stone", "item") and e.get("item") == item_id:
+            return e
+    return None
 
 
 def get_moves_at_level(dex_id, level):
