@@ -643,12 +643,34 @@ input.invalid { border-color: var(--red); }
 .shop-title { font-size:16px; color:var(--yellow); }
 .shop-currency { font-size:13px; color:var(--green); }
 .shop-items { flex:1; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
+.shop-section-label { font-size:12px; color:var(--text-dim); padding:4px 0; border-bottom:1px solid var(--border); margin-top:4px; }
 .shop-item { display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; }
 .shop-item-name { font-size:13px; }
-.shop-item-price { font-size:11px; color:var(--green); margin-top:2px; }
-.shop-buy-btn { padding:8px 14px; border-radius:6px; background:var(--green); color:#1a1a2e; font-size:11px; }
+.shop-item-desc { font-size:12px; color:var(--text-dim); margin-top:2px; }
+.shop-item-price { font-size:12px; color:var(--green); margin-top:2px; }
+.shop-item-owned { font-size:12px; color:var(--yellow); margin-top:1px; }
+.shop-buy-btn { padding:8px 14px; border-radius:6px; background:var(--green); color:#1a1a2e; font-size:12px; }
 .shop-buy-btn:hover { filter:brightness(1.1); }
 .shop-buy-btn:disabled { opacity:0.4; cursor:not-allowed; }
+/* ─── Item Use UI ─────────────────────────────── */
+.btn-item { background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; }
+.btn-item:hover { filter:brightness(1.15); }
+.item-panel { display:flex; flex-direction:column; gap:6px; padding:8px; max-height:180px; overflow-y:auto; }
+.item-btn { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg2); border:2px solid var(--border); border-radius:6px; cursor:pointer; font-family:inherit; color:var(--text); font-size:12px; transition:all 0.15s; }
+.item-btn:hover:not(:disabled) { border-color:#a855f7; background:var(--bg3); }
+.item-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.item-btn-name { font-size:12px; }
+.item-btn-qty { font-size:12px; color:var(--yellow); }
+.item-heal-flash { animation:heal-flash 0.6s ease-out; }
+@keyframes heal-flash { 0%{filter:brightness(1) drop-shadow(0 0 0 transparent)} 30%{filter:brightness(1.8) drop-shadow(0 0 12px #4ade80)} 100%{filter:brightness(1) drop-shadow(0 0 0 transparent)} }
+/* ─── My Team Item Use ────────────────────────── */
+.myteam-card { cursor:pointer; transition:all 0.15s; }
+.myteam-card:hover { border-color:var(--accent); background:var(--bg3); }
+.myteam-card.selected { border-color:#a855f7; box-shadow:0 0 10px rgba(168,85,247,0.3); }
+.myteam-item-bar { display:flex; gap:6px; flex-wrap:wrap; padding:6px 0; }
+.myteam-item-btn { padding:6px 10px; border-radius:6px; background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; font-size:12px; font-family:inherit; cursor:pointer; border:none; transition:all 0.15s; }
+.myteam-item-btn:hover:not(:disabled) { filter:brightness(1.15); }
+.myteam-item-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
 /* ─── Gym List ─────────────────────────────────── */
 .gymlist-screen { padding:16px; gap:12px; }
@@ -891,7 +913,7 @@ input.invalid { border-color: var(--red); }
     </div>
     <div class="shop-items" id="shop-items"></div>
     <div class="shop-header" style="margin-top:8px">
-      <span style="font-size:11px;color:var(--text-dim)" id="shop-balls"></span>
+      <span style="font-size:12px;color:var(--text-dim)" id="shop-inventory-summary"></span>
     </div>
     <button class="btn btn-secondary" onclick="goHome()">BACK</button>
   </div>
@@ -1226,6 +1248,7 @@ function handleMessage(msg) {
       }
       break;
     case 'wild_force_switch':
+      if (msg.inventory && S.account) S.account.inventory = msg.inventory;
       if (msg.events && msg.events.length) {
         playJourneyEvents(msg.events).then(() => {
           if (msg.your_team) S.myTeam = msg.your_team;
@@ -1280,6 +1303,9 @@ function handleMessage(msg) {
       break;
     case 'buy_result':
       handleBuyResult(msg);
+      break;
+    case 'item_used':
+      handleItemUsed(msg);
       break;
     case 'progression_data':
       if (S.account) {
@@ -1996,9 +2022,12 @@ function renderMyTeam(team, allPokemon) {
     return;
   }
 
+  const inv = (S.account && S.account.inventory) || {};
+  const hasItems = Object.keys(HEALING_ITEMS).some(k => (inv[k] || 0) > 0);
+
   // We need pokemon data for names/types/moves — use the client pokemon list or fetch
   list.innerHTML = '';
-  team.forEach(p => {
+  team.forEach((p, idx) => {
     const pokeData = S.pokemonList.find(pk => pk.id === p.dex_id);
     const name = pokeData ? pokeData.name : `#${p.dex_id}`;
     const types = pokeData ? pokeData.types : [];
@@ -2006,6 +2035,10 @@ function renderMyTeam(team, allPokemon) {
 
     const card = document.createElement('div');
     card.className = 'myteam-card';
+    card.id = 'myteam-card-' + idx;
+    if (hasItems) {
+      card.onclick = () => toggleTeamItemPanel(idx);
+    }
     card.innerHTML = `
       <img src="/sprites/front/${String(p.dex_id).padStart(3,'0')}.png" alt="${name}">
       <div class="myteam-info">
@@ -2020,9 +2053,57 @@ function renderMyTeam(team, allPokemon) {
       </div>
     `;
     list.appendChild(card);
+
+    // Item panel (hidden by default)
+    const itemPanel = document.createElement('div');
+    itemPanel.id = 'myteam-items-' + idx;
+    itemPanel.className = 'myteam-item-bar';
+    itemPanel.style.display = 'none';
+    if (hasItems) {
+      for (const [key, info] of Object.entries(HEALING_ITEMS)) {
+        const qty = inv[key] || 0;
+        if (qty <= 0) continue;
+        const btn = document.createElement('button');
+        btn.className = 'myteam-item-btn';
+        btn.textContent = info.name + ' (' + qty + ')';
+        btn.onclick = (e) => { e.stopPropagation(); useTeamItem(key, idx); };
+        itemPanel.appendChild(btn);
+      }
+    }
+    list.appendChild(itemPanel);
   });
 
-  stats.textContent = `Team: ${team.length}/6 • Total owned: ${allPokemon ? allPokemon.length : '?'} • Poke Balls: ${S.account ? S.account.pokeballs : '?'}`;
+  // Stats line with item inventory
+  let statsText = `Team: ${team.length}/6 | Owned: ${allPokemon ? allPokemon.length : '?'}`;
+  if (hasItems) {
+    const itemParts = [];
+    for (const [k, info] of Object.entries(HEALING_ITEMS)) {
+      const qty = inv[k] || 0;
+      if (qty > 0) itemParts.push(info.name + ': ' + qty);
+    }
+    if (itemParts.length) statsText += ' | ' + itemParts.join(', ');
+  }
+  stats.textContent = statsText;
+}
+
+function toggleTeamItemPanel(idx) {
+  // Toggle the item bar for this Pokemon card
+  const panel = document.getElementById('myteam-items-' + idx);
+  const card = document.getElementById('myteam-card-' + idx);
+  if (!panel) return;
+  const wasVisible = panel.style.display !== 'none';
+  // Hide all item panels first
+  document.querySelectorAll('.myteam-item-bar').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.myteam-card').forEach(c => c.classList.remove('selected'));
+  if (!wasVisible) {
+    panel.style.display = 'flex';
+    if (card) card.classList.add('selected');
+  }
+}
+
+function useTeamItem(itemType, pokemonIndex) {
+  send({type:'use_item', item_type:itemType, pokemon_index:pokemonIndex, context:'team'});
+  playSound('select');
 }
 
 /* ─── Hub ──────────────────────────────────────── */
@@ -2056,10 +2137,15 @@ function updateHubProfile() {
   // Find highest level on team
   const team = a.team || [];
   const maxLv = team.length ? Math.max(...team.map(p => p.level || 1)) : '—';
+  // Count healing items
+  const inv = a.inventory || {};
+  let itemTotal = 0;
+  for (const key of Object.keys(HEALING_ITEMS || {})) { itemTotal += (inv[key] || 0); }
   el.innerHTML =
     '<span>Welcome, <span class="stat">' + a.username + '</span>!</span>' +
     '<span>$<span class="stat">' + (a.currency || 0) + '</span></span>' +
     '<span>Balls: <span class="stat">' + (a.pokeballs || 0) + '</span></span>' +
+    '<span>Items: <span class="stat">' + itemTotal + '</span></span>' +
     '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '/151</span></span>' +
     '<span>Best Lv: <span class="stat">' + maxLv + '</span></span>' +
     '<div class="hub-badges">' + badgeHtml + '</div>';
@@ -2087,6 +2173,7 @@ function updateJourneyState(msg) {
   if (msg.wild_pokemon) { S.oppTeam = [msg.wild_pokemon]; S.oppActive = 0; }
   if (msg.your_pokemon) S.myTeam[S.myActive] = msg.your_pokemon;
   if (msg.xp_results && msg.xp_results.length) S.pendingXpResults = msg.xp_results;
+  if (msg.inventory && S.account) S.account.inventory = msg.inventory;
 }
 
 function renderJourneyBattle() {
@@ -2162,6 +2249,9 @@ function showJourneyMovePanel() {
     const balls = S.account ? S.account.pokeballs : 0;
     html += '<button class="btn btn-ball" onclick="journeyBall()" ' + (balls <= 0 ? 'disabled' : '') + '>BALL (' + balls + ')</button>';
   }
+  // Items button (available in wild & gym)
+  const totalItems = _countHealingItems();
+  html += '<button class="btn btn-item" onclick="showJourneyItemPanel()"' + (totalItems <= 0 ? ' disabled' : '') + '>ITEMS' + (totalItems > 0 ? ' (' + totalItems + ')' : '') + '</button>';
   html += '<button class="btn btn-secondary" onclick="showJourneySwitchPanel()">SWITCH</button>';
   if (S.encounterType === 'wild') {
     html += '<button class="btn btn-run" onclick="journeyRun()">RUN</button>';
@@ -2211,12 +2301,88 @@ function journeyRun() { send({type:'wild_action',action_type:'run'}); showWaitin
 function journeySwitch(i) { send({type:'wild_action',action_type:'switch',pokemon_index:i}); showWaiting(''); playSound('select'); }
 function journeyForceSwitch(i) { send({type:'wild_action',action_type:'switch',pokemon_index:i}); showWaiting(''); playSound('select'); }
 
+/* ─── Journey Item Use ────────────────────────── */
+const HEALING_ITEMS = {
+  potion:       {name:'Potion',       desc:'Restores 20 HP',        revive:false},
+  super_potion: {name:'Super Potion', desc:'Restores 50 HP',        revive:false},
+  hyper_potion: {name:'Hyper Potion', desc:'Restores 200 HP',       revive:false},
+  revive:       {name:'Revive',       desc:'Revive to 50% HP',      revive:true},
+  full_restore: {name:'Full Restore', desc:'Full HP + cure status', revive:false},
+};
+
+function _countHealingItems() {
+  const inv = (S.account && S.account.inventory) || {};
+  let total = 0;
+  for (const key of Object.keys(HEALING_ITEMS)) {
+    total += (inv[key] || 0);
+  }
+  return total;
+}
+
+function showJourneyItemPanel() {
+  const controls = document.getElementById('battle-controls');
+  const inv = (S.account && S.account.inventory) || {};
+  let html = '<div class="item-panel">';
+  for (const [key, info] of Object.entries(HEALING_ITEMS)) {
+    const qty = inv[key] || 0;
+    if (info.revive) {
+      // Revive: show fainted team members as targets
+      html += '<button class="item-btn" ' + (qty <= 0 ? 'disabled' : '') + ' onclick="showReviveTargets(\'' + key + '\')">' +
+        '<span class="item-btn-name">' + info.name + ' — ' + info.desc + '</span>' +
+        '<span class="item-btn-qty">x' + qty + '</span></button>';
+    } else {
+      // Healing item: use on active Pokemon
+      const active = S.myTeam[S.myActive];
+      const atFull = active && active.current_hp >= active.max_hp;
+      html += '<button class="item-btn" ' + (qty <= 0 || atFull ? 'disabled' : '') + ' onclick="journeyUseItem(\'' + key + '\',' + S.myActive + ')">' +
+        '<span class="item-btn-name">' + info.name + ' — ' + info.desc + '</span>' +
+        '<span class="item-btn-qty">x' + qty + '</span></button>';
+    }
+  }
+  html += '</div>';
+  html += '<div class="wild-action-bar"><button class="btn btn-secondary" onclick="showJourneyMovePanel()">BACK</button></div>';
+  controls.innerHTML = html;
+}
+
+function showReviveTargets(itemType) {
+  const controls = document.getElementById('battle-controls');
+  let html = '<div class="item-panel">';
+  html += '<div style="font-size:12px;color:var(--yellow);padding:4px;text-align:center">Choose a fainted Pokemon to revive:</div>';
+  S.myTeam.forEach((p, i) => {
+    const canRevive = p.is_fainted;
+    html += '<button class="item-btn" ' + (!canRevive ? 'disabled' : '') + ' onclick="journeyUseItem(\'' + itemType + '\',' + i + ')">' +
+      '<img src="/sprites/front/' + String(p.dex_id).padStart(3,'0') + '.png" style="width:32px;height:32px;image-rendering:pixelated;margin-right:8px" alt="">' +
+      '<span class="item-btn-name">' + p.name + (p.is_fainted ? ' (FAINTED)' : ' ' + p.current_hp + '/' + p.max_hp + ' HP') + '</span></button>';
+  });
+  html += '</div>';
+  html += '<div class="wild-action-bar"><button class="btn btn-secondary" onclick="showJourneyItemPanel()">BACK</button></div>';
+  controls.innerHTML = html;
+}
+
+function journeyUseItem(itemType, pokemonIndex) {
+  const ctx = S.encounterType || 'wild';
+  send({type:'use_item', item_type:itemType, pokemon_index:pokemonIndex, context:ctx});
+  showWaiting('');
+  playSound('select');
+}
+
 /* ─── Journey Event Animation ──────────────────── */
 async function playJourneyEvents(events) {
   showWaiting('');
   for (const evt of events) {
     const t = evt.type || evt.event;
     switch (t) {
+      case 'item_use': {
+        setBattleText('Used ' + evt.item_name + ' on ' + evt.pokemon + '!');
+        playSound('select');
+        // Heal flash animation on player sprite
+        const healSprite = document.getElementById('player-sprite');
+        healSprite.classList.add('item-heal-flash');
+        setHpBar('player-hp-bar', 'player-hp-text', evt.hp, evt.max_hp, true);
+        await delay(1200);
+        healSprite.classList.remove('item-heal-flash');
+        break;
+      }
       case 'move_use':
         setBattleText(evt.pokemon + ' used ' + evt.move + '!');
         await delay(800);
@@ -2428,20 +2594,57 @@ function showShop() {
 function renderShop(data) {
   const items = document.getElementById('shop-items');
   document.getElementById('shop-currency').textContent = '$' + data.currency;
-  document.getElementById('shop-balls').textContent = 'Poke Balls: ' + data.pokeballs;
+  if (S.account) {
+    S.account.inventory = data.inventory || {};
+    S.account.pokeballs = data.pokeballs;
+  }
+  // Build inventory summary
+  const summaryEl = document.getElementById('shop-inventory-summary');
+  let summaryParts = ['Balls: ' + data.pokeballs];
+  const inv = data.inventory || {};
+  if (Object.keys(inv).length > 0) {
+    for (const [k, v] of Object.entries(inv)) {
+      const itemDef = data.items.find(i => i.type === k);
+      if (itemDef && v > 0) summaryParts.push(itemDef.name + ': ' + v);
+    }
+  }
+  summaryEl.textContent = summaryParts.join(' | ');
+
   items.innerHTML = '';
-  data.items.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'shop-item';
-    div.innerHTML = '<div><div class="shop-item-name">' + item.name + '</div>' +
-      '<div class="shop-item-price">$' + item.price + '</div></div>' +
-      '<div style="display:flex;gap:6px">' +
-      '<button class="shop-buy-btn" ' + (data.currency >= item.price ? '' : 'disabled') +
-      ' onclick="buyItem(\'' + item.type + '\')">BUY</button>' +
-      '<button class="shop-buy-btn" ' + (data.currency >= item.price * 5 ? '' : 'disabled') +
-      ' onclick="buyItem(\'' + item.type + '\',5)">x5</button></div>';
-    items.appendChild(div);
-  });
+  // Separate by category
+  const balls = data.items.filter(i => i.category === 'ball');
+  const healing = data.items.filter(i => i.category === 'healing');
+
+  if (balls.length) {
+    const label = document.createElement('div');
+    label.className = 'shop-section-label';
+    label.textContent = 'POKE BALLS';
+    items.appendChild(label);
+    balls.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
+  }
+  if (healing.length) {
+    const label = document.createElement('div');
+    label.className = 'shop-section-label';
+    label.textContent = 'HEALING ITEMS';
+    items.appendChild(label);
+    healing.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
+  }
+}
+
+function _buildShopItem(item, currency) {
+  const div = document.createElement('div');
+  div.className = 'shop-item';
+  const ownedText = item.owned > 0 ? '<div class="shop-item-owned">Owned: ' + item.owned + '</div>' : '';
+  div.innerHTML = '<div><div class="shop-item-name">' + item.name + '</div>' +
+    '<div class="shop-item-desc">' + (item.description || '') + '</div>' +
+    '<div class="shop-item-price">$' + item.price + '</div>' +
+    ownedText + '</div>' +
+    '<div style="display:flex;gap:6px">' +
+    '<button class="shop-buy-btn" ' + (currency >= item.price ? '' : 'disabled') +
+    ' onclick="buyItem(\'' + item.type + '\')">BUY</button>' +
+    '<button class="shop-buy-btn" ' + (currency >= item.price * 5 ? '' : 'disabled') +
+    ' onclick="buyItem(\'' + item.type + '\',5)">x5</button></div>';
+  return div;
 }
 
 function buyItem(type, qty) { send({type:'buy_item',item_type:type,quantity:qty||1}); }
@@ -2449,11 +2652,25 @@ function buyItem(type, qty) { send({type:'buy_item',item_type:type,quantity:qty|
 function handleBuyResult(msg) {
   if (msg.success) {
     playSound('select');
-    if (S.account) { S.account.currency = msg.new_currency; S.account.pokeballs = msg.pokeballs; }
-    showToast('Purchased! Progress Saved');
+    if (S.account) {
+      S.account.currency = msg.new_currency;
+      S.account.pokeballs = msg.pokeballs;
+      if (msg.inventory) S.account.inventory = msg.inventory;
+    }
+    showToast('Purchased!');
     send({ type: 'get_shop' });
   } else {
-    setBattleText(msg.message || 'Purchase failed');
+    showToast(msg.message || 'Purchase failed');
+  }
+}
+
+function handleItemUsed(msg) {
+  if (S.account && msg.inventory) S.account.inventory = msg.inventory;
+  showToast(msg.message || 'Item used!');
+  playSound('select');
+  // Refresh My Team view if on that screen
+  if (S.screen === 'myteam') {
+    send({ type: 'get_team' });
   }
 }
 
