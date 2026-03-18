@@ -16,7 +16,9 @@ Gen 1 Pokemon multiplayer battle game with WebSocket real-time gameplay.
 | `server.py` | WebSocket + HTTP static file server (entry point) |
 | `battle_engine.py` | Gen 1 damage calc, turn resolution, status effects |
 | `game_room.py` | Room management, game state machine |
+| `ai_player.py` | BotPlayer AI opponent for single-player mode |
 | `pokemon_data.py` | Load/validate JSON data at startup |
+| `player_accounts.py` | Account registration, login, starter selection, team management |
 | `index.html` | Full client (all screens, CSS, JS inline) |
 | `admin.html` | Admin panel (game history, active rooms, stats) |
 | `data/pokemon.json` | 151 Pokemon: stats, types, 4 moves each |
@@ -80,10 +82,26 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 
 ## Game Flow
 
-1. Title → Create/Join room (4-letter code)
-2. Team Select → Pick 6 Pokemon simultaneously (90s timer)
+1. Title → Create/Join room (4-letter code) or "Battle AI" for single-player
+2. Team Select → Pick 6 Pokemon simultaneously (90s timer); bot auto-picks
 3. Battle → Turn-based with tap phase for damage moves
 4. Game Over → Rematch or new game
+
+## AI Single-Player Mode
+
+- `BotPlayer` in `ai_player.py` duck-types the `Player` interface (`is_bot = True`, `send()` is no-op)
+- Bot auto-handles all phases: team select, action choice, tap phase, force switch, rematch
+- Move AI scores by `power * accuracy * type_effectiveness * STAB` with randomness
+- Switches on type disadvantage (30% chance if matchup ≤0.5x)
+- Tap score: random 0.3–0.8 (human has advantage)
+- `GameRoom` checks `player.is_bot` at each decision point and immediately sets asyncio Events
+- Game recording uses `on_game_end` callback on `GameRoom`, set via `RoomManager`, to avoid circular imports between `game_room.py` and `server.py`
+
+## Gotchas
+
+- **Module init order**: In `server.py`, `room_manager = RoomManager(...)` must come AFTER all functions it references (e.g., `record_game`) are defined — Python executes top-level statements in order
+- **Query strings in static serving**: `request.path` in websockets includes query string; must strip `?...` before file path resolution or `admin.html?k=SECRET` returns 404
+- **websockets version**: EC2 system apt has v9.1 (incompatible API); must use `pip3 install 'websockets>=14'`
 
 ## Battle Mechanics
 
