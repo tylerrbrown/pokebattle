@@ -67,7 +67,7 @@ def generate_wild_pokemon(player_team_avg_level):
     species = random.choice(pool)
 
     # Level scales with player's team average
-    base_level = max(2, player_team_avg_level + random.randint(-3, 3))
+    base_level = max(2, int(player_team_avg_level) + random.randint(-3, 3))
     level = min(70, base_level)
     if rarity == "legendary":
         level = max(level, 50)  # Legendaries are always at least level 50

@@ -619,6 +619,93 @@ input.invalid { border-color: var(--red); }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── Hub Screen ───────────────────────────────── */
+.hub-screen { align-items:center; justify-content:center; gap:16px; padding:20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); }
+.hub-profile { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:11px; color:var(--text-dim); background:var(--bg2); padding:8px 14px; border-radius:8px; border:1px solid var(--border); width:360px; max-width:95%; }
+.hub-profile .stat { color:var(--yellow); }
+.hub-badges { display:flex; gap:4px; align-items:center; }
+.hub-badge { width:14px; height:14px; border-radius:50%; background:var(--bg); border:1px solid var(--border); }
+.hub-badge.earned { border:2px solid var(--yellow); }
+.hub-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:320px; max-width:95%; }
+.btn-wild { grid-column:1/-1; background:linear-gradient(135deg,var(--green),#22c55e); color:#1a1a2e; font-size:15px; font-weight:bold; padding:16px; }
+.btn-wild:hover { filter:brightness(1.1); }
+.btn-gym { background:linear-gradient(135deg,#7038f8,#a890f0); color:#fff; }
+.btn-gym:hover { filter:brightness(1.1); }
+.btn-shop { background:linear-gradient(135deg,var(--yellow),var(--orange)); color:#1a1a2e; }
+.btn-shop:hover { filter:brightness(1.1); }
+.btn-home { background:var(--bg3); color:var(--text); border:2px solid var(--accent); }
+.btn-home:hover { border-color:var(--green); }
+
+/* ─── Shop ─────────────────────────────────────── */
+.shop-screen { padding:16px; gap:12px; }
+.shop-header { display:flex; justify-content:space-between; align-items:center; }
+.shop-title { font-size:16px; color:var(--yellow); }
+.shop-currency { font-size:13px; color:var(--green); }
+.shop-items { flex:1; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
+.shop-item { display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; }
+.shop-item-name { font-size:13px; }
+.shop-item-price { font-size:11px; color:var(--green); margin-top:2px; }
+.shop-buy-btn { padding:8px 14px; border-radius:6px; background:var(--green); color:#1a1a2e; font-size:11px; }
+.shop-buy-btn:hover { filter:brightness(1.1); }
+.shop-buy-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* ─── Gym List ─────────────────────────────────── */
+.gymlist-screen { padding:16px; gap:12px; }
+.gymlist-header { display:flex; justify-content:space-between; align-items:center; }
+.gymlist-title { font-size:16px; color:#a890f0; }
+.gym-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+.gym-card { display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s; }
+.gym-card:hover:not(.locked):not(.completed) { border-color:var(--accent); background:var(--bg3); }
+.gym-card.completed { border-color:var(--green); opacity:0.7; }
+.gym-card.locked { opacity:0.4; cursor:not-allowed; }
+.gym-card.next { border-color:var(--yellow); box-shadow:0 0 10px rgba(250,204,21,0.2); }
+.gym-badge-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid var(--border); flex-shrink:0; }
+.gym-card.completed .gym-badge-icon { border-color:var(--green); }
+.gym-card-info { flex:1; }
+.gym-card-name { font-size:12px; margin-bottom:3px; }
+.gym-card-detail { font-size:10px; color:var(--text-dim); }
+
+/* ─── Gym Intro ────────────────────────────────── */
+.gymintro-screen { align-items:center; justify-content:center; gap:16px; padding:20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); }
+.gymintro-name { font-size:20px; color:var(--accent); text-shadow:0 0 15px rgba(233,69,96,0.4); }
+.gymintro-title { font-size:11px; color:var(--text-dim); margin-top:4px; }
+.gymintro-dialog { font-size:12px; line-height:2.2; text-align:center; max-width:340px; color:var(--text); background:var(--bg2); padding:14px; border-radius:8px; border:1px solid var(--border); }
+.gymintro-info { font-size:10px; color:var(--text-dim); text-align:center; line-height:2; }
+
+/* ─── Wild Battle Controls ─────────────────────── */
+.wild-action-bar { display:flex; gap:6px; padding:6px 8px; background:var(--bg2); }
+.wild-action-bar .btn { font-size:11px; padding:8px 10px; flex:1; }
+.btn-ball { background:var(--red); color:#fff; }
+.btn-ball:hover { filter:brightness(1.2); }
+.btn-run { background:var(--bg3); color:var(--text); border:2px solid var(--border); }
+
+/* ─── Journey Overlays ─────────────────────────── */
+.journey-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:200; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px; }
+.journey-overlay.active { display:flex; }
+.catch-ball { width:50px; height:50px; border-radius:50%; background:linear-gradient(180deg,var(--red) 48%,#333 48%,#333 52%,#fff 52%); border:3px solid #555; position:relative; }
+.catch-ball::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:14px; height:14px; background:#fff; border:3px solid #555; border-radius:50%; }
+@keyframes ball-shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(20deg)} 75%{transform:rotate(-20deg)} }
+@keyframes ball-drop { 0%{transform:translateY(-100px);opacity:0} 60%{transform:translateY(10px);opacity:1} 100%{transform:translateY(0);opacity:1} }
+.catch-ball.shaking { animation:ball-shake 0.5s ease-in-out; }
+.catch-ball.dropping { animation:ball-drop 0.5s ease-out; }
+.catch-text { font-size:13px; color:var(--text); text-align:center; }
+.catch-result { font-size:16px; text-align:center; }
+.catch-result.caught { color:var(--green); }
+.catch-result.escaped { color:var(--red); }
+.levelup-text { font-size:18px; color:var(--yellow); text-shadow:0 0 20px rgba(250,204,21,0.5); }
+.levelup-pokemon { font-size:14px; color:var(--text); margin-top:4px; }
+.levelup-detail { font-size:11px; color:var(--text-dim); line-height:2.2; text-align:center; margin-top:8px; }
+.evo-text { font-size:16px; color:var(--green); text-align:center; }
+.evo-sprites { display:flex; align-items:center; gap:16px; }
+.evo-sprites img { width:96px; height:96px; image-rendering:pixelated; }
+.evo-arrow { font-size:24px; color:var(--yellow); }
+@keyframes evo-glow { 0%,100%{filter:brightness(1)} 50%{filter:brightness(2)} }
+.evo-glowing { animation:evo-glow 0.8s ease-in-out 3; }
+.gym-result-badge { font-size:13px; color:var(--yellow); margin-top:4px; }
+.gym-result-dialog { font-size:12px; color:var(--text); text-align:center; line-height:2; max-width:320px; }
+.gym-result-currency { font-size:11px; color:var(--green); margin-top:4px; }
+.journey-level { font-size:10px; color:var(--yellow); margin-left:6px; }
 </style>
 </head>
 <body>
@@ -658,20 +745,34 @@ input.invalid { border-color: var(--red); }
     </div>
   </div>
 
+  <!-- HUB SCREEN (Journey Mode main menu) -->
+  <div id="screen-hub" class="screen hub-screen">
+    <div class="title-logo" style="font-size:22px">POKE<br>BATTLE</div>
+    <div class="hub-profile" id="hub-profile"></div>
+    <div class="hub-btns">
+      <button class="btn btn-wild" onclick="startWildEncounter()">WILD ENCOUNTER</button>
+      <button class="btn btn-gym" onclick="showGyms()">GYM LEADERS</button>
+      <button class="btn btn-shop" onclick="showShop()">SHOP</button>
+      <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
+      <button class="btn btn-ai" onclick="showQuickBattle()">QUICK BATTLE</button>
+      <button class="btn btn-secondary" style="font-size:11px" onclick="logout()">LOG OUT</button>
+    </div>
+  </div>
+
   <!-- MY TEAM SCREEN -->
   <div id="screen-myteam" class="screen myteam-screen">
     <div class="myteam-header">
       <span class="myteam-title">My Team</span>
-      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="showScreen('title')">BACK</button>
+      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="goHome()">BACK</button>
     </div>
     <div class="myteam-list" id="myteam-list"></div>
     <div class="myteam-stats" id="myteam-stats"></div>
   </div>
 
-  <!-- TITLE SCREEN (main menu after login) -->
+  <!-- TITLE SCREEN (Quick Battle menu) -->
   <div id="screen-title" class="screen title-screen">
-    <div class="title-logo">POKÉ<br>BATTLE</div>
-    <div class="title-subtitle" id="title-greeting">Gen 1 • Multiplayer • Real-time</div>
+    <div class="title-logo" style="font-size:22px">QUICK<br>BATTLE</div>
+    <div class="title-subtitle" id="title-greeting">Pick 6 from all 151 and battle!</div>
     <div class="title-instructions">
       <p>1. CREATE a room and share the 4-letter code</p>
       <p>2. Or JOIN with a friend's code</p>
@@ -685,10 +786,7 @@ input.invalid { border-color: var(--red); }
       <input id="join-code" type="text" placeholder="Room Code (4 letters)" maxlength="4" style="display:none" autocomplete="off">
       <button id="join-btn" class="btn btn-primary" style="display:none" onclick="joinRoom()">JOIN ROOM</button>
       <button class="btn btn-ai" onclick="createAiBattle()">BATTLE AI</button>
-      <div style="display:flex;gap:10px;width:100%">
-        <button class="btn btn-secondary" id="myteam-btn" style="flex:1" onclick="showMyTeam()">MY TEAM</button>
-        <button class="btn btn-secondary" style="flex:1" onclick="logout()">LOG OUT</button>
-      </div>
+      <button class="btn btn-home" onclick="goHome()">BACK TO HUB</button>
       <div id="title-error" class="error-text"></div>
     </div>
   </div>
@@ -773,7 +871,73 @@ input.invalid { border-color: var(--red); }
     <div class="gameover-btns">
       <button class="btn btn-primary" onclick="requestRematch()">REMATCH</button>
       <button class="btn btn-secondary" onclick="backToTitle()">NEW GAME</button>
+      <button class="btn btn-home" onclick="goHome()">HOME</button>
     </div>
+  </div>
+
+  <!-- SHOP SCREEN -->
+  <div id="screen-shop" class="screen shop-screen">
+    <div class="shop-header">
+      <span class="shop-title">POKEMART</span>
+      <span class="shop-currency" id="shop-currency"></span>
+    </div>
+    <div class="shop-items" id="shop-items"></div>
+    <div class="shop-header" style="margin-top:8px">
+      <span style="font-size:11px;color:var(--text-dim)" id="shop-balls"></span>
+    </div>
+    <button class="btn btn-secondary" onclick="goHome()">BACK</button>
+  </div>
+
+  <!-- GYM LIST SCREEN -->
+  <div id="screen-gymlist" class="screen gymlist-screen">
+    <div class="gymlist-header">
+      <span class="gymlist-title">GYM LEADERS</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:11px" onclick="goHome()">BACK</button>
+    </div>
+    <div class="gym-list" id="gym-list"></div>
+  </div>
+
+  <!-- GYM INTRO SCREEN -->
+  <div id="screen-gymintro" class="screen gymintro-screen">
+    <div class="gymintro-name" id="gymintro-name"></div>
+    <div class="gymintro-title" id="gymintro-title"></div>
+    <div class="gymintro-dialog" id="gymintro-dialog"></div>
+    <div class="gymintro-info" id="gymintro-info"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" id="gymintro-battle-btn" onclick="beginGymBattle()">BATTLE!</button>
+      <button class="btn btn-secondary" onclick="showGyms()">BACK</button>
+    </div>
+  </div>
+
+  <!-- JOURNEY OVERLAYS -->
+  <div id="catch-overlay" class="journey-overlay">
+    <div class="catch-ball" id="catch-ball-anim"></div>
+    <div class="catch-text" id="catch-text"></div>
+    <div class="catch-result" id="catch-result"></div>
+    <button class="btn btn-primary" id="catch-ok-btn" style="display:none" onclick="dismissCatchOverlay()">OK</button>
+  </div>
+  <div id="levelup-overlay" class="journey-overlay">
+    <div class="levelup-text">LEVEL UP!</div>
+    <div class="levelup-pokemon" id="levelup-pokemon"></div>
+    <img id="levelup-sprite" style="width:96px;height:96px;image-rendering:pixelated" src="" alt="">
+    <div class="levelup-detail" id="levelup-detail"></div>
+    <button class="btn btn-primary" onclick="dismissLevelUp()">OK</button>
+  </div>
+  <div id="evo-overlay" class="journey-overlay">
+    <div class="evo-text" id="evo-text">Evolving...</div>
+    <div class="evo-sprites">
+      <img id="evo-from-sprite" src="" alt="">
+      <span class="evo-arrow">-></span>
+      <img id="evo-to-sprite" src="" alt="">
+    </div>
+    <button class="btn btn-primary" id="evo-ok-btn" style="display:none" onclick="dismissEvoOverlay()">OK</button>
+  </div>
+  <div id="gym-result-overlay" class="journey-overlay">
+    <div class="gameover-title" id="gym-result-title"></div>
+    <div class="gym-result-dialog" id="gym-result-dialog"></div>
+    <div class="gym-result-badge" id="gym-result-badge"></div>
+    <div class="gym-result-currency" id="gym-result-currency"></div>
+    <button class="btn btn-primary" onclick="dismissGymResult()">OK</button>
   </div>
 </div>
 
@@ -797,7 +961,14 @@ const S = {
   animating: false,
   isAiBattle: false,
   // Account state
-  account: null,  // { id, username, token, starter_dex_id, pokeballs, team, total_pokemon }
+  account: null,
+  // Journey state
+  journeyMode: false,
+  encounterType: null, // 'wild' or 'gym'
+  encounter: null,
+  gymData: null,
+  currentGymId: null,
+  pendingXpResults: [],
 };
 
 /* ─── WebSocket ─────────────────────────────────── */
@@ -835,8 +1006,8 @@ function handleMessage(msg) {
       if (!msg.profile.starter_dex_id) {
         showScreen('starter');
       } else {
-        showScreen('title');
-        updateTitleGreeting();
+        showScreen('hub');
+        updateHubProfile();
       }
       break;
     case 'register_error':
@@ -854,11 +1025,12 @@ function handleMessage(msg) {
       break;
     case 'starter_chosen':
       S.account = msg.profile;
-      showScreen('title');
-      updateTitleGreeting();
+      showScreen('hub');
+      updateHubProfile();
       break;
     case 'profile':
       S.account = msg.profile;
+      if (S.screen === 'hub') updateHubProfile();
       break;
     case 'team_data':
       renderMyTeam(msg.team, msg.all_pokemon);
@@ -985,6 +1157,103 @@ function handleMessage(msg) {
       break;
     case 'left_room':
       backToTitle();
+      break;
+    // ─── Journey Mode Messages ─────────────────────
+    case 'wild_encounter_start':
+      S.journeyMode = true;
+      S.encounterType = 'wild';
+      S.encounter = msg;
+      setupJourneyBattle(msg);
+      break;
+    case 'wild_turn_result':
+      updateJourneyState(msg);
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(() => {
+          renderJourneyBattle();
+          showJourneyMovePanel();
+        });
+      } else {
+        renderJourneyBattle();
+        showJourneyMovePanel();
+      }
+      break;
+    case 'wild_fainted':
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(() => showJourneyVictory(msg));
+      } else {
+        showJourneyVictory(msg);
+      }
+      break;
+    case 'wild_blackout':
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(() => showJourneyDefeat(msg));
+      } else {
+        showJourneyDefeat(msg);
+      }
+      break;
+    case 'wild_force_switch':
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(() => {
+          if (msg.your_team) S.myTeam = msg.your_team;
+          showJourneySwitchPanel(msg.available);
+        });
+      } else {
+        if (msg.your_team) S.myTeam = msg.your_team;
+        showJourneySwitchPanel(msg.available);
+      }
+      break;
+    case 'wild_fled':
+      S.journeyMode = false;
+      setBattleText('Got away safely!');
+      setTimeout(() => goHome(), 1500);
+      break;
+    case 'wild_catch_attempt':
+      showCatchAnimation(msg.shakes, msg.caught);
+      break;
+    case 'wild_caught':
+      showCaughtResult(msg);
+      break;
+    case 'gym_list':
+      renderGymList(msg);
+      break;
+    case 'gym_intro':
+      showGymIntro(msg.gym);
+      break;
+    case 'gym_battle_start':
+      S.journeyMode = true;
+      S.encounterType = 'gym';
+      S.gymData = { name: msg.gym_name, team_size: msg.gym_team_size };
+      S.encounter = msg;
+      setupJourneyBattle(msg);
+      setBattleText(msg.gym_name + "'s Pokemon appeared!");
+      break;
+    case 'gym_victory':
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(() => showGymVictory(msg));
+      } else {
+        showGymVictory(msg);
+      }
+      break;
+    case 'gym_defeat':
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(() => showGymDefeat(msg));
+      } else {
+        showGymDefeat(msg);
+      }
+      break;
+    case 'shop_data':
+      renderShop(msg);
+      break;
+    case 'buy_result':
+      handleBuyResult(msg);
+      break;
+    case 'progression_data':
+      if (S.account) {
+        S.account.badges = msg.badges;
+        S.account.currency = msg.currency;
+        S.account.pokeballs = msg.pokeballs;
+        S.account.total_pokemon = msg.total_pokemon;
+      }
       break;
     case 'error':
       showError(msg.message);
@@ -1559,13 +1828,13 @@ function backToTitle() {
   send({ type: 'leave' });
   S.roomCode = null;
   S.isAiBattle = false;
+  S.journeyMode = false;
   S.selectedTeam = [];
   S.myTeam = [];
   S.oppTeam = [];
   clearTimer();
   if (S.account) {
-    showScreen('title');
-    updateTitleGreeting();
+    goHome();
   } else {
     showScreen('login');
   }
@@ -1715,6 +1984,491 @@ function renderMyTeam(team, allPokemon) {
 
   stats.textContent = `Team: ${team.length}/6 • Total owned: ${allPokemon ? allPokemon.length : '?'} • Poke Balls: ${S.account ? S.account.pokeballs : '?'}`;
 }
+
+/* ─── Hub ──────────────────────────────────────── */
+function goHome() {
+  S.journeyMode = false;
+  S.encounter = null;
+  S.encounterType = null;
+  S.gymData = null;
+  send({ type: 'get_profile' });
+  showScreen('hub');
+  updateHubProfile();
+}
+
+function showQuickBattle() {
+  showScreen('title');
+  updateTitleGreeting();
+}
+
+function updateHubProfile() {
+  const el = document.getElementById('hub-profile');
+  if (!S.account) return;
+  const a = S.account;
+  const badges = a.badges || [];
+  const badgeColors = ['#b8a038','#6890f0','#f8d030','#78c850','#a040a0','#f85888','#f08030','#e0c068'];
+  let badgeHtml = '';
+  for (let i = 0; i < 8; i++) {
+    const earned = badges.includes(i + 1);
+    badgeHtml += '<div class="hub-badge' + (earned ? ' earned' : '') + '" style="' + (earned ? 'background:' + badgeColors[i] : '') + '" title="Gym ' + (i+1) + '"></div>';
+  }
+  el.innerHTML =
+    '<span>Welcome, <span class="stat">' + a.username + '</span>!</span>' +
+    '<span>$<span class="stat">' + (a.currency || 0) + '</span></span>' +
+    '<span>Balls: <span class="stat">' + (a.pokeballs || 0) + '</span></span>' +
+    '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '</span></span>' +
+    '<div class="hub-badges">' + badgeHtml + '</div>';
+}
+
+/* ─── Journey Battle ───────────────────────────── */
+function setupJourneyBattle(msg) {
+  S.myTeam = msg.your_team;
+  S.myActive = msg.active_index || 0;
+  S.oppTeam = [msg.wild_pokemon];
+  S.oppActive = 0;
+  showScreen('battle');
+  renderJourneyBattle();
+  if (S.encounterType === 'wild') {
+    const w = msg.wild_pokemon;
+    const rText = w.rarity && w.rarity !== 'common' ? ' (' + w.rarity + ')' : '';
+    setBattleText('A wild ' + w.name + ' Lv.' + w.level + rText + ' appeared!');
+  }
+  setTimeout(() => showJourneyMovePanel(), 1500);
+}
+
+function updateJourneyState(msg) {
+  if (msg.your_team) S.myTeam = msg.your_team;
+  if (msg.active_index !== undefined) S.myActive = msg.active_index;
+  if (msg.wild_pokemon) { S.oppTeam = [msg.wild_pokemon]; S.oppActive = 0; }
+  if (msg.your_pokemon) S.myTeam[S.myActive] = msg.your_pokemon;
+  if (msg.xp_results && msg.xp_results.length) S.pendingXpResults = msg.xp_results;
+}
+
+function renderJourneyBattle() {
+  const myPoke = S.myTeam[S.myActive];
+  const oppPoke = S.oppTeam[0];
+  if (myPoke) {
+    const ps = document.getElementById('player-sprite');
+    ps.src = '/sprites/back/' + String(myPoke.dex_id).padStart(3,'0') + '.png';
+    ps.classList.remove('faint');
+    ps.style.display = myPoke.is_fainted ? 'none' : '';
+    let nh = myPoke.name + ' <span class="journey-level">Lv.' + (myPoke.level || '?') + '</span>';
+    if (myPoke.status) nh += ' <span class="poke-status-badge status-' + myPoke.status + '">' + myPoke.status.toUpperCase().slice(0,3) + '</span>';
+    document.getElementById('player-name-battle').innerHTML = nh;
+    setHpBar('player-hp-bar', 'player-hp-text', myPoke.current_hp, myPoke.max_hp, true);
+  }
+  if (oppPoke) {
+    const os = document.getElementById('opp-sprite');
+    os.src = '/sprites/front/' + String(oppPoke.dex_id).padStart(3,'0') + '.png';
+    os.classList.remove('faint');
+    os.style.display = (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'none' : '';
+    const prefix = S.encounterType === 'gym' ? (S.gymData ? S.gymData.name + "'s " : '') : 'Wild ';
+    let nh = prefix + oppPoke.name + ' <span class="journey-level">Lv.' + (oppPoke.level || '?') + '</span>';
+    if (oppPoke.status) nh += ' <span class="poke-status-badge status-' + oppPoke.status + '">' + oppPoke.status.toUpperCase().slice(0,3) + '</span>';
+    document.getElementById('opp-name').innerHTML = nh;
+    setHpBar('opp-hp-bar', 'opp-hp-text', oppPoke.current_hp, oppPoke.max_hp, false);
+  }
+  // Team balls
+  const pb = document.getElementById('player-balls');
+  pb.innerHTML = '';
+  S.myTeam.forEach(p => {
+    const b = document.createElement('div');
+    b.className = 'ball ' + (p.is_fainted ? 'fainted' : 'alive');
+    pb.appendChild(b);
+  });
+  const ob = document.getElementById('opp-balls');
+  ob.innerHTML = '';
+  if (S.encounterType === 'gym' && S.gymData) {
+    for (let i = 0; i < S.gymData.team_size; i++) {
+      const b = document.createElement('div');
+      b.className = 'ball alive';
+      ob.appendChild(b);
+    }
+  } else {
+    const b = document.createElement('div');
+    b.className = 'ball ' + (oppPoke && (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'fainted' : 'alive');
+    ob.appendChild(b);
+  }
+}
+
+function showJourneyMovePanel() {
+  const controls = document.getElementById('battle-controls');
+  const myPoke = S.myTeam[S.myActive];
+  if (!myPoke || myPoke.is_fainted) return;
+  let html = '<div class="move-panel">';
+  myPoke.moves.forEach((m, i) => {
+    const dis = m.current_pp <= 0 ? 'disabled' : '';
+    html += '<button class="move-btn" ' + dis + ' onclick="journeyMove(' + i + ')">' +
+      '<span class="move-name">' + m.name + '</span>' +
+      '<span class="move-meta"><span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.type + '</span>' +
+      '<span>PP ' + m.current_pp + '/' + (m.pp || '??') + '</span></span></button>';
+  });
+  html += '</div><div class="wild-action-bar">';
+  if (S.encounterType === 'wild') {
+    const balls = S.account ? S.account.pokeballs : 0;
+    html += '<button class="btn btn-ball" onclick="journeyBall()" ' + (balls <= 0 ? 'disabled' : '') + '>BALL (' + balls + ')</button>';
+  }
+  html += '<button class="btn btn-secondary" onclick="showJourneySwitchPanel()">SWITCH</button>';
+  if (S.encounterType === 'wild') {
+    html += '<button class="btn btn-run" onclick="journeyRun()">RUN</button>';
+  }
+  html += '</div>';
+  controls.innerHTML = html;
+}
+
+function showJourneySwitchPanel(available) {
+  const controls = document.getElementById('battle-controls');
+  const forced = !!available;
+  let html = '<div class="switch-panel">';
+  S.myTeam.forEach((p, i) => {
+    const isA = i === S.myActive;
+    const canSw = !p.is_fainted && !isA;
+    const valid = forced ? (available || []).includes(i) : canSw;
+    html += '<button class="switch-btn" ' + (!valid ? 'disabled' : '') + ' onclick="' + (forced ? 'journeyForceSwitch' : 'journeySwitch') + '(' + i + ')">' +
+      '<img src="/sprites/front/' + String(p.dex_id).padStart(3,'0') + '.png" alt="' + p.name + '">' +
+      '<span class="sw-name">' + p.name + (isA ? ' *' : '') + '</span>' +
+      '<span class="sw-hp">' + (p.is_fainted ? 'FAINTED' : p.current_hp + '/' + p.max_hp) + '</span></button>';
+  });
+  html += '</div>';
+  if (!forced) {
+    html += '<div class="wild-action-bar"><button class="btn btn-secondary" onclick="showJourneyMovePanel()">MOVES</button></div>';
+  } else {
+    html += '<div class="wild-action-bar"><span style="font-size:11px;color:var(--yellow);padding:4px">Choose your next Pokemon!</span></div>';
+  }
+  controls.innerHTML = html;
+}
+
+function journeyMove(i) { send({type:'wild_action',action_type:'move',move_index:i,tap_score:0.5}); showWaiting(''); playSound('select'); }
+function journeyBall() { send({type:'wild_action',action_type:'ball'}); showWaiting(''); playSound('select'); }
+function journeyRun() { send({type:'wild_action',action_type:'run'}); showWaiting(''); playSound('select'); }
+function journeySwitch(i) { send({type:'wild_action',action_type:'switch',pokemon_index:i}); showWaiting(''); playSound('select'); }
+function journeyForceSwitch(i) { send({type:'wild_action',action_type:'switch',pokemon_index:i}); showWaiting(''); playSound('select'); }
+
+/* ─── Journey Event Animation ──────────────────── */
+async function playJourneyEvents(events) {
+  showWaiting('');
+  for (const evt of events) {
+    const t = evt.type || evt.event;
+    switch (t) {
+      case 'move_use':
+        setBattleText(evt.pokemon + ' used ' + evt.move + '!');
+        await delay(800);
+        break;
+      case 'critical_hit':
+        setBattleText('A critical hit!');
+        await delay(600);
+        break;
+      case 'effectiveness':
+        if (evt.value === 'super_effective') {
+          setBattleText("It's super effective!");
+          screenShake(); screenFlash(); playSound('super_effective');
+        } else if (evt.value === 'not_very_effective') {
+          setBattleText("It's not very effective...");
+        } else if (evt.value === 'no_effect') {
+          setBattleText("It had no effect...");
+        }
+        await delay(800);
+        break;
+      case 'damage': {
+        playSound('hit');
+        const isOpp = S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon;
+        const sId = isOpp ? 'opp-sprite' : 'player-sprite';
+        document.getElementById(sId).classList.add('hit-flash');
+        setHpBar(isOpp ? 'opp-hp-bar' : 'player-hp-bar', isOpp ? 'opp-hp-text' : 'player-hp-text', evt.hp, evt.max_hp, !isOpp);
+        await delay(900);
+        document.getElementById(sId).classList.remove('hit-flash');
+        break;
+      }
+      case 'miss':
+        setBattleText(evt.pokemon + "'s attack missed!");
+        await delay(800);
+        break;
+      case 'faint': {
+        setBattleText(evt.pokemon + ' fainted!');
+        playSound('faint');
+        const isOppF = S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon;
+        document.getElementById(isOppF ? 'opp-sprite' : 'player-sprite').classList.add('faint');
+        await delay(1200);
+        break;
+      }
+      case 'status_apply': {
+        const st = {'paralyze':'was paralyzed!','sleep':'fell asleep!','poison':'was poisoned!','burn':'was burned!','freeze':'was frozen!'};
+        setBattleText(evt.pokemon + ' ' + (st[evt.status] || 'was afflicted!'));
+        await delay(800);
+        break;
+      }
+      case 'switch':
+        setBattleText('Go, ' + evt.pokemon + '!');
+        renderJourneyBattle();
+        await delay(800);
+        break;
+      case 'gym_next_pokemon':
+        setBattleText('Opponent sends out ' + evt.pokemon + '!');
+        renderJourneyBattle();
+        await delay(1000);
+        break;
+    }
+  }
+}
+
+/* ─── Journey Victory/Defeat ───────────────────── */
+function showJourneyVictory(msg) {
+  S.journeyMode = false;
+  const currency = msg.currency_gained || 0;
+  const xp = msg.xp_results || [];
+  setBattleText('You won! +$' + currency);
+  playSound('win');
+  setTimeout(() => {
+    if (xp.length && xp[0].leveled_up) {
+      showLevelUpOverlay(xp[0], () => {
+        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome());
+        else goHome();
+      });
+    } else goHome();
+  }, 2000);
+}
+
+function showJourneyDefeat(msg) {
+  S.journeyMode = false;
+  const isGym = msg && msg.gym_name;
+  if (isGym) {
+    showGymDefeat(msg);
+  } else {
+    setBattleText('All your Pokemon fainted...');
+    playSound('faint');
+    setTimeout(() => goHome(), 2500);
+  }
+}
+
+/* ─── Catch Animation ──────────────────────────── */
+function showCatchAnimation(shakes, caught) {
+  const overlay = document.getElementById('catch-overlay');
+  const ball = document.getElementById('catch-ball-anim');
+  const text = document.getElementById('catch-text');
+  const result = document.getElementById('catch-result');
+  const okBtn = document.getElementById('catch-ok-btn');
+  overlay.classList.add('active');
+  result.textContent = ''; result.className = 'catch-result';
+  okBtn.style.display = 'none'; text.textContent = '';
+  ball.className = 'catch-ball dropping';
+  let cnt = 0;
+  const iv = setInterval(() => {
+    if (cnt >= shakes) {
+      clearInterval(iv);
+      if (caught) {
+        result.textContent = 'GOTCHA!'; result.classList.add('caught'); playSound('win');
+      } else {
+        result.textContent = 'Oh no! It broke free!'; result.classList.add('escaped');
+      }
+      okBtn.style.display = '';
+      return;
+    }
+    ball.className = 'catch-ball shaking';
+    cnt++;
+    text.textContent = '.'.repeat(cnt);
+    setTimeout(() => { ball.className = 'catch-ball'; }, 400);
+  }, 700);
+}
+
+function dismissCatchOverlay() {
+  document.getElementById('catch-overlay').classList.remove('active');
+}
+
+function showCaughtResult(msg) {
+  const p = msg.pokemon;
+  setBattleText('You caught ' + p.name + ' Lv.' + p.level + '! +$' + msg.currency_gained);
+  if (S.account) {
+    S.account.pokeballs = Math.max(0, (S.account.pokeballs || 0) - 1);
+  }
+  setTimeout(() => {
+    const xp = msg.xp_results || [];
+    if (xp.length && xp[0].leveled_up) {
+      showLevelUpOverlay(xp[0], () => {
+        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome());
+        else goHome();
+      });
+    } else goHome();
+  }, 2500);
+}
+
+/* ─── Level Up Overlay ─────────────────────────── */
+let levelUpCb = null;
+function showLevelUpOverlay(result, cb) {
+  levelUpCb = cb;
+  const pokeData = S.pokemonList.find(p => p.id === result.dex_id);
+  const name = pokeData ? pokeData.name : '#' + result.dex_id;
+  document.getElementById('levelup-pokemon').textContent = name + ' grew to Lv. ' + result.new_level + '!';
+  document.getElementById('levelup-sprite').src = '/sprites/front/' + String(result.dex_id).padStart(3,'0') + '.png';
+  let detail = result.old_level + ' -> ' + result.new_level;
+  if (result.new_moves && result.new_moves.length) {
+    detail += '<br>New moves learned:';
+    result.new_moves.forEach(m => { detail += '<br>' + m.move_id; });
+  }
+  document.getElementById('levelup-detail').innerHTML = detail;
+  document.getElementById('levelup-overlay').classList.add('active');
+  playSound('win');
+}
+
+function dismissLevelUp() {
+  document.getElementById('levelup-overlay').classList.remove('active');
+  if (levelUpCb) { const cb = levelUpCb; levelUpCb = null; cb(); }
+}
+
+/* ─── Evolution Overlay ────────────────────────── */
+let evoCb = null;
+function showEvolutionOverlay(evo, cb) {
+  evoCb = cb;
+  const fromData = S.pokemonList.find(p => p.id === evo.from_dex_id);
+  const fromName = fromData ? fromData.name : '???';
+  const toName = evo.to_name || '???';
+  document.getElementById('evo-text').textContent = fromName + ' is evolving!';
+  const fs = document.getElementById('evo-from-sprite');
+  const ts = document.getElementById('evo-to-sprite');
+  fs.src = '/sprites/front/' + String(evo.from_dex_id).padStart(3,'0') + '.png';
+  fs.className = 'evo-glowing'; fs.style.opacity = '1';
+  ts.src = '/sprites/front/' + String(evo.to_dex_id).padStart(3,'0') + '.png';
+  ts.style.opacity = '0.3'; ts.className = '';
+  document.getElementById('evo-ok-btn').style.display = 'none';
+  document.getElementById('evo-overlay').classList.add('active');
+  setTimeout(() => {
+    fs.style.opacity = '0.3'; ts.style.opacity = '1'; ts.className = 'evo-glowing';
+    document.getElementById('evo-text').textContent = fromName + ' evolved into ' + toName + '!';
+    playSound('win');
+    document.getElementById('evo-ok-btn').style.display = '';
+  }, 2500);
+}
+
+function dismissEvoOverlay() {
+  const o = document.getElementById('evo-overlay');
+  o.classList.remove('active');
+  document.getElementById('evo-from-sprite').className = '';
+  document.getElementById('evo-to-sprite').className = '';
+  if (evoCb) { const cb = evoCb; evoCb = null; cb(); }
+}
+
+/* ─── Shop ─────────────────────────────────────── */
+function showShop() {
+  showScreen('shop');
+  send({ type: 'get_shop' });
+  document.getElementById('shop-items').innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px">Loading...</div>';
+}
+
+function renderShop(data) {
+  const items = document.getElementById('shop-items');
+  document.getElementById('shop-currency').textContent = '$' + data.currency;
+  document.getElementById('shop-balls').textContent = 'Poke Balls: ' + data.pokeballs;
+  items.innerHTML = '';
+  data.items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'shop-item';
+    div.innerHTML = '<div><div class="shop-item-name">' + item.name + '</div>' +
+      '<div class="shop-item-price">$' + item.price + '</div></div>' +
+      '<div style="display:flex;gap:6px">' +
+      '<button class="shop-buy-btn" ' + (data.currency >= item.price ? '' : 'disabled') +
+      ' onclick="buyItem(\'' + item.type + '\')">BUY</button>' +
+      '<button class="shop-buy-btn" ' + (data.currency >= item.price * 5 ? '' : 'disabled') +
+      ' onclick="buyItem(\'' + item.type + '\',5)">x5</button></div>';
+    items.appendChild(div);
+  });
+}
+
+function buyItem(type, qty) { send({type:'buy_item',item_type:type,quantity:qty||1}); }
+
+function handleBuyResult(msg) {
+  if (msg.success) {
+    playSound('select');
+    if (S.account) { S.account.currency = msg.new_currency; S.account.pokeballs = msg.pokeballs; }
+    send({ type: 'get_shop' });
+  } else {
+    setBattleText(msg.message || 'Purchase failed');
+  }
+}
+
+/* ─── Gyms ─────────────────────────────────────── */
+function showGyms() {
+  showScreen('gymlist');
+  send({ type: 'get_gyms' });
+  document.getElementById('gym-list').innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px">Loading...</div>';
+}
+
+const GYM_BADGE_COLORS = ['#b8a038','#6890f0','#f8d030','#78c850','#a040a0','#f85888','#f08030','#e0c068'];
+
+function renderGymList(data) {
+  const list = document.getElementById('gym-list');
+  list.innerHTML = '';
+  data.gyms.forEach((gym, i) => {
+    const completed = gym.completed;
+    const isNext = data.next_gym_id === gym.id;
+    const locked = !completed && !isNext && gym.id > 1 && !data.badges.includes(gym.id - 1);
+    const card = document.createElement('div');
+    card.className = 'gym-card' + (completed ? ' completed' : '') + (isNext ? ' next' : '') + (locked ? ' locked' : '');
+    const bc = GYM_BADGE_COLORS[i] || '#888';
+    card.innerHTML =
+      '<div class="gym-badge-icon" style="background:' + (completed ? bc : 'var(--bg)') + ';color:' + (completed ? '#fff' : bc) + '">' + (completed ? 'V' : gym.id) + '</div>' +
+      '<div class="gym-card-info"><div class="gym-card-name">' + gym.name +
+      ' <span class="move-type-badge" style="background:var(--type-' + gym.type + ');font-size:9px">' + gym.type + '</span></div>' +
+      '<div class="gym-card-detail">' + gym.badge + ' | ' + gym.team_size + ' Pokemon (Lv.' + gym.max_level + ')</div>' +
+      '<div class="gym-card-detail">' + (completed ? 'DEFEATED' : isNext ? 'CHALLENGE READY' : locked ? 'LOCKED' : '') + '</div></div>';
+    if (!locked && !completed) {
+      card.onclick = () => { S.currentGymId = gym.id; send({type:'start_gym',gym_id:gym.id}); };
+    }
+    list.appendChild(card);
+  });
+}
+
+function showGymIntro(gym) {
+  showScreen('gymintro');
+  S.currentGymId = gym.id;
+  document.getElementById('gymintro-name').textContent = gym.name;
+  document.getElementById('gymintro-title').textContent = gym.title;
+  document.getElementById('gymintro-dialog').textContent = gym.dialog_intro;
+  document.getElementById('gymintro-info').innerHTML =
+    '<span class="move-type-badge" style="background:var(--type-' + gym.type + ')">' + gym.type + '</span> Type<br>' +
+    gym.badge + '<br>' + gym.team_size + ' Pokemon (up to Lv.' + gym.max_level + ')';
+}
+
+function beginGymBattle() { send({type:'gym_battle_start',gym_id:S.currentGymId}); }
+
+/* ─── Gym Result ───────────────────────────────── */
+function showGymVictory(msg) {
+  S.journeyMode = false;
+  S.pendingXpResults = msg.xp_results || [];
+  const o = document.getElementById('gym-result-overlay');
+  document.getElementById('gym-result-title').textContent = 'VICTORY!';
+  document.getElementById('gym-result-title').className = 'gameover-title win';
+  document.getElementById('gym-result-dialog').textContent = msg.dialog_win;
+  document.getElementById('gym-result-badge').textContent = 'Earned: ' + msg.badge + '!';
+  document.getElementById('gym-result-currency').textContent = '+$' + msg.currency_gained;
+  o.classList.add('active');
+  playSound('win');
+}
+
+function showGymDefeat(msg) {
+  S.journeyMode = false;
+  S.pendingXpResults = [];
+  const o = document.getElementById('gym-result-overlay');
+  document.getElementById('gym-result-title').textContent = 'DEFEAT';
+  document.getElementById('gym-result-title').className = 'gameover-title lose';
+  document.getElementById('gym-result-dialog').textContent = msg.dialog_lose || 'You were defeated...';
+  document.getElementById('gym-result-badge').textContent = '';
+  document.getElementById('gym-result-currency').textContent = '';
+  o.classList.add('active');
+  playSound('faint');
+}
+
+function dismissGymResult() {
+  document.getElementById('gym-result-overlay').classList.remove('active');
+  const xp = S.pendingXpResults;
+  S.pendingXpResults = [];
+  if (xp.length && xp[0].leveled_up) {
+    showLevelUpOverlay(xp[0], () => {
+      if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome());
+      else goHome();
+    });
+  } else goHome();
+}
+
+function startWildEncounter() { send({type:'wild_encounter'}); }
 
 /* ─── Init ──────────────────────────────────────── */
 connect();
