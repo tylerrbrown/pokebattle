@@ -103,6 +103,22 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **Query strings in static serving**: `request.path` in websockets includes query string; must strip `?...` before file path resolution or `admin.html?k=SECRET` returns 404
 - **websockets version**: EC2 system apt has v9.1 (incompatible API); must use `pip3 install 'websockets>=14'`
 
+## Move Learning & Management
+
+- **Move Management Screen**: Accessible from My Team via "MOVES" button on each Pokemon
+  - Shows current moves (up to 4) with type badge, power, accuracy, PP
+  - Shows all learnable moves from learnset at or below Pokemon's current level
+  - Select a current move, then tap a learnable move to swap them
+  - If fewer than 4 moves, new moves can be added directly
+- **Level-Up Move Learning**: When a Pokemon levels up and learns a new move:
+  - If fewer than 4 moves: auto-learned and shown in level-up overlay
+  - If already has 4 moves: modal overlay prompts player to choose which move to replace (or skip)
+- **WebSocket Messages**:
+  - `get_learnable_moves` → `learnable_moves`: returns current + available moves with full details
+  - `swap_move` → `swap_move_ok`: validates learnset, updates DB, returns new move list
+  - `learn_move_choice` → `learn_move_ok` / `learn_move_skipped`: level-up move replacement decisions
+- **Data**: `data/learnsets.json` — dex_id → `[{level, move}]` level-up move lists
+
 ## Battle Mechanics
 
 - Faithful Gen 1: damage formula, STAB, type chart, status effects

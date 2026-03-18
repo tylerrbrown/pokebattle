@@ -712,6 +712,67 @@ input.invalid { border-color: var(--red); }
   opacity:0; transform:translateY(-10px); animation:toast-in 0.3s ease forwards, toast-out 0.3s ease 1.8s forwards; }
 @keyframes toast-in { to { opacity:1; transform:translateY(0); } }
 @keyframes toast-out { to { opacity:0; transform:translateY(-10px); } }
+
+/* ─── Move Management Screen ──────────────────── */
+.movemgmt-screen { padding:16px; gap:12px; }
+.movemgmt-header { display:flex; justify-content:space-between; align-items:center; }
+.movemgmt-title { font-size:16px; color:var(--accent); }
+.movemgmt-pokemon { display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; }
+.movemgmt-pokemon img { width:64px; height:64px; image-rendering:pixelated; }
+.movemgmt-pokemon-info { flex:1; }
+.movemgmt-pokemon-info .pname { font-size:14px; margin-bottom:4px; }
+.movemgmt-pokemon-info .plevel { font-size:12px; color:var(--yellow); }
+.movemgmt-section-title { font-size:13px; color:var(--text-dim); margin-top:4px; }
+.movemgmt-current { display:flex; flex-direction:column; gap:6px; }
+.movemgmt-move {
+  display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg2);
+  border:2px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s;
+}
+.movemgmt-move:hover { border-color:var(--blue); background:var(--bg3); }
+.movemgmt-move.selected { border-color:var(--accent); background:rgba(233,69,96,0.15); }
+.movemgmt-move-name { font-size:13px; flex:1; }
+.movemgmt-move-stats { font-size:12px; color:var(--text-dim); display:flex; gap:8px; }
+.movemgmt-move-stats span { white-space:nowrap; }
+.movemgmt-learnable {
+  flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;
+}
+.movemgmt-learn-move {
+  display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--bg2);
+  border:2px solid var(--border); border-radius:6px; cursor:pointer; transition:all 0.15s;
+}
+.movemgmt-learn-move:hover { border-color:var(--green); background:var(--bg3); }
+.movemgmt-learn-move.known { opacity:0.35; cursor:not-allowed; border-color:var(--border); }
+.movemgmt-learn-move.known:hover { background:var(--bg2); border-color:var(--border); }
+.movemgmt-learn-name { font-size:12px; flex:1; }
+.movemgmt-learn-stats { font-size:12px; color:var(--text-dim); display:flex; gap:6px; }
+.movemgmt-learn-lvl { font-size:12px; color:var(--yellow); min-width:40px; }
+.movemgmt-hint { font-size:12px; color:var(--text-dim); text-align:center; padding:8px; line-height:1.8; }
+
+/* ─── Learn Move Overlay (level-up) ───────────── */
+.learnmove-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:200;
+  flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:20px;
+}
+.learnmove-overlay.active { display:flex; }
+.learnmove-title { font-size:16px; color:var(--green); text-align:center; }
+.learnmove-subtitle { font-size:13px; color:var(--text); text-align:center; }
+.learnmove-new-move {
+  padding:12px 16px; background:var(--bg2); border:3px solid var(--green); border-radius:8px;
+  text-align:center; min-width:250px;
+}
+.learnmove-new-move .lm-name { font-size:14px; color:var(--green); }
+.learnmove-new-move .lm-stats { font-size:12px; color:var(--text-dim); margin-top:4px; }
+.learnmove-current-title { font-size:12px; color:var(--text-dim); margin-top:4px; }
+.learnmove-current-list { display:flex; flex-direction:column; gap:6px; width:280px; max-width:95%; }
+.learnmove-current-move {
+  display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg2);
+  border:2px solid var(--border); border-radius:6px; cursor:pointer; transition:all 0.15s;
+}
+.learnmove-current-move:hover { border-color:var(--accent); background:var(--bg3); }
+.learnmove-current-move .lm-name { font-size:13px; flex:1; }
+.learnmove-current-move .lm-stats { font-size:12px; color:var(--text-dim); }
+.learnmove-skip { font-size:12px; color:var(--text-dim); cursor:pointer; margin-top:4px; text-decoration:underline; }
+.learnmove-skip:hover { color:var(--text); }
 </style>
 </head>
 <body>
@@ -775,6 +836,20 @@ input.invalid { border-color: var(--red); }
     </div>
     <div class="myteam-list" id="myteam-list"></div>
     <div class="myteam-stats" id="myteam-stats"></div>
+  </div>
+
+  <!-- MOVE MANAGEMENT SCREEN -->
+  <div id="screen-movemgmt" class="screen movemgmt-screen">
+    <div class="movemgmt-header">
+      <span class="movemgmt-title">MOVES</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="showMyTeam()">BACK</button>
+    </div>
+    <div class="movemgmt-pokemon" id="movemgmt-pokemon"></div>
+    <div class="movemgmt-section-title">Current Moves (tap to select for replacement)</div>
+    <div class="movemgmt-current" id="movemgmt-current"></div>
+    <div class="movemgmt-section-title">Learnable Moves (tap to learn)</div>
+    <div class="movemgmt-hint" id="movemgmt-hint">Select a current move first, then tap a learnable move to swap it in.</div>
+    <div class="movemgmt-learnable" id="movemgmt-learnable"></div>
   </div>
 
   <!-- TITLE SCREEN (Quick Battle menu) -->
@@ -947,6 +1022,15 @@ input.invalid { border-color: var(--red); }
     <div class="gym-result-currency" id="gym-result-currency"></div>
     <button class="btn btn-primary" onclick="dismissGymResult()">OK</button>
   </div>
+  <!-- LEARN MOVE OVERLAY (level-up prompt) -->
+  <div id="learnmove-overlay" class="learnmove-overlay">
+    <div class="learnmove-title" id="learnmove-title"></div>
+    <div class="learnmove-subtitle" id="learnmove-subtitle"></div>
+    <div class="learnmove-new-move" id="learnmove-new-move"></div>
+    <div class="learnmove-current-title">Replace which move?</div>
+    <div class="learnmove-current-list" id="learnmove-current-list"></div>
+    <div class="learnmove-skip" onclick="skipLearnMove()">Don't learn this move</div>
+  </div>
 </div>
 
 <script>
@@ -977,6 +1061,14 @@ const S = {
   gymData: null,
   currentGymId: null,
   pendingXpResults: [],
+  // Move management
+  moveMgmtPokemonId: null,
+  moveMgmtSelectedMove: null, // move_id of currently selected current move
+  // Learn move queue (for level-up prompts)
+  learnMoveQueue: [],  // [{pokemon_id, dex_id, move_id, move_data, current_moves}]
+  learnMoveCallback: null,
+  _pendingLearnInfo: null,
+  _moveLookup: {},  // move_id -> {name, type, power, accuracy, pp, ...}
 };
 
 /* ─── Toast Notifications ──────────────────────── */
@@ -1059,6 +1151,10 @@ function handleMessage(msg) {
       break;
     case 'pokemon_list':
       S.pokemonList = msg.pokemon_list;
+      // Build move lookup for learn-move overlays
+      msg.pokemon_list.forEach(function(pk) {
+        if (pk.moves) pk.moves.forEach(function(m) { S._moveLookup[m.id] = m; });
+      });
       break;
     // ─── Game Messages ──────────────────────────────
     case 'room_created':
@@ -1288,6 +1384,35 @@ function handleMessage(msg) {
         S.account.pokeballs = msg.pokeballs;
         S.account.total_pokemon = msg.total_pokemon;
       }
+      break;
+    // ─── Move Management Messages ─────────────────
+    case 'learnable_moves':
+      // Check if this is a response for a pending learn-move prompt
+      if (S._pendingLearnInfo && S._pendingLearnInfo.pokemon_id === msg.pokemon_id) {
+        var info = S._pendingLearnInfo;
+        S._pendingLearnInfo = null;
+        var curMoveIds = msg.current_moves.map(function(m) { return m.move_id; });
+        // Also register moves in the global lookup so overlay can display them
+        msg.current_moves.forEach(function(m) { S._moveLookup[m.move_id] = m; });
+        msg.learnable_moves.forEach(function(m) { S._moveLookup[m.move_id] = m; });
+        queueLearnMoves(info.pokemon_id, info.dex_id, info.pending, curMoveIds, info.callback);
+      } else {
+        renderMoveMgmt(msg);
+      }
+      break;
+    case 'swap_move_ok':
+      showToast('Move learned: ' + msg.swapped_move.name + '!');
+      playSound('win');
+      // Refresh the move management screen
+      send({ type: 'get_learnable_moves', pokemon_id: msg.pokemon_id });
+      break;
+    case 'learn_move_ok':
+      showToast('Learned ' + msg.new_move_name + '!');
+      playSound('win');
+      processLearnMoveQueue();
+      break;
+    case 'learn_move_skipped':
+      processLearnMoveQueue();
       break;
     case 'error':
       showError(msg.message);
@@ -1996,33 +2121,289 @@ function renderMyTeam(team, allPokemon) {
     return;
   }
 
-  // We need pokemon data for names/types/moves — use the client pokemon list or fetch
+  // Build a lookup of all moves from pokemonList + server move data for display
+  const allMovesLookup = Object.assign({}, S._moveLookup);
+  S.pokemonList.forEach(pk => {
+    if (pk.moves) pk.moves.forEach(m => { if (!allMovesLookup[m.id]) allMovesLookup[m.id] = m; });
+  });
+
   list.innerHTML = '';
   team.forEach(p => {
     const pokeData = S.pokemonList.find(pk => pk.id === p.dex_id);
-    const name = pokeData ? pokeData.name : `#${p.dex_id}`;
+    const name = pokeData ? pokeData.name : '#' + p.dex_id;
     const types = pokeData ? pokeData.types : [];
-    const moves = pokeData ? pokeData.moves : [];
+
+    // Use actual moves from DB if available, fallback to species defaults
+    let moveIds = [];
+    try { moveIds = p.moves ? JSON.parse(p.moves) : []; } catch(e) { moveIds = []; }
+    const moveBadges = moveIds.map(mid => {
+      const md = allMovesLookup[mid];
+      if (md) return '<span class="move-type-badge" style="background:var(--type-' + md.type + ')">' + md.name + '</span>';
+      return '<span class="move-type-badge" style="background:var(--type-normal)">' + mid + '</span>';
+    }).join('');
+    // Fallback if no custom moves stored
+    const displayMoves = moveIds.length > 0 ? moveBadges : (pokeData ? pokeData.moves.slice(0,4).map(m =>
+      '<span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.name + '</span>'
+    ).join('') : '');
 
     const card = document.createElement('div');
     card.className = 'myteam-card';
-    card.innerHTML = `
-      <img src="/sprites/front/${String(p.dex_id).padStart(3,'0')}.png" alt="${name}">
-      <div class="myteam-info">
-        <div class="pname">${p.nickname || name}</div>
-        <div class="plevel">Lv. ${p.level}</div>
-        <div class="ptypes">${types.map(t =>
-          `<span class="move-type-badge" style="background:var(--type-${t})">${t}</span>`
-        ).join(' ')}</div>
-        <div class="myteam-moves">${moves.slice(0,4).map(m =>
-          `<span class="move-type-badge" style="background:var(--type-${m.type})">${m.name}</span>`
-        ).join('')}</div>
-      </div>
-    `;
+    card.innerHTML =
+      '<img src="/sprites/front/' + String(p.dex_id).padStart(3,'0') + '.png" alt="' + name + '">' +
+      '<div class="myteam-info">' +
+        '<div class="pname">' + (p.nickname || name) + '</div>' +
+        '<div class="plevel">Lv. ' + p.level + '</div>' +
+        '<div class="ptypes">' + types.map(function(t) {
+          return '<span class="move-type-badge" style="background:var(--type-' + t + ')">' + t + '</span>';
+        }).join(' ') + '</div>' +
+        '<div class="myteam-moves">' + displayMoves + '</div>' +
+      '</div>' +
+      '<button class="btn btn-secondary" style="flex:none;font-size:12px;padding:8px 12px" onclick="openMoveMgmt(' + p.id + ')">MOVES</button>';
     list.appendChild(card);
   });
 
-  stats.textContent = `Team: ${team.length}/6 • Total owned: ${allPokemon ? allPokemon.length : '?'} • Poke Balls: ${S.account ? S.account.pokeballs : '?'}`;
+  stats.textContent = 'Team: ' + team.length + '/6 | Total: ' + (allPokemon ? allPokemon.length : '?') + ' | Balls: ' + (S.account ? S.account.pokeballs : '?');
+}
+
+/* ─── Move Management ─────────────────────────── */
+function openMoveMgmt(pokemonRowId) {
+  S.moveMgmtPokemonId = pokemonRowId;
+  S.moveMgmtSelectedMove = null;
+  showScreen('movemgmt');
+  // Show loading state
+  document.getElementById('movemgmt-current').innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:12px">Loading...</div>';
+  document.getElementById('movemgmt-learnable').innerHTML = '';
+  send({ type: 'get_learnable_moves', pokemon_id: pokemonRowId });
+}
+
+function renderMoveMgmt(data) {
+  // Populate global move lookup with server-provided move data
+  data.current_moves.forEach(function(m) { S._moveLookup[m.move_id] = m; });
+  data.learnable_moves.forEach(function(m) { S._moveLookup[m.move_id] = m; });
+
+  // Pokemon header
+  const pokeEl = document.getElementById('movemgmt-pokemon');
+  const sprite = String(data.dex_id).padStart(3, '0');
+  pokeEl.innerHTML =
+    '<img src="/sprites/front/' + sprite + '.png" alt="' + data.pokemon_name + '">' +
+    '<div class="movemgmt-pokemon-info">' +
+      '<div class="pname">' + data.pokemon_name + '</div>' +
+      '<div class="plevel">Lv. ' + data.level + '</div>' +
+    '</div>';
+
+  // Current moves
+  const currentEl = document.getElementById('movemgmt-current');
+  currentEl.innerHTML = '';
+  if (data.current_moves.length === 0) {
+    currentEl.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:12px">No moves known</div>';
+  } else {
+    data.current_moves.forEach(function(m) {
+      const div = document.createElement('div');
+      div.className = 'movemgmt-move' + (S.moveMgmtSelectedMove === m.move_id ? ' selected' : '');
+      div.innerHTML =
+        '<span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.type.toUpperCase() + '</span>' +
+        '<span class="movemgmt-move-name">' + m.name + '</span>' +
+        '<span class="movemgmt-move-stats">' +
+          '<span>' + (m.power > 0 ? 'Pow ' + m.power : 'Status') + '</span>' +
+          '<span>Acc ' + m.accuracy + '</span>' +
+          '<span>PP ' + m.pp + '</span>' +
+        '</span>';
+      div.onclick = function() { selectCurrentMove(m.move_id); };
+      currentEl.appendChild(div);
+    });
+  }
+
+  // Hint
+  const hintEl = document.getElementById('movemgmt-hint');
+  if (data.current_moves.length >= 4) {
+    hintEl.textContent = 'Select a current move to replace, then tap a learnable move.';
+  } else {
+    hintEl.textContent = 'Tap a learnable move to add it (' + data.current_moves.length + '/4 slots used).';
+  }
+
+  // Learnable moves
+  const learnEl = document.getElementById('movemgmt-learnable');
+  learnEl.innerHTML = '';
+  const knownIds = new Set(data.current_moves.map(function(m) { return m.move_id; }));
+  // Filter out duplicates and sort by level
+  const seen = new Set();
+  const filtered = data.learnable_moves.filter(function(m) {
+    if (seen.has(m.move_id)) return false;
+    seen.add(m.move_id);
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    learnEl.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:12px">No learnable moves at this level.</div>';
+  } else {
+    filtered.forEach(function(m) {
+      const isKnown = knownIds.has(m.move_id);
+      const div = document.createElement('div');
+      div.className = 'movemgmt-learn-move' + (isKnown ? ' known' : '');
+      div.innerHTML =
+        '<span class="movemgmt-learn-lvl">Lv' + m.level_learned + '</span>' +
+        '<span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.type.toUpperCase() + '</span>' +
+        '<span class="movemgmt-learn-name">' + m.name + '</span>' +
+        '<span class="movemgmt-learn-stats">' +
+          '<span>' + (m.power > 0 ? 'Pow ' + m.power : 'Status') + '</span>' +
+          '<span>Acc ' + m.accuracy + '</span>' +
+          '<span>PP ' + m.pp + '</span>' +
+        '</span>';
+      if (!isKnown) {
+        div.onclick = function() { learnMoveFromMgmt(data, m); };
+      }
+      learnEl.appendChild(div);
+    });
+  }
+}
+
+function selectCurrentMove(moveId) {
+  S.moveMgmtSelectedMove = (S.moveMgmtSelectedMove === moveId) ? null : moveId;
+  // Re-highlight
+  document.querySelectorAll('#movemgmt-current .movemgmt-move').forEach(function(el) {
+    // We need to match by checking the move name — store data attr instead
+    el.classList.remove('selected');
+  });
+  // Re-render by fetching again is wasteful; just toggle class
+  // We stored the move_id in the onclick; toggle based on selection
+  if (S.moveMgmtPokemonId) {
+    send({ type: 'get_learnable_moves', pokemon_id: S.moveMgmtPokemonId });
+  }
+}
+
+function learnMoveFromMgmt(data, newMove) {
+  if (data.current_moves.length >= 4) {
+    // Must have a selected move to replace
+    if (!S.moveMgmtSelectedMove) {
+      showToast('Select a current move to replace first!');
+      return;
+    }
+    send({
+      type: 'swap_move',
+      pokemon_id: S.moveMgmtPokemonId,
+      old_move: S.moveMgmtSelectedMove,
+      new_move: newMove.move_id,
+    });
+    S.moveMgmtSelectedMove = null;
+  } else {
+    // Less than 4 moves — just add it
+    send({
+      type: 'swap_move',
+      pokemon_id: S.moveMgmtPokemonId,
+      old_move: null,
+      new_move: newMove.move_id,
+    });
+  }
+}
+
+/* ─── Learn Move Overlay (level-up) ──────────── */
+function queueLearnMoves(pokemonId, dexId, pendingMoves, currentMoves, callback) {
+  // pendingMoves is array of {move_id, move_data, level}
+  // currentMoves is array of move_id strings
+  pendingMoves.forEach(function(pm) {
+    S.learnMoveQueue.push({
+      pokemon_id: pokemonId,
+      dex_id: dexId,
+      move_id: pm.move_id,
+      move_data: pm.move_data || {},
+      current_moves: currentMoves,
+    });
+  });
+  S.learnMoveCallback = callback;
+  processLearnMoveQueue();
+}
+
+function processLearnMoveQueue() {
+  const overlay = document.getElementById('learnmove-overlay');
+  if (S.learnMoveQueue.length === 0) {
+    overlay.classList.remove('active');
+    if (S.learnMoveCallback) {
+      var cb = S.learnMoveCallback;
+      S.learnMoveCallback = null;
+      cb();
+    }
+    return;
+  }
+
+  var item = S.learnMoveQueue[0];
+  var md = item.move_data;
+  var moveName = md.name || item.move_id;
+  var moveType = md.type || 'normal';
+  var pokeName = '???';
+  var pokeData = S.pokemonList.find(function(p) { return p.id === item.dex_id; });
+  if (pokeData) pokeName = pokeData.name;
+
+  document.getElementById('learnmove-title').textContent = pokeName + ' wants to learn';
+  document.getElementById('learnmove-subtitle').textContent = 'a new move!';
+
+  var nmEl = document.getElementById('learnmove-new-move');
+  nmEl.innerHTML =
+    '<div class="lm-name">' +
+      '<span class="move-type-badge" style="background:var(--type-' + moveType + ')">' + moveType.toUpperCase() + '</span> ' +
+      moveName +
+    '</div>' +
+    '<div class="lm-stats">' +
+      (md.power > 0 ? 'Pow ' + md.power : 'Status') + ' | Acc ' + (md.accuracy || '—') + ' | PP ' + (md.pp || '—') +
+    '</div>';
+
+  // Build current moves list
+  var listEl = document.getElementById('learnmove-current-list');
+  listEl.innerHTML = '';
+
+  // Build a lookup from pokemonList moves data + server-provided lookup
+  var allMovesLookup = Object.assign({}, S._moveLookup);
+  S.pokemonList.forEach(function(pk) {
+    if (pk.moves) pk.moves.forEach(function(m) { if (!allMovesLookup[m.id]) allMovesLookup[m.id] = m; });
+  });
+
+  item.current_moves.forEach(function(mid) {
+    var mdata = allMovesLookup[mid] || {};
+    var mName = mdata.name || mid;
+    var mType = mdata.type || 'normal';
+    var div = document.createElement('div');
+    div.className = 'learnmove-current-move';
+    div.innerHTML =
+      '<span class="move-type-badge" style="background:var(--type-' + mType + ')">' + mType.toUpperCase() + '</span> ' +
+      '<span class="lm-name">' + mName + '</span>' +
+      '<span class="lm-stats">' +
+        (mdata.power > 0 ? 'Pow ' + mdata.power : 'Status') +
+        ' | PP ' + (mdata.pp || '?') +
+      '</span>';
+    div.onclick = function() { confirmLearnMoveReplace(mid); };
+    listEl.appendChild(div);
+  });
+
+  overlay.classList.add('active');
+}
+
+function confirmLearnMoveReplace(replaceMoveId) {
+  if (S.learnMoveQueue.length === 0) return;
+  var item = S.learnMoveQueue.shift();
+  send({
+    type: 'learn_move_choice',
+    pokemon_id: item.pokemon_id,
+    new_move: item.move_id,
+    replace_move: replaceMoveId,
+  });
+  // Update current_moves in remaining queue items for this pokemon
+  S.learnMoveQueue.forEach(function(qi) {
+    if (qi.pokemon_id === item.pokemon_id) {
+      var idx = qi.current_moves.indexOf(replaceMoveId);
+      if (idx >= 0) qi.current_moves[idx] = item.move_id;
+    }
+  });
+}
+
+function skipLearnMove() {
+  if (S.learnMoveQueue.length === 0) return;
+  var item = S.learnMoveQueue.shift();
+  send({
+    type: 'learn_move_choice',
+    pokemon_id: item.pokemon_id,
+    new_move: item.move_id,
+    replace_move: null,
+  });
+  processLearnMoveQueue();
 }
 
 /* ─── Hub ──────────────────────────────────────── */
@@ -2284,6 +2665,42 @@ async function playJourneyEvents(events) {
 }
 
 /* ─── Journey Victory/Defeat ───────────────────── */
+function buildPostLevelUpChain(xpResult, finalCallback) {
+  // Build a callback chain: level-up -> learn moves -> evolution -> final
+  return function() {
+    var pending = xpResult.pending_learn || [];
+    var autoLearned = xpResult.auto_learned || [];
+
+    // Get current moves from DB for this pokemon (approximation from auto_learned data)
+    // We need to reconstruct current_moves after auto-learn
+    // The server already updated DB, but we need the move list for the overlay
+    // We can derive it: original moves (from new_moves minus pending minus auto) + auto_learned
+    // Simpler: ask the server. But that's async. Instead, we'll approximate:
+    // Build current moves from what we know
+    var currentMoveIds = [];
+    // We don't have the exact current moves client-side after auto-learn,
+    // so fetch them for pending_learn
+    if (pending.length > 0) {
+      // We need to get current moves from server for the learn overlay
+      // Use the learnable_moves endpoint to get current moves, then queue
+      send({ type: 'get_learnable_moves', pokemon_id: xpResult.pokemon_id });
+      // Store pending info for when learnable_moves response arrives
+      S._pendingLearnInfo = {
+        pokemon_id: xpResult.pokemon_id,
+        dex_id: xpResult.dex_id,
+        pending: pending,
+        callback: function() {
+          if (xpResult.evolution) showEvolutionOverlay(xpResult.evolution, finalCallback);
+          else finalCallback();
+        }
+      };
+    } else {
+      if (xpResult.evolution) showEvolutionOverlay(xpResult.evolution, finalCallback);
+      else finalCallback();
+    }
+  };
+}
+
 function showJourneyVictory(msg) {
   S.journeyMode = false;
   const currency = msg.currency_gained || 0;
@@ -2292,10 +2709,8 @@ function showJourneyVictory(msg) {
   playSound('win');
   setTimeout(() => {
     if (xp.length && xp[0].leveled_up) {
-      showLevelUpOverlay(xp[0], () => {
-        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome(true));
-        else goHome(true);
-      });
+      var chain = buildPostLevelUpChain(xp[0], function() { goHome(true); });
+      showLevelUpOverlay(xp[0], chain);
     } else goHome(true);
   }, 2000);
 }
@@ -2355,10 +2770,8 @@ function showCaughtResult(msg) {
   setTimeout(() => {
     const xp = msg.xp_results || [];
     if (xp.length && xp[0].leveled_up) {
-      showLevelUpOverlay(xp[0], () => {
-        if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome(true));
-        else goHome(true);
-      });
+      var chain = buildPostLevelUpChain(xp[0], function() { goHome(true); });
+      showLevelUpOverlay(xp[0], chain);
     } else goHome(true);
   }, 2500);
 }
@@ -2372,9 +2785,31 @@ function showLevelUpOverlay(result, cb) {
   document.getElementById('levelup-pokemon').textContent = name + ' grew to Lv. ' + result.new_level + '!';
   document.getElementById('levelup-sprite').src = '/sprites/front/' + String(result.dex_id).padStart(3,'0') + '.png';
   let detail = result.old_level + ' -> ' + result.new_level;
-  if (result.new_moves && result.new_moves.length) {
-    detail += '<br>New moves learned:';
-    result.new_moves.forEach(m => { detail += '<br>' + m.move_id; });
+  // Show auto-learned moves
+  var autoLearned = result.auto_learned || [];
+  if (autoLearned.length) {
+    detail += '<br>Learned:';
+    autoLearned.forEach(function(m) {
+      var md = m.move_data || {};
+      detail += '<br><span class="move-type-badge" style="background:var(--type-' + (md.type || 'normal') + ')">' + (md.type || '').toUpperCase() + '</span> ' + (md.name || m.move_id);
+    });
+  }
+  // Show pending moves that need player choice
+  var pendingLearn = result.pending_learn || [];
+  if (pendingLearn.length) {
+    detail += '<br>New move' + (pendingLearn.length > 1 ? 's' : '') + ' available!';
+    pendingLearn.forEach(function(m) {
+      var md = m.move_data || {};
+      detail += '<br><span class="move-type-badge" style="background:var(--type-' + (md.type || 'normal') + ')">' + (md.type || '').toUpperCase() + '</span> ' + (md.name || m.move_id);
+    });
+  }
+  // Fallback: show new_moves if no auto/pending categorization (backwards compat)
+  if (!autoLearned.length && !pendingLearn.length && result.new_moves && result.new_moves.length) {
+    detail += '<br>New moves:';
+    result.new_moves.forEach(function(m) {
+      var md = m.move_data || {};
+      detail += '<br><span class="move-type-badge" style="background:var(--type-' + (md.type || 'normal') + ')">' + (md.type || '').toUpperCase() + '</span> ' + (md.name || m.move_id);
+    });
   }
   document.getElementById('levelup-detail').innerHTML = detail;
   document.getElementById('levelup-overlay').classList.add('active');
@@ -2534,10 +2969,8 @@ function dismissGymResult() {
   const xp = S.pendingXpResults;
   S.pendingXpResults = [];
   if (xp.length && xp[0].leveled_up) {
-    showLevelUpOverlay(xp[0], () => {
-      if (xp[0].evolution) showEvolutionOverlay(xp[0].evolution, () => goHome(true));
-      else goHome(true);
-    });
+    var chain = buildPostLevelUpChain(xp[0], function() { goHome(true); });
+    showLevelUpOverlay(xp[0], chain);
   } else goHome(true);
 }
 
