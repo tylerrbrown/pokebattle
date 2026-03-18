@@ -97,6 +97,16 @@ class AccountManager:
 
             CREATE INDEX IF NOT EXISTS idx_pp_player ON player_pokemon(player_id);
             CREATE INDEX IF NOT EXISTS idx_pp_team ON player_pokemon(player_id, is_in_team);
+
+            CREATE TABLE IF NOT EXISTS player_inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                item_type TEXT NOT NULL,
+                quantity INTEGER DEFAULT 0,
+                FOREIGN KEY (player_id) REFERENCES players(id),
+                UNIQUE(player_id, item_type)
+            );
+            CREATE INDEX IF NOT EXISTS idx_inv_player ON player_inventory(player_id);
         """)
         # Schema migrations for existing databases
         self._migrate(conn)
@@ -245,6 +255,11 @@ class AccountManager:
             (player_id,)
         ).fetchall()
 
+        inventory = conn.execute(
+            "SELECT item_type, quantity FROM player_inventory WHERE player_id = ? AND quantity > 0",
+            (player_id,)
+        ).fetchall()
+
         conn.close()
 
         return {
@@ -258,6 +273,7 @@ class AccountManager:
             "total_pokemon": total_pokemon,
             "badges": [r["gym_id"] for r in badges],
             "milestones": [r["milestone"] for r in milestones],
+            "inventory": {r["item_type"]: r["quantity"] for r in inventory},
         }
 
     def add_pokeballs(self, player_id, count):
@@ -390,6 +406,48 @@ class AccountManager:
             conn.close()
             return False
         conn.execute("UPDATE players SET currency = currency - ? WHERE id = ?", (amount, player_id))
+        conn.commit()
+        conn.close()
+        return True
+
+    # ─── Inventory ─────────────────────────────────────
+
+    def get_inventory(self, player_id):
+        """Get all items in player's inventory. Returns dict {item_type: quantity}."""
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT item_type, quantity FROM player_inventory WHERE player_id = ? AND quantity > 0",
+            (player_id,)
+        ).fetchall()
+        conn.close()
+        return {r["item_type"]: r["quantity"] for r in rows}
+
+    def add_item(self, player_id, item_type, count=1):
+        """Add items to inventory."""
+        conn = self._conn()
+        conn.execute(
+            """INSERT INTO player_inventory (player_id, item_type, quantity)
+               VALUES (?, ?, ?)
+               ON CONFLICT(player_id, item_type) DO UPDATE SET quantity = quantity + ?""",
+            (player_id, item_type, count, count)
+        )
+        conn.commit()
+        conn.close()
+
+    def use_item(self, player_id, item_type):
+        """Use one item from inventory. Returns True if player had one to use."""
+        conn = self._conn()
+        row = conn.execute(
+            "SELECT quantity FROM player_inventory WHERE player_id = ? AND item_type = ?",
+            (player_id, item_type)
+        ).fetchone()
+        if not row or row["quantity"] <= 0:
+            conn.close()
+            return False
+        conn.execute(
+            "UPDATE player_inventory SET quantity = quantity - 1 WHERE player_id = ? AND item_type = ?",
+            (player_id, item_type)
+        )
         conn.commit()
         conn.close()
         return True

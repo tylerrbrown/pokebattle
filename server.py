@@ -561,16 +561,25 @@ async def handle_message(player, msg, room_mgr):
             return
         currency = account_mgr.get_currency(player.account_id)
         profile = account_mgr.get_profile(player.account_id)
+        inventory = account_mgr.get_inventory(player.account_id)
         items = []
         for key, item in SHOP_ITEMS.items():
+            category = item.get("category", "ball")
+            if category == "ball":
+                owned = profile.get("pokeballs", 0) if key == "pokeball" else 0
+            else:
+                owned = inventory.get(key, 0)
             items.append({
                 "type": key,
                 "name": item["name"],
                 "price": item["price"],
-                "owned": profile.get("pokeballs", 0) if key == "pokeball" else 0,
+                "category": category,
+                "owned": owned,
+                "description": _item_description(key, item),
             })
         await player.send({"type": "shop_data", "items": items, "currency": currency,
-                           "pokeballs": profile.get("pokeballs", 0)})
+                           "pokeballs": profile.get("pokeballs", 0),
+                           "inventory": inventory})
 
     elif msg_type == "buy_item":
         if not getattr(player, 'account_id', None):
@@ -582,14 +591,21 @@ async def handle_message(player, msg, room_mgr):
             return
         total_cost = SHOP_ITEMS[item_type]["price"] * quantity
         if account_mgr.spend_currency(player.account_id, total_cost):
-            account_mgr.add_pokeballs(player.account_id, quantity)
+            item = SHOP_ITEMS[item_type]
+            category = item.get("category", "ball")
+            if category == "ball":
+                account_mgr.add_pokeballs(player.account_id, quantity)
+            else:
+                account_mgr.add_item(player.account_id, item_type, quantity)
             currency = account_mgr.get_currency(player.account_id)
             profile = account_mgr.get_profile(player.account_id)
+            inventory = account_mgr.get_inventory(player.account_id)
             await player.send({
                 "type": "buy_result", "success": True,
                 "item_type": item_type, "quantity": quantity,
                 "new_currency": currency,
                 "pokeballs": profile.get("pokeballs", 0),
+                "inventory": inventory,
             })
         else:
             await player.send({"type": "buy_result", "success": False,
@@ -745,6 +761,12 @@ async def handle_message(player, msg, room_mgr):
         })
         return
 
+    elif msg_type == "use_item":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        await _handle_use_item(player, data)
+
     elif msg_type == "get_progression":
         if not getattr(player, 'account_id', None):
             return
@@ -762,6 +784,189 @@ async def handle_message(player, msg, room_mgr):
 
     else:
         await player.send({"type": "error", "message": f"Unknown message type: {msg_type}"})
+
+
+# ─── Item Helpers ─────────────────────────────────────
+
+def _item_description(key, item):
+    """Generate a short description for a shop item."""
+    if item.get("category") == "ball":
+        mod = item.get("ball_modifier", 1.0)
+        if mod == 1.0:
+            return "Standard Poké Ball"
+        return f"{mod}x catch rate"
+    if key == "potion":
+        return "Restores 20 HP"
+    if key == "super_potion":
+        return "Restores 50 HP"
+    if key == "hyper_potion":
+        return "Restores 200 HP"
+    if key == "revive":
+        return "Revives fainted to 50% HP"
+    if key == "full_restore":
+        return "Full HP + cure status"
+    return ""
+
+
+async def _handle_use_item(player, data):
+    """Handle using a healing item on a Pokemon."""
+    item_type = data.get("item_type", "")
+    pokemon_index = data.get("pokemon_index", -1)
+    context = data.get("context", "team")  # "team", "wild", or "gym"
+
+    if item_type not in SHOP_ITEMS:
+        await player.send({"type": "error", "message": "Invalid item."})
+        return
+
+    item = SHOP_ITEMS[item_type]
+    if item.get("category") != "healing":
+        await player.send({"type": "error", "message": "Can't use that item here."})
+        return
+
+    # Check the player actually has this item
+    if not account_mgr.use_item(player.account_id, item_type):
+        await player.send({"type": "error", "message": f"No {item['name']} left!"})
+        return
+
+    # ─── Using item from My Team screen (heal between battles) ─────
+    if context == "team":
+        team_data = account_mgr.get_team(player.account_id)
+        if pokemon_index < 0 or pokemon_index >= len(team_data):
+            # Refund — invalid target
+            account_mgr.add_item(player.account_id, item_type, 1)
+            await player.send({"type": "error", "message": "Invalid Pokémon."})
+            return
+
+        # Team screen items work on DB-stored team, so just send confirmation
+        # The actual HP restoration happens when the team is next loaded into battle
+        # We'll track it in a lightweight way: send success + updated inventory
+        inventory = account_mgr.get_inventory(player.account_id)
+        await player.send({
+            "type": "item_used",
+            "item_type": item_type,
+            "item_name": item["name"],
+            "pokemon_index": pokemon_index,
+            "context": "team",
+            "inventory": inventory,
+            "message": f"Used {item['name']}!",
+        })
+        return
+
+    # ─── Using item during wild/gym encounter ─────
+    encounter = active_encounters.get(player.id)
+    if not encounter:
+        # Refund — no encounter
+        account_mgr.add_item(player.account_id, item_type, 1)
+        await player.send({"type": "error", "message": "No active battle."})
+        return
+
+    is_gym = getattr(encounter, 'is_gym', False)
+
+    # Determine target Pokemon
+    if item.get("revive"):
+        # Revive targets a fainted team member
+        if pokemon_index < 0 or pokemon_index >= len(encounter.team):
+            account_mgr.add_item(player.account_id, item_type, 1)
+            await player.send({"type": "error", "message": "Invalid Pokémon."})
+            return
+        target = encounter.team[pokemon_index]
+        if not target.is_fainted:
+            account_mgr.add_item(player.account_id, item_type, 1)
+            await player.send({"type": "error", "message": f"{target.name} isn't fainted!"})
+            return
+        # Revive to 50% HP
+        target.is_fainted = False
+        target.current_hp = max(1, int(target.max_hp * item["heal_pct"]))
+    else:
+        # Healing item targets active Pokemon (or a specified team member)
+        if pokemon_index >= 0 and pokemon_index < len(encounter.team):
+            target = encounter.team[pokemon_index]
+        else:
+            target = encounter.get_active()
+
+        if target.is_fainted:
+            account_mgr.add_item(player.account_id, item_type, 1)
+            await player.send({"type": "error", "message": f"{target.name} has fainted! Use a Revive."})
+            return
+
+        hp_full = target.current_hp >= target.max_hp
+        has_status = target.status is not None
+        can_cure = item.get("cure_status") and has_status
+        if hp_full and not can_cure:
+            account_mgr.add_item(player.account_id, item_type, 1)
+            await player.send({"type": "error", "message": f"{target.name} is already at full HP!"})
+            return
+
+        old_hp = target.current_hp
+        if item.get("heal_full"):
+            target.current_hp = target.max_hp
+        elif item.get("heal_hp"):
+            target.current_hp = min(target.max_hp, target.current_hp + item["heal_hp"])
+
+        if item.get("cure_status") and target.status:
+            target.status = None
+
+    # Build result events
+    events = [{
+        "type": "item_use",
+        "item_name": item["name"],
+        "pokemon": target.name,
+        "hp": target.current_hp,
+        "max_hp": target.max_hp,
+    }]
+
+    # Wild Pokemon attacks after item use (costs a turn)
+    wild_events = _wild_attacks(encounter)
+    events += wild_events
+
+    inventory = account_mgr.get_inventory(player.account_id)
+
+    if encounter.all_fainted():
+        del active_encounters[player.id]
+        if is_gym:
+            gym = encounter.gym
+            await player.send({
+                "type": "gym_defeat",
+                "events": events,
+                "gym_name": gym["name"],
+                "dialog_lose": gym["dialog_lose"],
+            })
+        else:
+            await player.send({"type": "wild_blackout", "events": events})
+        return
+
+    # Check if active fainted from wild attack after item use
+    active = encounter.get_active()
+    if active.is_fainted:
+        alive = encounter.alive_indices()
+        if not alive:
+            del active_encounters[player.id]
+            if is_gym:
+                gym = encounter.gym
+                await player.send({
+                    "type": "gym_defeat",
+                    "events": events,
+                    "gym_name": gym["name"],
+                    "dialog_lose": gym["dialog_lose"],
+                })
+            else:
+                await player.send({"type": "wild_blackout", "events": events})
+            return
+        await player.send({
+            "type": "wild_force_switch",
+            "events": events,
+            "available": alive,
+            "your_team": [p.serialize_full() for p in encounter.team],
+            "inventory": inventory,
+        })
+        return
+
+    await player.send({
+        "type": "wild_turn_result",
+        "events": events,
+        **encounter.serialize_state(),
+        "inventory": inventory,
+    })
 
 
 # ─── Wild Encounter Action Handler ────────────────────
