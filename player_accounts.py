@@ -253,7 +253,7 @@ class AccountManager:
             "token": row["token"],
             "starter_dex_id": row["starter_dex_id"],
             "pokeballs": row["pokeballs"],
-            "currency": row.get("currency", 500),
+            "currency": dict(row).get("currency", 500),
             "team": [dict(r) for r in team],
             "total_pokemon": total_pokemon,
             "badges": [r["gym_id"] for r in badges],
@@ -448,5 +448,5 @@ class AccountManager:
             "token": row["token"],
             "starter_dex_id": row["starter_dex_id"],
             "pokeballs": row["pokeballs"],
-            "currency": row.get("currency", 500),
+            "currency": dict(row).get("currency", 500),
         }
