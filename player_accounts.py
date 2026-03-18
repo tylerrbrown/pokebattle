@@ -5,10 +5,36 @@ No passwords — just a username + auto-generated token for session persistence.
 """
 
 import json
+import math
 import random
 import secrets
 import sqlite3
 import time
+
+# XP curve: medium-fast growth rate — total XP at level N = (4/5) * N^3
+def xp_for_level(level):
+    """Total XP required to reach a given level."""
+    if level <= 1:
+        return 0
+    return int((4 / 5) * level ** 3)
+
+
+def xp_to_next_level(level, current_xp):
+    """XP remaining to reach the next level."""
+    if level >= 100:
+        return 0
+    return max(0, xp_for_level(level + 1) - current_xp)
+
+
+def calc_xp_yield(opponent_level, base_exp, is_wild=True):
+    """Calculate XP earned from defeating an opponent.
+    Simplified Gen 1: (base_exp * opponent_level) / 7
+    Trainer battles yield 1.5x, gym leaders yield 2x.
+    """
+    xp = int((base_exp * opponent_level) / 7)
+    if not is_wild:
+        xp = int(xp * 1.5)
+    return max(1, xp)
 
 
 class AccountManager:
@@ -33,6 +59,7 @@ class AccountManager:
                 token TEXT UNIQUE NOT NULL,
                 starter_dex_id INTEGER,
                 pokeballs INTEGER DEFAULT 10,
+                currency INTEGER DEFAULT 500,
                 created_at INTEGER NOT NULL
             );
 
@@ -43,17 +70,49 @@ class AccountManager:
                 nickname TEXT,
                 level INTEGER DEFAULT 5,
                 xp INTEGER DEFAULT 0,
+                moves TEXT,
                 is_in_team INTEGER DEFAULT 0,
                 team_slot INTEGER,
                 caught_at INTEGER NOT NULL,
                 FOREIGN KEY (player_id) REFERENCES players(id)
             );
 
+            CREATE TABLE IF NOT EXISTS player_badges (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                gym_id INTEGER NOT NULL,
+                earned_at INTEGER NOT NULL,
+                FOREIGN KEY (player_id) REFERENCES players(id),
+                UNIQUE(player_id, gym_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS player_progression (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                milestone TEXT NOT NULL,
+                completed_at INTEGER NOT NULL,
+                FOREIGN KEY (player_id) REFERENCES players(id),
+                UNIQUE(player_id, milestone)
+            );
+
             CREATE INDEX IF NOT EXISTS idx_pp_player ON player_pokemon(player_id);
             CREATE INDEX IF NOT EXISTS idx_pp_team ON player_pokemon(player_id, is_in_team);
         """)
+        # Schema migrations for existing databases
+        self._migrate(conn)
         conn.commit()
         conn.close()
+
+    def _migrate(self, conn):
+        """Add columns/tables that may be missing from older databases."""
+        # Check existing columns in players
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(players)").fetchall()}
+        if "currency" not in cols:
+            conn.execute("ALTER TABLE players ADD COLUMN currency INTEGER DEFAULT 500")
+        # Check existing columns in player_pokemon
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(player_pokemon)").fetchall()}
+        if "moves" not in cols:
+            conn.execute("ALTER TABLE player_pokemon ADD COLUMN moves TEXT")
 
     def register(self, username):
         """Register a new player. Returns (player_dict, error_string)."""
@@ -176,6 +235,16 @@ class AccountManager:
             (player_id,)
         ).fetchone()["cnt"]
 
+        badges = conn.execute(
+            "SELECT gym_id FROM player_badges WHERE player_id = ? ORDER BY gym_id",
+            (player_id,)
+        ).fetchall()
+
+        milestones = conn.execute(
+            "SELECT milestone FROM player_progression WHERE player_id = ?",
+            (player_id,)
+        ).fetchall()
+
         conn.close()
 
         return {
@@ -184,8 +253,11 @@ class AccountManager:
             "token": row["token"],
             "starter_dex_id": row["starter_dex_id"],
             "pokeballs": row["pokeballs"],
+            "currency": row.get("currency", 500),
             "team": [dict(r) for r in team],
             "total_pokemon": total_pokemon,
+            "badges": [r["gym_id"] for r in badges],
+            "milestones": [r["milestone"] for r in milestones],
         }
 
     def add_pokeballs(self, player_id, count):
@@ -237,6 +309,138 @@ class AccountManager:
         conn.close()
         return in_team == 1
 
+    # ─── XP & Leveling ──────────────────────────────────
+
+    def award_xp(self, pokemon_row_id, xp_gained):
+        """Add XP to a Pokemon. Returns level-up info dict."""
+        conn = self._conn()
+        row = conn.execute(
+            "SELECT level, xp, dex_id FROM player_pokemon WHERE id = ?",
+            (pokemon_row_id,)
+        ).fetchone()
+        if not row:
+            conn.close()
+            return None
+
+        old_level = row["level"]
+        total_xp = row["xp"] + xp_gained
+        new_level = old_level
+
+        # Check for level-ups (can gain multiple levels at once)
+        while new_level < 100 and total_xp >= xp_for_level(new_level + 1):
+            new_level += 1
+
+        conn.execute(
+            "UPDATE player_pokemon SET xp = ?, level = ? WHERE id = ?",
+            (total_xp, new_level, pokemon_row_id)
+        )
+        conn.commit()
+        conn.close()
+
+        return {
+            "pokemon_id": pokemon_row_id,
+            "dex_id": row["dex_id"],
+            "old_level": old_level,
+            "new_level": new_level,
+            "leveled_up": new_level > old_level,
+            "xp_gained": xp_gained,
+            "total_xp": total_xp,
+            "xp_to_next": xp_to_next_level(new_level, total_xp),
+        }
+
+    def update_pokemon_moves(self, pokemon_row_id, moves_list):
+        """Update the moves list for a specific owned Pokemon."""
+        conn = self._conn()
+        conn.execute(
+            "UPDATE player_pokemon SET moves = ? WHERE id = ?",
+            (json.dumps(moves_list), pokemon_row_id)
+        )
+        conn.commit()
+        conn.close()
+
+    def update_pokemon_species(self, pokemon_row_id, new_dex_id):
+        """Update Pokemon species (for evolution)."""
+        conn = self._conn()
+        conn.execute(
+            "UPDATE player_pokemon SET dex_id = ? WHERE id = ?",
+            (new_dex_id, pokemon_row_id)
+        )
+        conn.commit()
+        conn.close()
+
+    # ─── Currency ─────────────────────────────────────
+
+    def get_currency(self, player_id):
+        conn = self._conn()
+        row = conn.execute("SELECT currency FROM players WHERE id = ?", (player_id,)).fetchone()
+        conn.close()
+        return row["currency"] if row else 0
+
+    def add_currency(self, player_id, amount):
+        conn = self._conn()
+        conn.execute("UPDATE players SET currency = currency + ? WHERE id = ?", (amount, player_id))
+        conn.commit()
+        conn.close()
+
+    def spend_currency(self, player_id, amount):
+        """Spend currency. Returns True if player had enough."""
+        conn = self._conn()
+        row = conn.execute("SELECT currency FROM players WHERE id = ?", (player_id,)).fetchone()
+        if not row or row["currency"] < amount:
+            conn.close()
+            return False
+        conn.execute("UPDATE players SET currency = currency - ? WHERE id = ?", (amount, player_id))
+        conn.commit()
+        conn.close()
+        return True
+
+    # ─── Badges & Progression ─────────────────────────
+
+    def earn_badge(self, player_id, gym_id):
+        """Record badge earned. Returns True on success (False if duplicate)."""
+        conn = self._conn()
+        try:
+            conn.execute(
+                "INSERT INTO player_badges (player_id, gym_id, earned_at) VALUES (?, ?, ?)",
+                (player_id, gym_id, int(time.time()))
+            )
+            conn.commit()
+            conn.close()
+            return True
+        except sqlite3.IntegrityError:
+            conn.close()
+            return False
+
+    def get_badges(self, player_id):
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT gym_id FROM player_badges WHERE player_id = ? ORDER BY gym_id",
+            (player_id,)
+        ).fetchall()
+        conn.close()
+        return [r["gym_id"] for r in rows]
+
+    def record_milestone(self, player_id, milestone):
+        conn = self._conn()
+        try:
+            conn.execute(
+                "INSERT INTO player_progression (player_id, milestone, completed_at) VALUES (?, ?, ?)",
+                (player_id, milestone, int(time.time()))
+            )
+            conn.commit()
+        except sqlite3.IntegrityError:
+            pass
+        conn.close()
+
+    def get_milestones(self, player_id):
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT milestone FROM player_progression WHERE player_id = ?",
+            (player_id,)
+        ).fetchall()
+        conn.close()
+        return [r["milestone"] for r in rows]
+
     def _row_to_dict(self, row):
         return {
             "id": row["id"],
@@ -244,4 +448,5 @@ class AccountManager:
             "token": row["token"],
             "starter_dex_id": row["starter_dex_id"],
             "pokeballs": row["pokeballs"],
+            "currency": row.get("currency", 500),
         }

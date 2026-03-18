@@ -12,7 +12,7 @@ import pokemon_data
 from battle_engine import (
     PokemonInstance, calc_hp, calc_stat, calculate_damage,
     check_accuracy, check_status_prevents_action, resolve_move,
-    resolve_turn, build_team, STRUGGLE, LEVEL
+    resolve_turn, build_team, STRUGGLE, DEFAULT_LEVEL
 )
 
 # Load data

@@ -1,0 +1,366 @@
+"""Journey Mode orchestrator for PokeBattle.
+
+Handles wild encounters, catch mechanics, gym battles, Elite Four,
+Champion, and Masters Eight progression.
+"""
+
+import asyncio
+import json
+import math
+import random
+import time
+
+from battle_engine import (
+    PokemonInstance, build_journey_team, calculate_damage,
+    resolve_turn, STRUGGLE, DEFAULT_LEVEL
+)
+import pokemon_data
+from pokemon_data import get_type_effectiveness
+from ai_player import BotPlayer
+
+# ─── Constants ────────────────────────────────────────
+
+RARITY_WEIGHTS = {"common": 60, "uncommon": 25, "rare": 12, "legendary": 3}
+
+BALL_MODIFIERS = {
+    "pokeball": 1.0,
+    "greatball": 1.5,
+    "ultraball": 2.0,
+}
+
+SHOP_ITEMS = {
+    "pokeball":  {"name": "Poké Ball",  "price": 200,  "ball_modifier": 1.0},
+    "greatball": {"name": "Great Ball", "price": 600,  "ball_modifier": 1.5},
+    "ultraball": {"name": "Ultra Ball", "price": 1200, "ball_modifier": 2.0},
+}
+
+# Currency awards
+CURRENCY_WILD_WIN = 50
+CURRENCY_WILD_CATCH = 100
+CURRENCY_GYM_WIN = 500
+CURRENCY_ELITE_FOUR_WIN = 1000
+CURRENCY_CHAMPION_WIN = 5000
+CURRENCY_PVP_WIN = 200
+CURRENCY_MASTERS_WIN = 2000
+
+
+# ─── Wild Encounter ──────────────────────────────────
+
+def generate_wild_pokemon(player_team_avg_level):
+    """Pick a random wild Pokemon based on rarity weights, scaled to player level."""
+    pokemon_list = list(pokemon_data.POKEMON.values())
+
+    # Group by rarity
+    by_rarity = {}
+    for p in pokemon_list:
+        r = p.get("rarity", "common")
+        by_rarity.setdefault(r, []).append(p)
+
+    # Weighted rarity selection
+    rarity = random.choices(
+        list(RARITY_WEIGHTS.keys()),
+        weights=list(RARITY_WEIGHTS.values()),
+        k=1
+    )[0]
+
+    pool = by_rarity.get(rarity, by_rarity.get("common", []))
+    species = random.choice(pool)
+
+    # Level scales with player's team average
+    base_level = max(2, player_team_avg_level + random.randint(-3, 3))
+    level = min(70, base_level)
+    if rarity == "legendary":
+        level = max(level, 50)  # Legendaries are always at least level 50
+
+    # Get appropriate moves for this level
+    moves = pokemon_data.get_moves_at_level(species["id"], level)
+    if not moves:
+        moves = species["moves"][:2]  # Fallback
+
+    wild = PokemonInstance(species, pokemon_data.MOVES, level=level, custom_moves=moves)
+    return wild, rarity
+
+
+def calc_catch_rate(pokemon_catch_rate, current_hp, max_hp, ball_type="pokeball"):
+    """Calculate catch success probability (0.0-1.0)."""
+    ball_mod = BALL_MODIFIERS.get(ball_type, 1.0)
+    hp_factor = (3 * max_hp - 2 * current_hp) / (3 * max_hp)
+    chance = (pokemon_catch_rate * hp_factor * ball_mod) / 255.0
+    return min(1.0, max(0.01, chance))  # Always at least 1% chance
+
+
+def attempt_catch(pokemon_catch_rate, current_hp, max_hp, ball_type="pokeball"):
+    """Attempt to catch a Pokemon. Returns (caught, shakes)."""
+    chance = calc_catch_rate(pokemon_catch_rate, current_hp, max_hp, ball_type)
+
+    # Simulate 1-3 shakes
+    shakes = 0
+    for _ in range(3):
+        if random.random() < chance ** 0.33:  # Each shake is cube root of total chance
+            shakes += 1
+        else:
+            break
+
+    caught = shakes == 3
+    return caught, shakes
+
+
+class WildEncounter:
+    """Manages a single wild Pokemon encounter."""
+
+    TAP_PHASE_DURATION = 3
+    TAP_PHASE_TIMEOUT = 5
+    ACTION_TIMEOUT = 30
+
+    def __init__(self, player, player_team, wild_pokemon, wild_rarity):
+        self.player = player
+        self.team = player_team  # List of PokemonInstance
+        self.wild = wild_pokemon
+        self.wild_rarity = wild_rarity
+        self.active_idx = 0
+        self.state = "ACTION_SELECT"
+        self.turn_count = 0
+        self.created_at = time.time()
+
+        # Find first non-fainted Pokemon
+        for i, p in enumerate(self.team):
+            if not p.is_fainted:
+                self.active_idx = i
+                break
+
+    def get_active(self):
+        return self.team[self.active_idx]
+
+    def alive_indices(self):
+        return [i for i, p in enumerate(self.team) if not p.is_fainted]
+
+    def all_fainted(self):
+        return all(p.is_fainted for p in self.team)
+
+    def serialize_state(self):
+        """Get current state for the client."""
+        active = self.get_active()
+        return {
+            "wild_pokemon": {
+                "dex_id": self.wild.dex_id,
+                "name": self.wild.name,
+                "types": self.wild.types,
+                "level": self.wild.level,
+                "max_hp": self.wild.max_hp,
+                "current_hp": self.wild.current_hp,
+                "status": self.wild.status,
+                "rarity": self.wild_rarity,
+            },
+            "your_pokemon": active.serialize_full(),
+            "your_team": [p.serialize_full() for p in self.team],
+            "active_index": self.active_idx,
+        }
+
+
+# ─── Gym Leaders ──────────────────────────────────────
+
+GYM_LEADERS = [
+    {
+        "id": 1, "name": "Brock", "title": "The Rock-Solid Pokémon Trainer!",
+        "type": "rock", "badge": "Boulder Badge",
+        "team": [{"dex_id": 74, "level": 12}, {"dex_id": 95, "level": 14}],
+        "reward_currency": 500,
+        "dialog_intro": "I'm Brock! I'm the Pewter City Gym Leader! My rock-hard willpower is evident!",
+        "dialog_win": "Your Pokémon's trust in you is incredible! Take this Boulder Badge!",
+        "dialog_lose": "My rock-hard defense is unbeatable!",
+    },
+    {
+        "id": 2, "name": "Misty", "title": "The Tomboyish Mermaid!",
+        "type": "water", "badge": "Cascade Badge",
+        "team": [{"dex_id": 120, "level": 18}, {"dex_id": 121, "level": 21}],
+        "reward_currency": 600,
+        "dialog_intro": "I'm Misty! My policy is an all-out offensive with water-type Pokémon!",
+        "dialog_win": "You really are a tough trainer! Here, take the Cascade Badge!",
+        "dialog_lose": "My water Pokémon washed you away!",
+    },
+    {
+        "id": 3, "name": "Lt. Surge", "title": "The Lightning American!",
+        "type": "electric", "badge": "Thunder Badge",
+        "team": [{"dex_id": 100, "level": 21}, {"dex_id": 25, "level": 18}, {"dex_id": 26, "level": 24}],
+        "reward_currency": 700,
+        "dialog_intro": "I'm Lt. Surge! I've been to war and survived with my electric Pokémon!",
+        "dialog_win": "The Thunder Badge is yours! Your Pokémon fought with real spirit!",
+        "dialog_lose": "You're not strong enough to stand up to my lightning!",
+    },
+    {
+        "id": 4, "name": "Erika", "title": "The Nature-Loving Princess!",
+        "type": "grass", "badge": "Rainbow Badge",
+        "team": [{"dex_id": 71, "level": 29}, {"dex_id": 114, "level": 24}, {"dex_id": 45, "level": 29}],
+        "reward_currency": 800,
+        "dialog_intro": "I'm Erika. I adore grass-type Pokémon. Shall we battle?",
+        "dialog_win": "You're so talented! Here, take the Rainbow Badge!",
+        "dialog_lose": "My grass Pokémon are truly elegant in battle!",
+    },
+    {
+        "id": 5, "name": "Koga", "title": "The Poisonous Ninja Master!",
+        "type": "poison", "badge": "Soul Badge",
+        "team": [{"dex_id": 109, "level": 37}, {"dex_id": 89, "level": 39}, {"dex_id": 110, "level": 37}, {"dex_id": 49, "level": 43}],
+        "reward_currency": 900,
+        "dialog_intro": "I'm Koga! A master of poison techniques! Fwahahaha!",
+        "dialog_win": "You have proven your worth! Take the Soul Badge!",
+        "dialog_lose": "My poison brings swift defeat to all challengers!",
+    },
+    {
+        "id": 6, "name": "Sabrina", "title": "The Master of Psychic Pokémon!",
+        "type": "psychic", "badge": "Marsh Badge",
+        "team": [{"dex_id": 64, "level": 38}, {"dex_id": 122, "level": 37}, {"dex_id": 49, "level": 38}, {"dex_id": 65, "level": 43}],
+        "reward_currency": 1000,
+        "dialog_intro": "I had a vision of you coming. I'm Sabrina. I see you losing!",
+        "dialog_win": "Your power... it exceeds what I foresaw. Take the Marsh Badge.",
+        "dialog_lose": "I foresaw my victory. Psychic power always prevails.",
+    },
+    {
+        "id": 7, "name": "Blaine", "title": "The Hotheaded Quiz Master!",
+        "type": "fire", "badge": "Volcano Badge",
+        "team": [{"dex_id": 58, "level": 42}, {"dex_id": 77, "level": 40}, {"dex_id": 78, "level": 42}, {"dex_id": 59, "level": 47}],
+        "reward_currency": 1100,
+        "dialog_intro": "I'm Blaine! My fiery Pokémon will incinerate all challengers!",
+        "dialog_win": "You have beaten my fire! Take the Volcano Badge as proof!",
+        "dialog_lose": "My flames burn brighter than your ambition!",
+    },
+    {
+        "id": 8, "name": "Giovanni", "title": "The Self-Proclaimed Strongest Trainer!",
+        "type": "ground", "badge": "Earth Badge",
+        "team": [{"dex_id": 111, "level": 45}, {"dex_id": 51, "level": 42}, {"dex_id": 31, "level": 44}, {"dex_id": 34, "level": 45}, {"dex_id": 112, "level": 50}],
+        "reward_currency": 1500,
+        "dialog_intro": "I'm Giovanni! I'll show you the true power of ground-type Pokémon!",
+        "dialog_win": "Ha! You have proven yourself worthy! Take the Earth Badge!",
+        "dialog_lose": "The power of the Earth crushes all who stand before me!",
+    },
+]
+
+ELITE_FOUR = [
+    {
+        "id": "e4_1", "name": "Lorelei", "title": "Ice Master",
+        "type": "ice",
+        "team": [{"dex_id": 87, "level": 54}, {"dex_id": 91, "level": 53},
+                 {"dex_id": 80, "level": 54}, {"dex_id": 124, "level": 56}, {"dex_id": 131, "level": 56}],
+    },
+    {
+        "id": "e4_2", "name": "Bruno", "title": "Fighting Fury",
+        "type": "fighting",
+        "team": [{"dex_id": 95, "level": 53}, {"dex_id": 107, "level": 55},
+                 {"dex_id": 106, "level": 55}, {"dex_id": 95, "level": 56}, {"dex_id": 68, "level": 58}],
+    },
+    {
+        "id": "e4_3", "name": "Agatha", "title": "Ghost Specialist",
+        "type": "ghost",
+        "team": [{"dex_id": 94, "level": 56}, {"dex_id": 42, "level": 56},
+                 {"dex_id": 93, "level": 55}, {"dex_id": 24, "level": 58}, {"dex_id": 94, "level": 60}],
+    },
+    {
+        "id": "e4_4", "name": "Lance", "title": "Dragon Master",
+        "type": "dragon",
+        "team": [{"dex_id": 130, "level": 58}, {"dex_id": 148, "level": 56},
+                 {"dex_id": 148, "level": 56}, {"dex_id": 142, "level": 60}, {"dex_id": 149, "level": 62}],
+    },
+]
+
+CHAMPION = {
+    "name": "Blue", "title": "Pokémon Champion",
+    "team": [{"dex_id": 18, "level": 61}, {"dex_id": 65, "level": 59},
+             {"dex_id": 112, "level": 61}, {"dex_id": 130, "level": 63},
+             {"dex_id": 59, "level": 63}, {"dex_id": 103, "level": 65}],
+}
+
+MASTERS_EIGHT = [
+    {
+        "id": "m8_1", "name": "Leon", "title": "Unbeatable Champion",
+        "team": [{"dex_id": 6, "level": 75}, {"dex_id": 149, "level": 73},
+                 {"dex_id": 143, "level": 72}, {"dex_id": 94, "level": 74},
+                 {"dex_id": 65, "level": 73}, {"dex_id": 131, "level": 76}],
+    },
+    {
+        "id": "m8_2", "name": "Cynthia", "title": "Sinnoh's Finest",
+        "team": [{"dex_id": 130, "level": 73}, {"dex_id": 59, "level": 72},
+                 {"dex_id": 112, "level": 74}, {"dex_id": 131, "level": 73},
+                 {"dex_id": 68, "level": 74}, {"dex_id": 149, "level": 76}],
+    },
+    {
+        "id": "m8_3", "name": "Steven", "title": "Steel Collector",
+        "team": [{"dex_id": 82, "level": 72}, {"dex_id": 76, "level": 73},
+                 {"dex_id": 142, "level": 74}, {"dex_id": 91, "level": 73},
+                 {"dex_id": 95, "level": 72}, {"dex_id": 141, "level": 75}],
+    },
+    {
+        "id": "m8_4", "name": "Diantha", "title": "Kalos Queen",
+        "team": [{"dex_id": 36, "level": 72}, {"dex_id": 121, "level": 73},
+                 {"dex_id": 103, "level": 74}, {"dex_id": 124, "level": 73},
+                 {"dex_id": 126, "level": 74}, {"dex_id": 6, "level": 76}],
+    },
+    {
+        "id": "m8_5", "name": "Lance", "title": "Dragon Master Supreme",
+        "team": [{"dex_id": 149, "level": 75}, {"dex_id": 130, "level": 74},
+                 {"dex_id": 142, "level": 74}, {"dex_id": 6, "level": 73},
+                 {"dex_id": 148, "level": 72}, {"dex_id": 149, "level": 78}],
+    },
+    {
+        "id": "m8_6", "name": "Iris", "title": "Dragon Prodigy",
+        "team": [{"dex_id": 149, "level": 74}, {"dex_id": 131, "level": 73},
+                 {"dex_id": 59, "level": 74}, {"dex_id": 65, "level": 73},
+                 {"dex_id": 112, "level": 75}, {"dex_id": 149, "level": 77}],
+    },
+    {
+        "id": "m8_7", "name": "Alder", "title": "Wandering Champion",
+        "team": [{"dex_id": 127, "level": 73}, {"dex_id": 68, "level": 74},
+                 {"dex_id": 143, "level": 75}, {"dex_id": 59, "level": 74},
+                 {"dex_id": 9, "level": 74}, {"dex_id": 6, "level": 77}],
+    },
+    {
+        "id": "m8_8", "name": "Red", "title": "The Living Legend",
+        "team": [{"dex_id": 25, "level": 80}, {"dex_id": 3, "level": 77},
+                 {"dex_id": 6, "level": 77}, {"dex_id": 9, "level": 77},
+                 {"dex_id": 143, "level": 78}, {"dex_id": 131, "level": 78}],
+    },
+]
+
+
+def build_trainer_team(team_spec):
+    """Build a team from a gym/E4/champion team spec [{dex_id, level}]."""
+    team = []
+    for entry in team_spec:
+        species = pokemon_data.POKEMON.get(entry["dex_id"])
+        if species:
+            moves = pokemon_data.get_moves_at_level(entry["dex_id"], entry["level"])
+            if not moves:
+                moves = species["moves"][:4]
+            team.append(PokemonInstance(species, pokemon_data.MOVES,
+                                       level=entry["level"], custom_moves=moves))
+    return team
+
+
+def get_gym(gym_id):
+    """Get gym leader data by ID (1-8)."""
+    for g in GYM_LEADERS:
+        if g["id"] == gym_id:
+            return g
+    return None
+
+
+def get_next_gym(badges):
+    """Get the next gym to challenge based on earned badges."""
+    earned = set(badges)
+    for g in GYM_LEADERS:
+        if g["id"] not in earned:
+            return g
+    return None  # All badges earned
+
+
+def get_elite_four_member(index):
+    """Get Elite Four member by index (0-3)."""
+    if 0 <= index < len(ELITE_FOUR):
+        return ELITE_FOUR[index]
+    return None
+
+
+def get_masters_opponent(opponent_id):
+    """Get Masters Eight opponent by ID."""
+    for m in MASTERS_EIGHT:
+        if m["id"] == opponent_id:
+            return m
+    return None

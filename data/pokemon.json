@@ -18,7 +18,10 @@
       "tackle",
       "leech-seed",
       "vine-whip"
-    ]
+    ],
+    "base_experience": 64,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 2,
@@ -39,7 +42,10 @@
       "leech-seed",
       "tackle",
       "vine-whip"
-    ]
+    ],
+    "base_experience": 142,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 3,
@@ -60,7 +66,10 @@
       "leech-seed",
       "tackle",
       "vine-whip"
-    ]
+    ],
+    "base_experience": 236,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 4,
@@ -80,7 +89,10 @@
       "scratch",
       "ember",
       "leer"
-    ]
+    ],
+    "base_experience": 62,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 5,
@@ -100,7 +112,10 @@
       "growl",
       "scratch",
       "leer"
-    ]
+    ],
+    "base_experience": 142,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 6,
@@ -121,7 +136,10 @@
       "growl",
       "leer",
       "scratch"
-    ]
+    ],
+    "base_experience": 240,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 7,
@@ -141,7 +159,10 @@
       "tail-whip",
       "bubble",
       "water-gun"
-    ]
+    ],
+    "base_experience": 63,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 8,
@@ -161,7 +182,10 @@
       "tackle",
       "tail-whip",
       "water-gun"
-    ]
+    ],
+    "base_experience": 142,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 9,
@@ -181,7 +205,10 @@
       "tackle",
       "tail-whip",
       "water-gun"
-    ]
+    ],
+    "base_experience": 239,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 10,
@@ -201,7 +228,10 @@
       "tackle",
       "bug-bite",
       "harden"
-    ]
+    ],
+    "base_experience": 39,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 11,
@@ -221,7 +251,10 @@
       "tackle",
       "string-shot",
       "defense-curl"
-    ]
+    ],
+    "base_experience": 72,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 12,
@@ -242,7 +275,10 @@
       "poison-powder",
       "stun-spore",
       "sleep-powder"
-    ]
+    ],
+    "base_experience": 178,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 13,
@@ -263,7 +299,10 @@
       "string-shot",
       "harden",
       "tackle"
-    ]
+    ],
+    "base_experience": 39,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 14,
@@ -284,7 +323,10 @@
       "poison-sting",
       "string-shot",
       "tackle"
-    ]
+    ],
+    "base_experience": 72,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 15,
@@ -305,7 +347,10 @@
       "focus-energy",
       "twineedle",
       "rage"
-    ]
+    ],
+    "base_experience": 178,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 16,
@@ -326,7 +371,10 @@
       "sand-attack",
       "quick-attack",
       "whirlwind"
-    ]
+    ],
+    "base_experience": 50,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 17,
@@ -347,7 +395,10 @@
       "sand-attack",
       "quick-attack",
       "whirlwind"
-    ]
+    ],
+    "base_experience": 122,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 18,
@@ -368,7 +419,10 @@
       "quick-attack",
       "sand-attack",
       "whirlwind"
-    ]
+    ],
+    "base_experience": 216,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 19,
@@ -388,7 +442,10 @@
       "tail-whip",
       "quick-attack",
       "hyper-fang"
-    ]
+    ],
+    "base_experience": 51,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 20,
@@ -408,7 +465,10 @@
       "tackle",
       "tail-whip",
       "hyper-fang"
-    ]
+    ],
+    "base_experience": 145,
+    "rarity": "common",
+    "catch_rate": 127
   },
   {
     "id": 21,
@@ -429,7 +489,10 @@
       "peck",
       "leer",
       "fury-attack"
-    ]
+    ],
+    "base_experience": 52,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 22,
@@ -450,7 +513,10 @@
       "leer",
       "peck",
       "fury-attack"
-    ]
+    ],
+    "base_experience": 155,
+    "rarity": "common",
+    "catch_rate": 90
   },
   {
     "id": 23,
@@ -470,7 +536,10 @@
       "wrap",
       "poison-sting",
       "bite"
-    ]
+    ],
+    "base_experience": 58,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 24,
@@ -490,7 +559,10 @@
       "poison-sting",
       "wrap",
       "bite"
-    ]
+    ],
+    "base_experience": 157,
+    "rarity": "common",
+    "catch_rate": 90
   },
   {
     "id": 25,
@@ -510,7 +582,10 @@
       "thunder-shock",
       "thunder-wave",
       "quick-attack"
-    ]
+    ],
+    "base_experience": 112,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 26,
@@ -530,7 +605,10 @@
       "thunder-shock",
       "thunder-wave",
       "mega-punch"
-    ]
+    ],
+    "base_experience": 218,
+    "rarity": "uncommon",
+    "catch_rate": 75
   },
   {
     "id": 27,
@@ -550,7 +628,10 @@
       "sand-attack",
       "slash",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 60,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 28,
@@ -570,7 +651,10 @@
       "scratch",
       "slash",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 158,
+    "rarity": "common",
+    "catch_rate": 90
   },
   {
     "id": 29,
@@ -590,7 +674,10 @@
       "tackle",
       "scratch",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 55,
+    "rarity": "common",
+    "catch_rate": 235
   },
   {
     "id": 30,
@@ -610,7 +697,10 @@
       "scratch",
       "tackle",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 128,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 31,
@@ -631,7 +721,10 @@
       "scratch",
       "tackle",
       "tail-whip"
-    ]
+    ],
+    "base_experience": 227,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 32,
@@ -651,7 +744,10 @@
       "tackle",
       "horn-attack",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 55,
+    "rarity": "common",
+    "catch_rate": 235
   },
   {
     "id": 33,
@@ -671,7 +767,10 @@
       "leer",
       "tackle",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 128,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 34,
@@ -692,7 +791,10 @@
       "poison-sting",
       "tackle",
       "thrash"
-    ]
+    ],
+    "base_experience": 227,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 35,
@@ -712,7 +814,10 @@
       "pound",
       "sing",
       "double-slap"
-    ]
+    ],
+    "base_experience": 113,
+    "rarity": "uncommon",
+    "catch_rate": 150
   },
   {
     "id": 36,
@@ -732,7 +837,10 @@
       "metronome",
       "minimize",
       "sing"
-    ]
+    ],
+    "base_experience": 217,
+    "rarity": "uncommon",
+    "catch_rate": 25
   },
   {
     "id": 37,
@@ -752,7 +860,10 @@
       "tail-whip",
       "quick-attack",
       "roar"
-    ]
+    ],
+    "base_experience": 60,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 38,
@@ -772,7 +883,10 @@
       "quick-attack",
       "roar",
       "tail-whip"
-    ]
+    ],
+    "base_experience": 177,
+    "rarity": "uncommon",
+    "catch_rate": 75
   },
   {
     "id": 39,
@@ -792,7 +906,10 @@
       "pound",
       "disable",
       "defense-curl"
-    ]
+    ],
+    "base_experience": 95,
+    "rarity": "common",
+    "catch_rate": 170
   },
   {
     "id": 40,
@@ -812,7 +929,10 @@
       "disable",
       "double-slap",
       "sing"
-    ]
+    ],
+    "base_experience": 196,
+    "rarity": "common",
+    "catch_rate": 50
   },
   {
     "id": 41,
@@ -833,7 +953,10 @@
       "supersonic",
       "bite",
       "confuse-ray"
-    ]
+    ],
+    "base_experience": 49,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 42,
@@ -854,7 +977,10 @@
       "leech-life",
       "screech",
       "supersonic"
-    ]
+    ],
+    "base_experience": 159,
+    "rarity": "common",
+    "catch_rate": 90
   },
   {
     "id": 43,
@@ -875,7 +1001,10 @@
       "poison-powder",
       "stun-spore",
       "sleep-powder"
-    ]
+    ],
+    "base_experience": 64,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 44,
@@ -896,7 +1025,10 @@
       "poison-powder",
       "stun-spore",
       "sleep-powder"
-    ]
+    ],
+    "base_experience": 138,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 45,
@@ -917,7 +1049,10 @@
       "petal-dance",
       "sleep-powder",
       "stun-spore"
-    ]
+    ],
+    "base_experience": 221,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 46,
@@ -938,7 +1073,10 @@
       "stun-spore",
       "leech-life",
       "spore"
-    ]
+    ],
+    "base_experience": 57,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 47,
@@ -959,7 +1097,10 @@
       "scratch",
       "stun-spore",
       "spore"
-    ]
+    ],
+    "base_experience": 142,
+    "rarity": "common",
+    "catch_rate": 75
   },
   {
     "id": 48,
@@ -980,7 +1121,10 @@
       "tackle",
       "poison-powder",
       "leech-life"
-    ]
+    ],
+    "base_experience": 61,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 49,
@@ -1001,7 +1145,10 @@
       "leech-life",
       "poison-powder",
       "tackle"
-    ]
+    ],
+    "base_experience": 158,
+    "rarity": "common",
+    "catch_rate": 75
   },
   {
     "id": 50,
@@ -1021,7 +1168,10 @@
       "growl",
       "dig",
       "sand-attack"
-    ]
+    ],
+    "base_experience": 53,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 51,
@@ -1041,7 +1191,10 @@
       "growl",
       "scratch",
       "sand-attack"
-    ]
+    ],
+    "base_experience": 149,
+    "rarity": "common",
+    "catch_rate": 50
   },
   {
     "id": 52,
@@ -1061,7 +1214,10 @@
       "scratch",
       "bite",
       "pay-day"
-    ]
+    ],
+    "base_experience": 58,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 53,
@@ -1081,7 +1237,10 @@
       "growl",
       "scratch",
       "screech"
-    ]
+    ],
+    "base_experience": 154,
+    "rarity": "common",
+    "catch_rate": 90
   },
   {
     "id": 54,
@@ -1101,7 +1260,10 @@
       "tail-whip",
       "disable",
       "confusion"
-    ]
+    ],
+    "base_experience": 64,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 55,
@@ -1121,7 +1283,10 @@
       "scratch",
       "tail-whip",
       "confusion"
-    ]
+    ],
+    "base_experience": 175,
+    "rarity": "common",
+    "catch_rate": 75
   },
   {
     "id": 56,
@@ -1141,7 +1306,10 @@
       "scratch",
       "karate-chop",
       "fury-swipes"
-    ]
+    ],
+    "base_experience": 61,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 57,
@@ -1161,7 +1329,10 @@
       "karate-chop",
       "leer",
       "scratch"
-    ]
+    ],
+    "base_experience": 159,
+    "rarity": "common",
+    "catch_rate": 75
   },
   {
     "id": 58,
@@ -1181,7 +1352,10 @@
       "roar",
       "ember",
       "leer"
-    ]
+    ],
+    "base_experience": 70,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 59,
@@ -1201,7 +1375,10 @@
       "leer",
       "roar",
       "take-down"
-    ]
+    ],
+    "base_experience": 194,
+    "rarity": "uncommon",
+    "catch_rate": 75
   },
   {
     "id": 60,
@@ -1221,7 +1398,10 @@
       "hypnosis",
       "water-gun",
       "double-slap"
-    ]
+    ],
+    "base_experience": 60,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 61,
@@ -1241,7 +1421,10 @@
       "hypnosis",
       "water-gun",
       "double-slap"
-    ]
+    ],
+    "base_experience": 135,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 62,
@@ -1262,7 +1445,10 @@
       "double-slap",
       "hypnosis",
       "water-gun"
-    ]
+    ],
+    "base_experience": 230,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 63,
@@ -1282,7 +1468,10 @@
       "mega-punch",
       "mega-kick",
       "body-slam"
-    ]
+    ],
+    "base_experience": 62,
+    "rarity": "uncommon",
+    "catch_rate": 200
   },
   {
     "id": 64,
@@ -1302,7 +1491,10 @@
       "disable",
       "teleport",
       "psybeam"
-    ]
+    ],
+    "base_experience": 140,
+    "rarity": "uncommon",
+    "catch_rate": 100
   },
   {
     "id": 65,
@@ -1322,7 +1514,10 @@
       "disable",
       "teleport",
       "psybeam"
-    ]
+    ],
+    "base_experience": 225,
+    "rarity": "uncommon",
+    "catch_rate": 50
   },
   {
     "id": 66,
@@ -1342,7 +1537,10 @@
       "low-kick",
       "leer",
       "focus-energy"
-    ]
+    ],
+    "base_experience": 61,
+    "rarity": "uncommon",
+    "catch_rate": 180
   },
   {
     "id": 67,
@@ -1362,7 +1560,10 @@
       "leer",
       "low-kick",
       "focus-energy"
-    ]
+    ],
+    "base_experience": 142,
+    "rarity": "uncommon",
+    "catch_rate": 90
   },
   {
     "id": 68,
@@ -1382,7 +1583,10 @@
       "leer",
       "low-kick",
       "focus-energy"
-    ]
+    ],
+    "base_experience": 227,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 69,
@@ -1403,7 +1607,10 @@
       "vine-whip",
       "wrap",
       "poison-powder"
-    ]
+    ],
+    "base_experience": 60,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 70,
@@ -1424,7 +1631,10 @@
       "vine-whip",
       "wrap",
       "poison-powder"
-    ]
+    ],
+    "base_experience": 137,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 71,
@@ -1445,7 +1655,10 @@
       "razor-leaf",
       "sleep-powder",
       "stun-spore"
-    ]
+    ],
+    "base_experience": 221,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 72,
@@ -1466,7 +1679,10 @@
       "supersonic",
       "wrap",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 67,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 73,
@@ -1487,7 +1703,10 @@
       "supersonic",
       "wrap",
       "poison-sting"
-    ]
+    ],
+    "base_experience": 180,
+    "rarity": "uncommon",
+    "catch_rate": 60
   },
   {
     "id": 74,
@@ -1508,7 +1727,10 @@
       "defense-curl",
       "rock-throw",
       "self-destruct"
-    ]
+    ],
+    "base_experience": 60,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 75,
@@ -1529,7 +1751,10 @@
       "tackle",
       "rock-throw",
       "self-destruct"
-    ]
+    ],
+    "base_experience": 137,
+    "rarity": "common",
+    "catch_rate": 120
   },
   {
     "id": 76,
@@ -1550,7 +1775,10 @@
       "tackle",
       "rock-throw",
       "self-destruct"
-    ]
+    ],
+    "base_experience": 223,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 77,
@@ -1570,7 +1798,10 @@
       "tail-whip",
       "stomp",
       "growl"
-    ]
+    ],
+    "base_experience": 82,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 78,
@@ -1590,7 +1821,10 @@
       "growl",
       "stomp",
       "tail-whip"
-    ]
+    ],
+    "base_experience": 175,
+    "rarity": "uncommon",
+    "catch_rate": 60
   },
   {
     "id": 79,
@@ -1611,7 +1845,10 @@
       "disable",
       "headbutt",
       "growl"
-    ]
+    ],
+    "base_experience": 63,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 80,
@@ -1632,7 +1869,10 @@
       "disable",
       "headbutt",
       "growl"
-    ]
+    ],
+    "base_experience": 172,
+    "rarity": "uncommon",
+    "catch_rate": 75
   },
   {
     "id": 81,
@@ -1652,7 +1892,10 @@
       "sonic-boom",
       "thunder-shock",
       "supersonic"
-    ]
+    ],
+    "base_experience": 65,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 82,
@@ -1672,7 +1915,10 @@
       "tackle",
       "thunder-shock",
       "supersonic"
-    ]
+    ],
+    "base_experience": 163,
+    "rarity": "uncommon",
+    "catch_rate": 60
   },
   {
     "id": 83,
@@ -1693,7 +1939,10 @@
       "sand-attack",
       "leer",
       "fury-attack"
-    ]
+    ],
+    "base_experience": 132,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 84,
@@ -1714,7 +1963,10 @@
       "growl",
       "fury-attack",
       "drill-peck"
-    ]
+    ],
+    "base_experience": 62,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 85,
@@ -1735,7 +1987,10 @@
       "growl",
       "peck",
       "drill-peck"
-    ]
+    ],
+    "base_experience": 165,
+    "rarity": "common",
+    "catch_rate": 45
   },
   {
     "id": 86,
@@ -1755,7 +2010,10 @@
       "growl",
       "aurora-beam",
       "rest"
-    ]
+    ],
+    "base_experience": 65,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 87,
@@ -1776,7 +2034,10 @@
       "growl",
       "headbutt",
       "rest"
-    ]
+    ],
+    "base_experience": 166,
+    "rarity": "common",
+    "catch_rate": 75
   },
   {
     "id": 88,
@@ -1796,7 +2057,10 @@
       "pound",
       "poison-gas",
       "minimize"
-    ]
+    ],
+    "base_experience": 65,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 89,
@@ -1816,7 +2080,10 @@
       "poison-gas",
       "pound",
       "minimize"
-    ]
+    ],
+    "base_experience": 175,
+    "rarity": "uncommon",
+    "catch_rate": 75
   },
   {
     "id": 90,
@@ -1836,7 +2103,10 @@
       "withdraw",
       "supersonic",
       "clamp"
-    ]
+    ],
+    "base_experience": 61,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 91,
@@ -1857,7 +2127,10 @@
       "clamp",
       "supersonic",
       "withdraw"
-    ]
+    ],
+    "base_experience": 184,
+    "rarity": "common",
+    "catch_rate": 60
   },
   {
     "id": 92,
@@ -1878,7 +2151,10 @@
       "lick",
       "night-shade",
       "hypnosis"
-    ]
+    ],
+    "base_experience": 62,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 93,
@@ -1899,7 +2175,10 @@
       "lick",
       "night-shade",
       "hypnosis"
-    ]
+    ],
+    "base_experience": 142,
+    "rarity": "uncommon",
+    "catch_rate": 90
   },
   {
     "id": 94,
@@ -1920,7 +2199,10 @@
       "lick",
       "night-shade",
       "hypnosis"
-    ]
+    ],
+    "base_experience": 225,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 95,
@@ -1941,7 +2223,10 @@
       "tackle",
       "bind",
       "rock-throw"
-    ]
+    ],
+    "base_experience": 77,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 96,
@@ -1961,7 +2246,10 @@
       "pound",
       "disable",
       "confusion"
-    ]
+    ],
+    "base_experience": 66,
+    "rarity": "common",
+    "catch_rate": 190
   },
   {
     "id": 97,
@@ -1981,7 +2269,10 @@
       "disable",
       "hypnosis",
       "pound"
-    ]
+    ],
+    "base_experience": 169,
+    "rarity": "common",
+    "catch_rate": 75
   },
   {
     "id": 98,
@@ -2001,7 +2292,10 @@
       "leer",
       "vice-grip",
       "guillotine"
-    ]
+    ],
+    "base_experience": 65,
+    "rarity": "common",
+    "catch_rate": 225
   },
   {
     "id": 99,
@@ -2021,7 +2315,10 @@
       "leer",
       "vice-grip",
       "guillotine"
-    ]
+    ],
+    "base_experience": 166,
+    "rarity": "common",
+    "catch_rate": 60
   },
   {
     "id": 100,
@@ -2041,7 +2338,10 @@
       "tackle",
       "sonic-boom",
       "self-destruct"
-    ]
+    ],
+    "base_experience": 66,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 101,
@@ -2061,7 +2361,10 @@
       "sonic-boom",
       "tackle",
       "self-destruct"
-    ]
+    ],
+    "base_experience": 172,
+    "rarity": "uncommon",
+    "catch_rate": 60
   },
   {
     "id": 102,
@@ -2082,7 +2385,10 @@
       "hypnosis",
       "reflect",
       "leech-seed"
-    ]
+    ],
+    "base_experience": 65,
+    "rarity": "uncommon",
+    "catch_rate": 90
   },
   {
     "id": 103,
@@ -2103,7 +2409,10 @@
       "hypnosis",
       "stomp",
       "take-down"
-    ]
+    ],
+    "base_experience": 186,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 104,
@@ -2123,7 +2432,10 @@
       "growl",
       "leer",
       "focus-energy"
-    ]
+    ],
+    "base_experience": 64,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 105,
@@ -2143,7 +2455,10 @@
       "focus-energy",
       "growl",
       "leer"
-    ]
+    ],
+    "base_experience": 149,
+    "rarity": "uncommon",
+    "catch_rate": 75
   },
   {
     "id": 106,
@@ -2163,7 +2478,10 @@
       "meditate",
       "rolling-kick",
       "jump-kick"
-    ]
+    ],
+    "base_experience": 159,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 107,
@@ -2183,7 +2501,10 @@
       "comet-punch",
       "fire-punch",
       "ice-punch"
-    ]
+    ],
+    "base_experience": 159,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 108,
@@ -2203,7 +2524,10 @@
       "wrap",
       "stomp",
       "disable"
-    ]
+    ],
+    "base_experience": 77,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 109,
@@ -2223,7 +2547,10 @@
       "tackle",
       "sludge",
       "smokescreen"
-    ]
+    ],
+    "base_experience": 68,
+    "rarity": "uncommon",
+    "catch_rate": 190
   },
   {
     "id": 110,
@@ -2243,7 +2570,10 @@
       "smog",
       "tackle",
       "smokescreen"
-    ]
+    ],
+    "base_experience": 172,
+    "rarity": "uncommon",
+    "catch_rate": 60
   },
   {
     "id": 111,
@@ -2264,7 +2594,10 @@
       "stomp",
       "tail-whip",
       "fury-attack"
-    ]
+    ],
+    "base_experience": 69,
+    "rarity": "uncommon",
+    "catch_rate": 120
   },
   {
     "id": 112,
@@ -2285,7 +2618,10 @@
       "horn-attack",
       "stomp",
       "tail-whip"
-    ]
+    ],
+    "base_experience": 170,
+    "rarity": "uncommon",
+    "catch_rate": 60
   },
   {
     "id": 113,
@@ -2305,7 +2641,10 @@
       "pound",
       "sing",
       "growl"
-    ]
+    ],
+    "base_experience": 395,
+    "rarity": "rare",
+    "catch_rate": 30
   },
   {
     "id": 114,
@@ -2325,7 +2664,10 @@
       "constrict",
       "absorb",
       "poison-powder"
-    ]
+    ],
+    "base_experience": 87,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 115,
@@ -2345,7 +2687,10 @@
       "rage",
       "bite",
       "tail-whip"
-    ]
+    ],
+    "base_experience": 172,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 116,
@@ -2365,7 +2710,10 @@
       "smokescreen",
       "leer",
       "water-gun"
-    ]
+    ],
+    "base_experience": 59,
+    "rarity": "uncommon",
+    "catch_rate": 225
   },
   {
     "id": 117,
@@ -2385,7 +2733,10 @@
       "smokescreen",
       "leer",
       "water-gun"
-    ]
+    ],
+    "base_experience": 154,
+    "rarity": "uncommon",
+    "catch_rate": 75
   },
   {
     "id": 118,
@@ -2405,7 +2756,10 @@
       "tail-whip",
       "supersonic",
       "horn-attack"
-    ]
+    ],
+    "base_experience": 64,
+    "rarity": "common",
+    "catch_rate": 225
   },
   {
     "id": 119,
@@ -2425,7 +2779,10 @@
       "supersonic",
       "tail-whip",
       "horn-attack"
-    ]
+    ],
+    "base_experience": 158,
+    "rarity": "common",
+    "catch_rate": 60
   },
   {
     "id": 120,
@@ -2445,7 +2802,10 @@
       "water-gun",
       "harden",
       "recover"
-    ]
+    ],
+    "base_experience": 68,
+    "rarity": "uncommon",
+    "catch_rate": 225
   },
   {
     "id": 121,
@@ -2466,7 +2826,10 @@
       "tackle",
       "water-gun",
       "take-down"
-    ]
+    ],
+    "base_experience": 182,
+    "rarity": "uncommon",
+    "catch_rate": 60
   },
   {
     "id": 122,
@@ -2486,7 +2849,10 @@
       "confusion",
       "light-screen",
       "double-slap"
-    ]
+    ],
+    "base_experience": 161,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 123,
@@ -2507,7 +2873,10 @@
       "leer",
       "focus-energy",
       "double-team"
-    ]
+    ],
+    "base_experience": 100,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 124,
@@ -2528,7 +2897,10 @@
       "pound",
       "lick",
       "double-slap"
-    ]
+    ],
+    "base_experience": 159,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 125,
@@ -2548,7 +2920,10 @@
       "quick-attack",
       "thunder-shock",
       "screech"
-    ]
+    ],
+    "base_experience": 172,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 126,
@@ -2568,7 +2943,10 @@
       "leer",
       "confuse-ray",
       "fire-punch"
-    ]
+    ],
+    "base_experience": 173,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 127,
@@ -2588,7 +2966,10 @@
       "seismic-toss",
       "guillotine",
       "focus-energy"
-    ]
+    ],
+    "base_experience": 175,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 128,
@@ -2608,7 +2989,10 @@
       "stomp",
       "tail-whip",
       "leer"
-    ]
+    ],
+    "base_experience": 172,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 129,
@@ -2628,7 +3012,10 @@
       "tackle",
       "pound",
       "scratch"
-    ]
+    ],
+    "base_experience": 40,
+    "rarity": "common",
+    "catch_rate": 255
   },
   {
     "id": 130,
@@ -2649,7 +3036,10 @@
       "dragon-rage",
       "hydro-pump",
       "leer"
-    ]
+    ],
+    "base_experience": 189,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 131,
@@ -2670,7 +3060,10 @@
       "water-gun",
       "sing",
       "mist"
-    ]
+    ],
+    "base_experience": 187,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 132,
@@ -2690,7 +3083,10 @@
       "pound",
       "tackle",
       "scratch"
-    ]
+    ],
+    "base_experience": 101,
+    "rarity": "common",
+    "catch_rate": 35
   },
   {
     "id": 133,
@@ -2710,7 +3106,10 @@
       "tackle",
       "quick-attack",
       "tail-whip"
-    ]
+    ],
+    "base_experience": 65,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 134,
@@ -2730,7 +3129,10 @@
       "sand-attack",
       "tackle",
       "water-gun"
-    ]
+    ],
+    "base_experience": 184,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 135,
@@ -2750,7 +3152,10 @@
       "sand-attack",
       "tackle",
       "thunder-shock"
-    ]
+    ],
+    "base_experience": 184,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 136,
@@ -2770,7 +3175,10 @@
       "quick-attack",
       "sand-attack",
       "tackle"
-    ]
+    ],
+    "base_experience": 184,
+    "rarity": "uncommon",
+    "catch_rate": 45
   },
   {
     "id": 137,
@@ -2790,7 +3198,10 @@
       "sharpen",
       "tackle",
       "psybeam"
-    ]
+    ],
+    "base_experience": 79,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 138,
@@ -2811,7 +3222,10 @@
       "withdraw",
       "horn-attack",
       "leer"
-    ]
+    ],
+    "base_experience": 71,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 139,
@@ -2832,7 +3246,10 @@
       "water-gun",
       "withdraw",
       "leer"
-    ]
+    ],
+    "base_experience": 173,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 140,
@@ -2853,7 +3270,10 @@
       "scratch",
       "absorb",
       "slash"
-    ]
+    ],
+    "base_experience": 71,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 141,
@@ -2874,7 +3294,10 @@
       "harden",
       "scratch",
       "slash"
-    ]
+    ],
+    "base_experience": 173,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 142,
@@ -2895,7 +3318,10 @@
       "wing-attack",
       "supersonic",
       "bite"
-    ]
+    ],
+    "base_experience": 180,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 143,
@@ -2915,7 +3341,10 @@
       "headbutt",
       "rest",
       "body-slam"
-    ]
+    ],
+    "base_experience": 189,
+    "rarity": "rare",
+    "catch_rate": 25
   },
   {
     "id": 144,
@@ -2936,7 +3365,10 @@
       "peck",
       "blizzard",
       "agility"
-    ]
+    ],
+    "base_experience": 261,
+    "rarity": "legendary",
+    "catch_rate": 3
   },
   {
     "id": 145,
@@ -2957,7 +3389,10 @@
       "thunder-shock",
       "thunder",
       "agility"
-    ]
+    ],
+    "base_experience": 261,
+    "rarity": "legendary",
+    "catch_rate": 3
   },
   {
     "id": 146,
@@ -2978,7 +3413,10 @@
       "peck",
       "leer",
       "agility"
-    ]
+    ],
+    "base_experience": 261,
+    "rarity": "legendary",
+    "catch_rate": 3
   },
   {
     "id": 147,
@@ -2998,7 +3436,10 @@
       "wrap",
       "thunder-wave",
       "agility"
-    ]
+    ],
+    "base_experience": 60,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 148,
@@ -3018,7 +3459,10 @@
       "thunder-wave",
       "wrap",
       "agility"
-    ]
+    ],
+    "base_experience": 147,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 149,
@@ -3039,7 +3483,10 @@
       "leer",
       "thunder-wave",
       "wrap"
-    ]
+    ],
+    "base_experience": 270,
+    "rarity": "rare",
+    "catch_rate": 45
   },
   {
     "id": 150,
@@ -3059,7 +3506,10 @@
       "disable",
       "psychic",
       "swift"
-    ]
+    ],
+    "base_experience": 306,
+    "rarity": "legendary",
+    "catch_rate": 3
   },
   {
     "id": 151,
@@ -3079,6 +3529,9 @@
       "transform",
       "mega-punch",
       "metronome"
-    ]
+    ],
+    "base_experience": 270,
+    "rarity": "legendary",
+    "catch_rate": 45
   }
 ]

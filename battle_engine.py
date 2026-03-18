@@ -10,50 +10,53 @@ Faithful implementation of Generation I battle mechanics:
 - PP tracking with Struggle fallback
 """
 
+import json
 import random
 from pokemon_data import get_type_effectiveness, MOVES
 
 # Gen 1: Physical types use Attack/Defense, Special types use Special/Special
 PHYSICAL_TYPES = {"normal", "fighting", "poison", "ground", "flying", "bug", "rock", "ghost"}
 
-LEVEL = 50  # All Pokemon at level 50
+DEFAULT_LEVEL = 50  # Quick Battle level
 
 
-def calc_hp(base_hp):
-    """Calculate HP stat at level 50 (0 DVs, 0 Stat Exp).
+def calc_hp(base_hp, level=DEFAULT_LEVEL):
+    """Calculate HP stat (0 DVs, 0 Stat Exp).
     HP = ((Base + DV) * 2 * Level / 100) + Level + 10
     """
-    return int((base_hp * 2 * LEVEL / 100) + LEVEL + 10)
+    return int((base_hp * 2 * level / 100) + level + 10)
 
 
-def calc_stat(base_stat):
-    """Calculate non-HP stat at level 50 (0 DVs, 0 Stat Exp).
+def calc_stat(base_stat, level=DEFAULT_LEVEL):
+    """Calculate non-HP stat (0 DVs, 0 Stat Exp).
     Stat = ((Base + DV) * 2 * Level / 100) + 5
     """
-    return int((base_stat * 2 * LEVEL / 100) + 5)
+    return int((base_stat * 2 * level / 100) + 5)
 
 
 class PokemonInstance:
     """A Pokemon in battle with computed stats, HP, status, and PP tracking."""
 
-    def __init__(self, species_data, moves_data):
+    def __init__(self, species_data, moves_data, level=DEFAULT_LEVEL, custom_moves=None):
         self.species = species_data
         self.dex_id = species_data["id"]
         self.name = species_data["name"]
         self.types = species_data["types"]
+        self.level = level
 
         base = species_data["base_stats"]
-        self.max_hp = calc_hp(base["hp"])
+        self.max_hp = calc_hp(base["hp"], level)
         self.current_hp = self.max_hp
-        self.attack = calc_stat(base["attack"])
-        self.defense = calc_stat(base["defense"])
-        self.special = calc_stat(base["special"])
-        self.speed = calc_stat(base["speed"])
+        self.attack = calc_stat(base["attack"], level)
+        self.defense = calc_stat(base["defense"], level)
+        self.special = calc_stat(base["special"], level)
+        self.speed = calc_stat(base["speed"], level)
         self.base_speed = self.speed  # For critical hit calc
 
         # Moves with PP tracking
+        move_ids = custom_moves if custom_moves else species_data["moves"]
         self.moves = []
-        for move_id in species_data["moves"]:
+        for move_id in move_ids:
             if move_id in moves_data:
                 move = dict(moves_data[move_id])  # Copy
                 move["id"] = move_id
@@ -101,6 +104,7 @@ class PokemonInstance:
             "dex_id": self.dex_id,
             "name": self.name,
             "types": self.types,
+            "level": self.level,
             "max_hp": self.max_hp,
             "current_hp": self.current_hp,
             "attack": self.attack,
@@ -131,6 +135,7 @@ class PokemonInstance:
             "dex_id": self.dex_id,
             "name": self.name,
             "types": self.types,
+            "level": self.level,
             "max_hp": self.max_hp,
             "current_hp": self.current_hp,
             "status": self.status,
@@ -143,12 +148,25 @@ class PokemonInstance:
 
 
 def build_team(dex_ids, pokemon_db, moves_db):
-    """Build a team of PokemonInstance from dex IDs."""
+    """Build a team of PokemonInstance from dex IDs (Quick Battle, all at level 50)."""
     team = []
     for dex_id in dex_ids:
         species = pokemon_db.get(dex_id)
         if species:
             team.append(PokemonInstance(species, moves_db))
+    return team
+
+
+def build_journey_team(owned_pokemon_list, pokemon_db, moves_db):
+    """Build a team from player_pokemon rows with individual levels/moves."""
+    team = []
+    for p in owned_pokemon_list:
+        species = pokemon_db.get(p["dex_id"])
+        if species:
+            custom_moves = json.loads(p["moves"]) if p.get("moves") else None
+            inst = PokemonInstance(species, moves_db, level=p.get("level", 5), custom_moves=custom_moves)
+            inst.db_id = p.get("id")  # Track DB row ID for XP awards
+            team.append(inst)
     return team
 
 
@@ -183,7 +201,7 @@ def calculate_damage(attacker, defender, move, tap_multiplier=0.5):
     if effect == "fixed_20":
         return 20, 1.0, False
     if effect == "fixed_level":
-        return LEVEL, 1.0, False
+        return attacker.level, 1.0, False
     if effect == "ohko":
         # OHKO: if it hits, it's an instant KO
         return defender.current_hp, 1.0, False
@@ -204,9 +222,9 @@ def calculate_damage(attacker, defender, move, tap_multiplier=0.5):
     crit_rate = attacker.base_speed / 512.0
     is_critical = random.random() < crit_rate
 
-    effective_level = LEVEL
+    effective_level = attacker.level
     if is_critical:
-        effective_level = LEVEL * 2
+        effective_level = attacker.level * 2
         # Crits ignore stat stages in Gen 1
         if move_type in PHYSICAL_TYPES:
             atk_stat = attacker.attack
