@@ -595,6 +595,156 @@ async def handle_message(player, msg, room_mgr):
             await player.send({"type": "buy_result", "success": False,
                                "message": "Not enough PokéDollars!"})
 
+    elif msg_type == "get_learnable_moves":
+        if not getattr(player, 'account_id', None):
+            return
+        pokemon_row_id = data.get("pokemon_id")
+        if not pokemon_row_id:
+            await player.send({"type": "error", "message": "Missing pokemon_id."})
+            return
+        # Find this Pokemon in the player's collection
+        all_pokemon = account_mgr.get_all_pokemon(player.account_id)
+        poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
+        if not poke_row:
+            await player.send({"type": "error", "message": "Pokemon not found."})
+            return
+        dex_id = poke_row["dex_id"]
+        level = poke_row["level"]
+        current_moves = json.loads(poke_row["moves"]) if poke_row.get("moves") else []
+        # Get all moves learnable at or below current level from learnset
+        learnset = pokemon_data.get_learnset(dex_id)
+        learnable = []
+        seen = set()
+        for entry in learnset:
+            if entry["level"] <= level and entry["move"] not in seen:
+                seen.add(entry["move"])
+                move_data = pokemon_data.MOVES.get(entry["move"])
+                if move_data:
+                    learnable.append({
+                        "move_id": entry["move"],
+                        "level_learned": entry["level"],
+                        "name": move_data["name"],
+                        "type": move_data["type"],
+                        "category": move_data["category"],
+                        "power": move_data["power"],
+                        "accuracy": move_data["accuracy"],
+                        "pp": move_data["pp"],
+                    })
+        # Build current move details
+        current_move_details = []
+        for mid in current_moves:
+            md = pokemon_data.MOVES.get(mid)
+            if md:
+                current_move_details.append({
+                    "move_id": mid,
+                    "name": md["name"],
+                    "type": md["type"],
+                    "category": md["category"],
+                    "power": md["power"],
+                    "accuracy": md["accuracy"],
+                    "pp": md["pp"],
+                })
+        poke_data = pokemon_data.get_pokemon(dex_id)
+        await player.send({
+            "type": "learnable_moves",
+            "pokemon_id": pokemon_row_id,
+            "dex_id": dex_id,
+            "pokemon_name": poke_data["name"] if poke_data else f"#{dex_id}",
+            "level": level,
+            "current_moves": current_move_details,
+            "learnable_moves": learnable,
+        })
+        return
+
+    elif msg_type == "swap_move":
+        if not getattr(player, 'account_id', None):
+            return
+        pokemon_row_id = data.get("pokemon_id")
+        old_move = data.get("old_move")
+        new_move = data.get("new_move")
+        if not pokemon_row_id or not new_move:
+            await player.send({"type": "error", "message": "Missing parameters."})
+            return
+        # Find this Pokemon
+        all_pokemon = account_mgr.get_all_pokemon(player.account_id)
+        poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
+        if not poke_row:
+            await player.send({"type": "error", "message": "Pokemon not found."})
+            return
+        dex_id = poke_row["dex_id"]
+        level = poke_row["level"]
+        current_moves = json.loads(poke_row["moves"]) if poke_row.get("moves") else []
+        # Validate that the new move is in the learnset at or below current level
+        learnset = pokemon_data.get_learnset(dex_id)
+        valid_moves = {entry["move"] for entry in learnset if entry["level"] <= level}
+        if new_move not in valid_moves:
+            await player.send({"type": "error", "message": "Cannot learn that move yet."})
+            return
+        if new_move in current_moves:
+            await player.send({"type": "error", "message": "Already knows that move."})
+            return
+        # Perform the swap
+        if old_move and old_move in current_moves:
+            idx = current_moves.index(old_move)
+            current_moves[idx] = new_move
+        elif len(current_moves) < 4:
+            current_moves.append(new_move)
+        else:
+            await player.send({"type": "error", "message": "Must replace an existing move."})
+            return
+        account_mgr.update_pokemon_moves(pokemon_row_id, current_moves)
+        # Return updated move details
+        new_move_data = pokemon_data.MOVES.get(new_move, {})
+        await player.send({
+            "type": "swap_move_ok",
+            "pokemon_id": pokemon_row_id,
+            "new_moves": current_moves,
+            "swapped_move": {
+                "move_id": new_move,
+                "name": new_move_data.get("name", new_move),
+            },
+        })
+        return
+
+    elif msg_type == "learn_move_choice":
+        # Handle level-up move learning choice from client
+        if not getattr(player, 'account_id', None):
+            return
+        pokemon_row_id = data.get("pokemon_id")
+        new_move = data.get("new_move")
+        replace_move = data.get("replace_move")  # None/null means skip learning
+        if not pokemon_row_id or not new_move:
+            return
+        if replace_move is None:
+            # Player chose to skip learning this move
+            await player.send({"type": "learn_move_skipped", "pokemon_id": pokemon_row_id, "move": new_move})
+            return
+        # Find the Pokemon
+        all_pokemon = account_mgr.get_all_pokemon(player.account_id)
+        poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
+        if not poke_row:
+            return
+        current_moves = json.loads(poke_row["moves"]) if poke_row.get("moves") else []
+        if replace_move == "__add__":
+            # Add to empty slot (fewer than 4 moves)
+            if len(current_moves) < 4:
+                current_moves.append(new_move)
+        elif replace_move in current_moves:
+            idx = current_moves.index(replace_move)
+            current_moves[idx] = new_move
+        else:
+            return
+        account_mgr.update_pokemon_moves(pokemon_row_id, current_moves)
+        new_move_data = pokemon_data.MOVES.get(new_move, {})
+        await player.send({
+            "type": "learn_move_ok",
+            "pokemon_id": pokemon_row_id,
+            "new_move": new_move,
+            "new_move_name": new_move_data.get("name", new_move),
+            "current_moves": current_moves,
+        })
+        return
+
     elif msg_type == "get_progression":
         if not getattr(player, 'account_id', None):
             return
@@ -943,6 +1093,33 @@ def _award_encounter_xp(encounter, defeated):
                      "move_data": pokemon_data.MOVES.get(m["move"], {})}
                     for m in new_moves if m["move"] in pokemon_data.MOVES
                 ]
+
+                # Auto-learn moves if fewer than 4, otherwise prompt player
+                if result["new_moves"]:
+                    # Get current moves from DB
+                    all_pokemon = account_mgr.get_all_pokemon(encounter.player.account_id)
+                    poke_row = next((p for p in all_pokemon if p["id"] == db_id), None)
+                    current_moves = json.loads(poke_row["moves"]) if poke_row and poke_row.get("moves") else []
+
+                    auto_learned = []
+                    pending_learn = []
+                    for nm in result["new_moves"]:
+                        mid = nm["move_id"]
+                        if mid in current_moves:
+                            continue  # Already knows this move
+                        if len(current_moves) < 4:
+                            current_moves.append(mid)
+                            auto_learned.append(nm)
+                        else:
+                            # Need player to choose which move to replace
+                            pending_learn.append(nm)
+
+                    if auto_learned:
+                        account_mgr.update_pokemon_moves(db_id, current_moves)
+
+                    result["auto_learned"] = auto_learned
+                    result["pending_learn"] = pending_learn
+
                 # Check evolution
                 evo = pokemon_data.get_evolution(result["dex_id"])
                 if evo and evo.get("method") == "level" and result["new_level"] >= evo.get("level", 999):
