@@ -149,10 +149,17 @@ class GameRoom:
     async def _start_team_select(self):
         """Transition to team selection phase."""
         self.state = "TEAM_SELECT"
+
+        # Check if both already ready (e.g. journey battle with pre-set teams)
+        if all(p and p.ready for p in self.players):
+            await self._start_battle()
+            return
+
         pokemon_list = pokemon_data.get_pokemon_list_for_client()
 
+        # Only send team select to players who aren't already ready
         for p in self.players:
-            if p:
+            if p and not p.ready:
                 await p.send({
                     "type": "team_select_start",
                     "pokemon_list": pokemon_list,
@@ -167,7 +174,7 @@ class GameRoom:
                 if opp:
                     await opp.send({"type": "opponent_ready"})
 
-        # Check if both already ready (e.g. both bots, or instant lock-in)
+        # Check again after bot selection
         if all(p and p.ready for p in self.players):
             await self._start_battle()
             return

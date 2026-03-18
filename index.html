@@ -754,7 +754,8 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-gym" onclick="showGyms()">GYM LEADERS</button>
       <button class="btn btn-shop" onclick="showShop()">SHOP</button>
       <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
-      <button class="btn btn-ai" onclick="showQuickBattle()">QUICK BATTLE</button>
+      <button class="btn btn-ai" onclick="createJourneyBattle()">BATTLE AI</button>
+      <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:11px">QUICK BATTLE</button>
       <button class="btn btn-secondary" style="font-size:11px" onclick="logout()">LOG OUT</button>
     </div>
   </div>
@@ -1348,6 +1349,12 @@ function createAiBattle() {
   if (!S.playerName) return;
   S.isAiBattle = true;
   send({ type: 'create_ai_battle' });
+}
+
+function createJourneyBattle() {
+  if (!S.account) return;
+  S.isAiBattle = true;
+  send({ type: 'create_journey_battle' });
 }
 
 function showJoinInput() {

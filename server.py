@@ -350,6 +350,42 @@ async def handle_message(player, msg, room_mgr):
             await room.add_player(bot)
         return
 
+    if msg_type == "create_journey_battle":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokémon in team."})
+            return
+
+        # Pre-set player's Journey team
+        journey_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        player.team = journey_team
+        player.team_dex_ids = [p.dex_id for p in journey_team]
+        player.team_name = f"{player.name}'s Team"
+        player.ready = True
+
+        # Create bot scaled to player's average level
+        avg_level = sum(p.level for p in journey_team) / len(journey_team)
+        bot = BotPlayer()
+        bot.select_team_at_level(int(avg_level))
+
+        code = await room_mgr.create_room(player)
+        await player.send({
+            "type": "room_created",
+            "code": code,
+            "ai_battle": True,
+            "journey_battle": True,
+            "opponent_name": bot.name,
+        })
+        # Add bot to room — both already ready, skips team select
+        room_mgr.player_rooms[bot.id] = code
+        room = room_mgr.rooms.get(code)
+        if room:
+            await room.add_player(bot)
+        return
+
     if msg_type == "create_room":
         name = str(data.get("name", "")).strip()
         if not name or len(name) < 2 or len(name) > 16:
