@@ -29,9 +29,14 @@ BALL_MODIFIERS = {
 }
 
 SHOP_ITEMS = {
-    "pokeball":  {"name": "Poké Ball",  "price": 200,  "ball_modifier": 1.0},
-    "greatball": {"name": "Great Ball", "price": 600,  "ball_modifier": 1.5},
-    "ultraball": {"name": "Ultra Ball", "price": 1200, "ball_modifier": 2.0},
+    "pokeball":  {"name": "Poké Ball",  "price": 200,  "ball_modifier": 1.0, "category": "ball"},
+    "greatball": {"name": "Great Ball", "price": 600,  "ball_modifier": 1.5, "category": "ball"},
+    "ultraball": {"name": "Ultra Ball", "price": 1200, "ball_modifier": 2.0, "category": "ball"},
+    "potion":        {"name": "Potion",        "price": 300,  "category": "healing", "heal_hp": 20},
+    "super_potion":  {"name": "Super Potion",  "price": 700,  "category": "healing", "heal_hp": 50},
+    "hyper_potion":  {"name": "Hyper Potion",  "price": 1200, "category": "healing", "heal_hp": 200},
+    "revive":        {"name": "Revive",        "price": 1500, "category": "healing", "revive": True, "heal_pct": 0.5},
+    "full_restore":  {"name": "Full Restore",  "price": 3000, "category": "healing", "heal_full": True, "cure_status": True},
 }
 
 # Currency awards
