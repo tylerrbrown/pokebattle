@@ -31,6 +31,7 @@
   --type-fighting: #c03028; --type-poison: #a040a0; --type-ground: #e0c068;
   --type-flying: #a890f0; --type-psychic: #f85888; --type-bug: #a8b820;
   --type-rock: #b8a038; --type-ghost: #705898; --type-dragon: #7038f8;
+  --type-dark: #705848; --type-steel: #b8b8d0;
 }
 html, body { height: 100%; overflow: hidden; }
 body {
@@ -720,7 +721,7 @@ input.invalid { border-color: var(--red); }
   <!-- LOGIN SCREEN -->
   <div id="screen-login" class="screen login-screen active">
     <div class="title-logo">POKÉ<br>BATTLE</div>
-    <div class="title-subtitle">Gen 1 • Multiplayer • Real-time</div>
+    <div class="title-subtitle">Gen 1 &amp; 2 • Multiplayer • Real-time</div>
     <div class="login-form">
       <input id="login-username" type="text" placeholder="Enter Username" maxlength="16" autocomplete="off">
       <button class="btn btn-primary" onclick="doLogin()">PLAY</button>
@@ -747,6 +748,21 @@ input.invalid { border-color: var(--red); }
       <div class="starter-card" onclick="chooseStar(7)">
         <img src="/sprites/front/007.png" alt="Squirtle">
         <span class="starter-name">Squirtle</span>
+        <span class="starter-type move-type-badge" style="background:var(--type-water)">WATER</span>
+      </div>
+      <div class="starter-card" onclick="chooseStar(152)">
+        <img src="/sprites/front/152.png" alt="Chikorita">
+        <span class="starter-name">Chikorita</span>
+        <span class="starter-type move-type-badge" style="background:var(--type-grass)">GRASS</span>
+      </div>
+      <div class="starter-card" onclick="chooseStar(155)">
+        <img src="/sprites/front/155.png" alt="Cyndaquil">
+        <span class="starter-name">Cyndaquil</span>
+        <span class="starter-type move-type-badge" style="background:var(--type-fire)">FIRE</span>
+      </div>
+      <div class="starter-card" onclick="chooseStar(158)">
+        <img src="/sprites/front/158.png" alt="Totodile">
+        <span class="starter-name">Totodile</span>
         <span class="starter-type move-type-badge" style="background:var(--type-water)">WATER</span>
       </div>
     </div>
@@ -780,7 +796,7 @@ input.invalid { border-color: var(--red); }
   <!-- TITLE SCREEN (Quick Battle menu) -->
   <div id="screen-title" class="screen title-screen">
     <div class="title-logo" style="font-size:22px">QUICK<br>BATTLE</div>
-    <div class="title-subtitle" id="title-greeting">Pick 6 from all 151 and battle!</div>
+    <div class="title-subtitle" id="title-greeting">Pick 6 from all 251 and battle!</div>
     <div class="title-instructions">
       <p>1. CREATE a room and share the 4-letter code</p>
       <p>2. Or JOIN with a friend's code</p>
@@ -2060,7 +2076,7 @@ function updateHubProfile() {
     '<span>Welcome, <span class="stat">' + a.username + '</span>!</span>' +
     '<span>$<span class="stat">' + (a.currency || 0) + '</span></span>' +
     '<span>Balls: <span class="stat">' + (a.pokeballs || 0) + '</span></span>' +
-    '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '/151</span></span>' +
+    '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '/251</span></span>' +
     '<span>Best Lv: <span class="stat">' + maxLv + '</span></span>' +
     '<div class="hub-badges">' + badgeHtml + '</div>';
 }

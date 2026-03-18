@@ -1168,5 +1168,785 @@
     "pp": 20,
     "effect": null,
     "effect_chance": 0
+  },
+  "shadow-ball": {
+    "name": "Shadow Ball",
+    "type": "ghost",
+    "category": "special",
+    "power": 80,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "crunch": {
+    "name": "Crunch",
+    "type": "dark",
+    "category": "physical",
+    "power": 80,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "iron-tail": {
+    "name": "Iron Tail",
+    "type": "steel",
+    "category": "physical",
+    "power": 100,
+    "accuracy": 75,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "cross-chop": {
+    "name": "Cross Chop",
+    "type": "fighting",
+    "category": "physical",
+    "power": 100,
+    "accuracy": 80,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "megahorn": {
+    "name": "Megahorn",
+    "type": "bug",
+    "category": "physical",
+    "power": 120,
+    "accuracy": 85,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "sacred-fire": {
+    "name": "Sacred Fire",
+    "type": "fire",
+    "category": "physical",
+    "power": 100,
+    "accuracy": 95,
+    "pp": 5,
+    "effect": "burn",
+    "effect_chance": 50
+  },
+  "aeroblast": {
+    "name": "Aeroblast",
+    "type": "flying",
+    "category": "special",
+    "power": 100,
+    "accuracy": 95,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "outrage": {
+    "name": "Outrage",
+    "type": "dragon",
+    "category": "physical",
+    "power": 120,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "dynamic-punch": {
+    "name": "Dynamic Punch",
+    "type": "fighting",
+    "category": "physical",
+    "power": 100,
+    "accuracy": 50,
+    "pp": 5,
+    "effect": "confuse",
+    "effect_chance": 100
+  },
+  "zap-cannon": {
+    "name": "Zap Cannon",
+    "type": "electric",
+    "category": "special",
+    "power": 120,
+    "accuracy": 50,
+    "pp": 5,
+    "effect": "paralyze",
+    "effect_chance": 100
+  },
+  "metal-claw": {
+    "name": "Metal Claw",
+    "type": "steel",
+    "category": "physical",
+    "power": 50,
+    "accuracy": 95,
+    "pp": 35,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "spark": {
+    "name": "Spark",
+    "type": "electric",
+    "category": "physical",
+    "power": 65,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": "paralyze",
+    "effect_chance": 30
+  },
+  "flamethrower": {
+    "name": "Flamethrower",
+    "type": "fire",
+    "category": "special",
+    "power": 90,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": "burn",
+    "effect_chance": 10
+  },
+  "thunderbolt": {
+    "name": "Thunderbolt",
+    "type": "electric",
+    "category": "special",
+    "power": 90,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": "paralyze",
+    "effect_chance": 10
+  },
+  "surf": {
+    "name": "Surf",
+    "type": "water",
+    "category": "special",
+    "power": 90,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "earthquake": {
+    "name": "Earthquake",
+    "type": "ground",
+    "category": "physical",
+    "power": 100,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "sludge-bomb": {
+    "name": "Sludge Bomb",
+    "type": "poison",
+    "category": "physical",
+    "power": 90,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": "poison",
+    "effect_chance": 30
+  },
+  "giga-drain": {
+    "name": "Giga Drain",
+    "type": "grass",
+    "category": "special",
+    "power": 75,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "rollout": {
+    "name": "Rollout",
+    "type": "rock",
+    "category": "physical",
+    "power": 30,
+    "accuracy": 90,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "fury-cutter": {
+    "name": "Fury Cutter",
+    "type": "bug",
+    "category": "physical",
+    "power": 40,
+    "accuracy": 95,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "mud-slap": {
+    "name": "Mud Slap",
+    "type": "ground",
+    "category": "physical",
+    "power": 20,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "icy-wind": {
+    "name": "Icy Wind",
+    "type": "ice",
+    "category": "special",
+    "power": 55,
+    "accuracy": 95,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "powder-snow": {
+    "name": "Powder Snow",
+    "type": "ice",
+    "category": "special",
+    "power": 40,
+    "accuracy": 100,
+    "pp": 25,
+    "effect": "freeze",
+    "effect_chance": 10
+  },
+  "faint-attack": {
+    "name": "Faint Attack",
+    "type": "dark",
+    "category": "physical",
+    "power": 60,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "pursuit": {
+    "name": "Pursuit",
+    "type": "dark",
+    "category": "physical",
+    "power": 40,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "mean-look": {
+    "name": "Mean Look",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "cotton-spore": {
+    "name": "Cotton Spore",
+    "type": "grass",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 40,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "reversal": {
+    "name": "Reversal",
+    "type": "fighting",
+    "category": "physical",
+    "power": 60,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "mach-punch": {
+    "name": "Mach Punch",
+    "type": "fighting",
+    "category": "physical",
+    "power": 40,
+    "accuracy": 100,
+    "pp": 30,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "scary-face": {
+    "name": "Scary Face",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "foresight": {
+    "name": "Foresight",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 40,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "return": {
+    "name": "Return",
+    "type": "normal",
+    "category": "physical",
+    "power": 70,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "hidden-power": {
+    "name": "Hidden Power",
+    "type": "normal",
+    "category": "special",
+    "power": 60,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "rain-dance": {
+    "name": "Rain Dance",
+    "type": "water",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "sunny-day": {
+    "name": "Sunny Day",
+    "type": "fire",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "ancient-power": {
+    "name": "Ancient Power",
+    "type": "rock",
+    "category": "special",
+    "power": 60,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "steel-wing": {
+    "name": "Steel Wing",
+    "type": "steel",
+    "category": "physical",
+    "power": 70,
+    "accuracy": 90,
+    "pp": 25,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "twister": {
+    "name": "Twister",
+    "type": "dragon",
+    "category": "special",
+    "power": 40,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "dragon-breath": {
+    "name": "Dragon Breath",
+    "type": "dragon",
+    "category": "special",
+    "power": 60,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": "paralyze",
+    "effect_chance": 30
+  },
+  "extremespeed": {
+    "name": "Extreme Speed",
+    "type": "normal",
+    "category": "physical",
+    "power": 80,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "rock-smash": {
+    "name": "Rock Smash",
+    "type": "fighting",
+    "category": "physical",
+    "power": 40,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "waterfall": {
+    "name": "Waterfall",
+    "type": "water",
+    "category": "physical",
+    "power": 80,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "heal-bell": {
+    "name": "Heal Bell",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "flame-wheel": {
+    "name": "Flame Wheel",
+    "type": "fire",
+    "category": "physical",
+    "power": 60,
+    "accuracy": 100,
+    "pp": 25,
+    "effect": "burn",
+    "effect_chance": 10
+  },
+  "octazooka": {
+    "name": "Octazooka",
+    "type": "water",
+    "category": "special",
+    "power": 65,
+    "accuracy": 85,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "curse": {
+    "name": "Curse",
+    "type": "ghost",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "spite": {
+    "name": "Spite",
+    "type": "ghost",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "belly-drum": {
+    "name": "Belly Drum",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "rapid-spin": {
+    "name": "Rapid Spin",
+    "type": "normal",
+    "category": "physical",
+    "power": 20,
+    "accuracy": 100,
+    "pp": 40,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "swagger": {
+    "name": "Swagger",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 90,
+    "pp": 15,
+    "effect": "confuse",
+    "effect_chance": 100
+  },
+  "present": {
+    "name": "Present",
+    "type": "normal",
+    "category": "physical",
+    "power": 40,
+    "accuracy": 90,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "protect": {
+    "name": "Protect",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "sandstorm": {
+    "name": "Sandstorm",
+    "type": "rock",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "endure": {
+    "name": "Endure",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "encore": {
+    "name": "Encore",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "milk-drink": {
+    "name": "Milk Drink",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "morning-sun": {
+    "name": "Morning Sun",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "moonlight": {
+    "name": "Moonlight",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "synthesis": {
+    "name": "Synthesis",
+    "type": "grass",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "solar-beam": {
+    "name": "Solar Beam",
+    "type": "grass",
+    "category": "special",
+    "power": 120,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "thunder-punch": {
+    "name": "Thunder Punch",
+    "type": "electric",
+    "category": "physical",
+    "power": 75,
+    "accuracy": 100,
+    "pp": 15,
+    "effect": "paralyze",
+    "effect_chance": 10
+  },
+  "tri-attack": {
+    "name": "Tri Attack",
+    "type": "normal",
+    "category": "special",
+    "power": 80,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "whirlpool": {
+    "name": "Whirlpool",
+    "type": "water",
+    "category": "special",
+    "power": 35,
+    "accuracy": 85,
+    "pp": 15,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "pain-split": {
+    "name": "Pain Split",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "perish-song": {
+    "name": "Perish Song",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "thief": {
+    "name": "Thief",
+    "type": "dark",
+    "category": "physical",
+    "power": 60,
+    "accuracy": 100,
+    "pp": 25,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "vital-throw": {
+    "name": "Vital Throw",
+    "type": "fighting",
+    "category": "physical",
+    "power": 70,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "false-swipe": {
+    "name": "False Swipe",
+    "type": "normal",
+    "category": "physical",
+    "power": 40,
+    "accuracy": 100,
+    "pp": 40,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "lock-on": {
+    "name": "Lock-On",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "sketch": {
+    "name": "Sketch",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 1,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "triple-kick": {
+    "name": "Triple Kick",
+    "type": "fighting",
+    "category": "physical",
+    "power": 10,
+    "accuracy": 90,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "destiny-bond": {
+    "name": "Destiny Bond",
+    "type": "ghost",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "charm": {
+    "name": "Charm",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "sweet-kiss": {
+    "name": "Sweet Kiss",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 75,
+    "pp": 10,
+    "effect": "confuse",
+    "effect_chance": 100
+  },
+  "detect": {
+    "name": "Detect",
+    "type": "fighting",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 5,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "conversion-2": {
+    "name": "Conversion 2",
+    "type": "normal",
+    "category": "status",
+    "power": 0,
+    "accuracy": 100,
+    "pp": 30,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "future-sight": {
+    "name": "Future Sight",
+    "type": "psychic",
+    "category": "special",
+    "power": 120,
+    "accuracy": 100,
+    "pp": 10,
+    "effect": null,
+    "effect_chance": 0
+  },
+  "slam": {
+    "name": "Slam",
+    "type": "normal",
+    "category": "physical",
+    "power": 80,
+    "accuracy": 75,
+    "pp": 20,
+    "effect": null,
+    "effect_chance": 0
   }
 }
