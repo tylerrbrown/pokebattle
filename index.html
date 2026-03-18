@@ -55,7 +55,7 @@ input {
   color: var(--text);
   border: 2px solid var(--border);
   padding: 10px 14px;
-  font-size: 12px;
+  font-size: 14px;
   border-radius: 6px;
 }
 input:focus { border-color: var(--accent); }
@@ -65,7 +65,7 @@ input.invalid { border-color: var(--red); }
   width: 100%;
   max-width: 900px;
   height: 100vh;
-  max-height: 700px;
+  max-height: 850px;
   position: relative;
   overflow: hidden;
 }
@@ -88,12 +88,12 @@ input.invalid { border-color: var(--red); }
   line-height: 1.6;
 }
 .title-subtitle {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-dim);
   text-align: center;
 }
 .title-instructions {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   line-height: 2.2;
   text-align: left;
@@ -113,7 +113,7 @@ input.invalid { border-color: var(--red); }
 .btn {
   padding: 12px 20px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 14px;
   transition: all 0.15s;
   flex: 1;
 }
@@ -125,7 +125,7 @@ input.invalid { border-color: var(--red); }
 .btn-ai { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: #1a1a2e; font-weight: bold; }
 .btn-ai:hover { filter: brightness(1.1); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.error-text { color: var(--red); font-size: 10px; min-height: 16px; text-align: center; }
+.error-text { color: var(--red); font-size: 12px; min-height: 16px; text-align: center; }
 
 /* ─── Lobby Screen ──────────────────────────────── */
 .lobby-screen {
@@ -142,7 +142,7 @@ input.invalid { border-color: var(--red); }
   cursor: pointer;
 }
 .room-code:hover { text-shadow: 0 0 40px rgba(233,69,96,0.7); }
-.lobby-status { font-size: 12px; color: var(--text-dim); }
+.lobby-status { font-size: 14px; color: var(--text-dim); }
 .dots-anim::after {
   content: '';
   animation: dots 1.5s infinite;
@@ -154,15 +154,15 @@ input.invalid { border-color: var(--red); }
 /* ─── Team Select Screen ────────────────────────── */
 .team-screen { padding: 10px; gap: 8px; }
 .team-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.team-header input { flex: 1; font-size: 10px; padding: 6px 10px; }
-.team-timer { font-size: 14px; color: var(--yellow); min-width: 50px; text-align: right; }
-.team-search { width: 100%; font-size: 10px; padding: 6px 10px; }
+.team-header input { flex: 1; font-size: 12px; padding: 6px 10px; }
+.team-timer { font-size: 16px; color: var(--yellow); min-width: 50px; text-align: right; }
+.team-search { width: 100%; font-size: 12px; padding: 6px 10px; }
 
 .pokemon-grid {
   flex: 1;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 4px;
   padding: 4px;
   scrollbar-width: thin;
@@ -186,7 +186,7 @@ input.invalid { border-color: var(--red); }
   height: 48px;
   image-rendering: pixelated;
 }
-.pokemon-card .pname { font-size: 8px; text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+.pokemon-card .pname { font-size: 10px; text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
 .team-bar {
   display: flex;
@@ -218,15 +218,15 @@ input.invalid { border-color: var(--red); }
   border-radius: 50%;
   background: var(--red);
   color: #fff;
-  font-size: 8px;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 .team-footer { display: flex; gap: 8px; align-items: center; }
-.team-footer .btn { font-size: 11px; padding: 10px 16px; }
-.opponent-status { font-size: 10px; color: var(--text-dim); flex: 1; text-align: right; }
+.team-footer .btn { font-size: 13px; padding: 10px 16px; }
+.opponent-status { font-size: 12px; color: var(--text-dim); flex: 1; text-align: right; }
 
 /* ─── Battle Screen ─────────────────────────────── */
 .battle-screen { background: var(--bg); position: relative; }
@@ -275,10 +275,10 @@ input.invalid { border-color: var(--red); }
 }
 .player-sprite.faint { animation: faint-anim 0.8s forwards; }
 
-.poke-name { font-size: 12px; margin-bottom: 4px; }
+.poke-name { font-size: 14px; margin-bottom: 4px; }
 .poke-status-badge {
   display: inline-block;
-  font-size: 9px;
+  font-size: 10px;
   padding: 1px 4px;
   border-radius: 3px;
   margin-left: 4px;
@@ -303,7 +303,7 @@ input.invalid { border-color: var(--red); }
   border-radius: 4px;
   transition: width 0.8s ease-out, background-color 0.3s;
 }
-.hp-text { font-size: 9px; color: var(--text-dim); margin-top: 2px; }
+.hp-text { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
 /* Pokeball team indicators */
 .team-balls {
@@ -330,7 +330,7 @@ input.invalid { border-color: var(--red); }
   align-items: center;
 }
 .battle-text {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
   min-height: 20px;
 }
@@ -355,13 +355,13 @@ input.invalid { border-color: var(--red); }
 }
 .move-btn:hover:not(:disabled) { border-color: var(--blue); }
 .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.move-btn .move-name { font-size: 11px; display: block; }
-.move-btn .move-meta { font-size: 9px; color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
+.move-btn .move-name { font-size: 13px; display: block; }
+.move-btn .move-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
 .move-type-badge {
   display: inline-block;
   padding: 1px 5px;
   border-radius: 3px;
-  font-size: 8px;
+  font-size: 10px;
   color: #fff;
   text-transform: uppercase;
 }
@@ -374,9 +374,9 @@ input.invalid { border-color: var(--red); }
   padding: 4px 8px;
   background: var(--bg2);
 }
-.action-bar .btn { font-size: 10px; padding: 6px 12px; flex: none; }
-.action-timer { font-size: 10px; color: var(--yellow); }
-.waiting-text { font-size: 11px; color: var(--text-dim); text-align: center; padding: 20px; }
+.action-bar .btn { font-size: 12px; padding: 6px 12px; flex: none; }
+.action-timer { font-size: 12px; color: var(--yellow); }
+.waiting-text { font-size: 13px; color: var(--text-dim); text-align: center; padding: 20px; }
 
 /* Switch panel (replaces move panel) */
 .switch-panel {
@@ -399,8 +399,8 @@ input.invalid { border-color: var(--red); }
 .switch-btn:hover:not(:disabled) { border-color: var(--green); }
 .switch-btn:disabled { opacity: 0.3; }
 .switch-btn img { width: 32px; height: 32px; image-rendering: pixelated; }
-.switch-btn .sw-name { font-size: 9px; display: block; margin-top: 2px; }
-.switch-btn .sw-hp { font-size: 8px; color: var(--text-dim); }
+.switch-btn .sw-name { font-size: 11px; display: block; margin-top: 2px; }
+.switch-btn .sw-hp { font-size: 10px; color: var(--text-dim); }
 
 /* ─── Tap Phase Overlay ─────────────────────────── */
 .tap-overlay {
@@ -415,8 +415,8 @@ input.invalid { border-color: var(--red); }
   gap: 16px;
 }
 .tap-overlay.active { display: flex; }
-.tap-move-name { font-size: 12px; color: var(--accent); }
-.tap-timer { font-size: 20px; color: var(--yellow); }
+.tap-move-name { font-size: 14px; color: var(--accent); }
+.tap-timer { font-size: 22px; color: var(--yellow); }
 .tap-meter-container {
   width: 60px;
   height: 200px;
@@ -435,11 +435,11 @@ input.invalid { border-color: var(--red); }
   border-radius: 0 0 5px 5px;
 }
 .tap-prompt {
-  font-size: 16px;
+  font-size: 18px;
   color: #fff;
   animation: pulse 0.3s infinite alternate;
 }
-.tap-multiplier { font-size: 14px; color: var(--green); }
+.tap-multiplier { font-size: 16px; color: var(--green); }
 .tap-area {
   position: absolute;
   inset: 0;
@@ -465,7 +465,7 @@ input.invalid { border-color: var(--red); }
 }
 .login-form input { width: 100%; text-align: center; }
 .login-welcome {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   text-align: center;
   line-height: 2;
@@ -478,8 +478,8 @@ input.invalid { border-color: var(--red); }
   gap: 20px;
   padding: 20px;
 }
-.starter-title { font-size: 14px; color: var(--yellow); text-align: center; }
-.starter-subtitle { font-size: 11px; color: var(--text-dim); text-align: center; }
+.starter-title { font-size: 16px; color: var(--yellow); text-align: center; }
+.starter-subtitle { font-size: 13px; color: var(--text-dim); text-align: center; }
 .starter-grid {
   display: flex;
   gap: 16px;
@@ -500,8 +500,8 @@ input.invalid { border-color: var(--red); }
 }
 .starter-card:hover { border-color: var(--accent); background: var(--bg3); transform: scale(1.05); }
 .starter-card img { width: 80px; height: 80px; image-rendering: pixelated; }
-.starter-card .starter-name { font-size: 10px; margin-top: 8px; text-align: center; }
-.starter-card .starter-type { font-size: 8px; margin-top: 4px; }
+.starter-card .starter-name { font-size: 12px; margin-top: 8px; text-align: center; }
+.starter-card .starter-type { font-size: 10px; margin-top: 4px; }
 
 /* ─── My Team Screen ───────────────────────────── */
 .myteam-screen {
@@ -513,7 +513,7 @@ input.invalid { border-color: var(--red); }
   justify-content: space-between;
   align-items: center;
 }
-.myteam-title { font-size: 16px; color: var(--accent); }
+.myteam-title { font-size: 18px; color: var(--accent); }
 .myteam-list {
   flex: 1;
   overflow-y: auto;
@@ -532,25 +532,25 @@ input.invalid { border-color: var(--red); }
 }
 .myteam-card img { width: 56px; height: 56px; image-rendering: pixelated; }
 .myteam-info { flex: 1; }
-.myteam-info .pname { font-size: 11px; margin-bottom: 4px; }
-.myteam-info .plevel { font-size: 9px; color: var(--yellow); }
-.myteam-info .ptypes { font-size: 8px; color: var(--text-dim); margin-top: 2px; }
+.myteam-info .pname { font-size: 13px; margin-bottom: 4px; }
+.myteam-info .plevel { font-size: 11px; color: var(--yellow); }
+.myteam-info .ptypes { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 .myteam-moves {
   display: flex;
   gap: 4px;
   margin-top: 4px;
   flex-wrap: wrap;
 }
-.myteam-moves .move-type-badge { font-size: 7px; }
+.myteam-moves .move-type-badge { font-size: 9px; }
 .myteam-empty {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   text-align: center;
   padding: 40px 20px;
   line-height: 2;
 }
 .myteam-stats {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-dim);
   text-align: center;
   padding: 8px;
@@ -565,12 +565,12 @@ input.invalid { border-color: var(--red); }
   padding: 20px;
 }
 .gameover-title {
-  font-size: 24px;
+  font-size: 28px;
   text-align: center;
 }
 .gameover-title.win { color: var(--green); text-shadow: 0 0 20px rgba(74,222,128,0.5); }
 .gameover-title.lose { color: var(--red); text-shadow: 0 0 20px rgba(239,68,68,0.5); }
-.gameover-summary { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 2; }
+.gameover-summary { font-size: 13px; color: var(--text-dim); text-align: center; line-height: 2; }
 .gameover-btns { display: flex; gap: 10px; }
 
 /* ─── Animations ────────────────────────────────── */
@@ -662,7 +662,7 @@ input.invalid { border-color: var(--red); }
   <div id="screen-myteam" class="screen myteam-screen">
     <div class="myteam-header">
       <span class="myteam-title">My Team</span>
-      <button class="btn btn-secondary" style="flex:none;font-size:10px" onclick="showScreen('title')">BACK</button>
+      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="showScreen('title')">BACK</button>
     </div>
     <div class="myteam-list" id="myteam-list"></div>
     <div class="myteam-stats" id="myteam-stats"></div>
@@ -695,7 +695,7 @@ input.invalid { border-color: var(--red); }
 
   <!-- LOBBY SCREEN -->
   <div id="screen-lobby" class="screen lobby-screen">
-    <div class="title-logo" style="font-size:18px">WAITING</div>
+    <div class="title-logo" style="font-size:20px">WAITING</div>
     <div class="room-code" id="lobby-code" onclick="copyCode()" title="Click to copy"></div>
     <div class="lobby-status">Share this code with your opponent</div>
     <div class="lobby-status dots-anim" id="lobby-waiting">Waiting for opponent</div>
@@ -1322,7 +1322,7 @@ function showSwitchPanel(available, forced) {
     </div>`;
   } else {
     html += `<div class="action-bar">
-      <span style="font-size:10px;color:var(--yellow)">Choose your next Pokemon!</span>
+      <span style="font-size:12px;color:var(--yellow)">Choose your next Pokemon!</span>
       <span class="action-timer" id="action-timer"></span>
     </div>`;
   }
