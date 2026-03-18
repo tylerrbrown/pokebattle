@@ -34,7 +34,7 @@ Liam wants PokeBattle to feel like a **Pokémon journey**, not just a battle sim
 - **Common** — appear frequently, easy to catch
 - **Uncommon** — appear less often, moderate catch difficulty
 - **Rare** — infrequent encounters, harder to catch
-- **Legendary** — very rare to encounter AND very hard to catch even when found
+- **Legendary** — very rare to encounter AND very hard to catch even when found (includes legendaries from games, shows, AND movies — e.g., Mewtwo, Lugia, Deoxys, Arceus)
 - Rarity should affect both encounter rate and catch rate independently
 
 ### 3. Remove Manual Team Picking in Journey Mode
