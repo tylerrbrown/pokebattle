@@ -10,6 +10,7 @@ import json
 import mimetypes
 import os
 import pathlib
+import random
 import re
 import sqlite3
 import time
@@ -707,6 +708,23 @@ async def _handle_wild_action(player, encounter, data):
 
         # Check outcomes
         if wild.is_fainted:
+            # Catch window: first time wild would faint in a wild encounter,
+            # hold it at 1 HP and prompt the player to throw a ball
+            if not is_gym and not encounter.catch_window:
+                encounter.catch_window = True
+                wild.current_hp = 1
+                wild.is_fainted = False
+                events.append({
+                    "type": "catch_window",
+                    "pokemon": wild.name,
+                })
+                await player.send({
+                    "type": "wild_catch_window",
+                    "events": events,
+                    **encounter.serialize_state(),
+                })
+                return
+
             xp_results = _award_encounter_xp(encounter, wild)
             account_mgr.add_currency(player.account_id, CURRENCY_WILD_WIN)
             del active_encounters[player.id]

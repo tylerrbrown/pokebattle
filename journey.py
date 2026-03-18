@@ -121,6 +121,7 @@ class WildEncounter:
         self.state = "ACTION_SELECT"
         self.turn_count = 0
         self.created_at = time.time()
+        self.catch_window = False  # True after wild would have fainted — one chance to throw a ball
 
         # Find first non-fainted Pokemon
         for i, p in enumerate(self.team):

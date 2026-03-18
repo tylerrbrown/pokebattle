@@ -1177,6 +1177,18 @@ function handleMessage(msg) {
         showJourneyMovePanel();
       }
       break;
+    case 'wild_catch_window':
+      updateJourneyState(msg);
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(() => {
+          renderJourneyBattle();
+          showCatchWindowPanel();
+        });
+      } else {
+        renderJourneyBattle();
+        showCatchWindowPanel();
+      }
+      break;
     case 'wild_fainted':
       if (msg.events && msg.events.length) {
         playJourneyEvents(msg.events).then(() => showJourneyVictory(msg));
@@ -2103,7 +2115,16 @@ function showJourneyMovePanel() {
       '<span class="move-meta"><span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.type + '</span>' +
       '<span>PP ' + m.current_pp + '/' + (m.pp || '??') + '</span></span></button>';
   });
-  html += '</div><div class="wild-action-bar">';
+  html += '</div>';
+  // Show catch hint when wild Pokemon is low HP
+  if (S.encounterType === 'wild' && S.oppTeam && S.oppTeam[0]) {
+    const opp = S.oppTeam[0];
+    const hpPct = opp.current_hp / opp.max_hp;
+    if (hpPct > 0 && hpPct <= 0.3) {
+      html += '<div style="text-align:center;color:var(--yellow);font-size:13px;padding:4px;font-weight:bold">It\'s weak — try throwing a Poké Ball!</div>';
+    }
+  }
+  html += '<div class="wild-action-bar">';
   if (S.encounterType === 'wild') {
     const balls = S.account ? S.account.pokeballs : 0;
     html += '<button class="btn btn-ball" onclick="journeyBall()" ' + (balls <= 0 ? 'disabled' : '') + '>BALL (' + balls + ')</button>';
@@ -2135,6 +2156,19 @@ function showJourneySwitchPanel(available) {
   } else {
     html += '<div class="wild-action-bar"><span style="font-size:11px;color:var(--yellow);padding:4px">Choose your next Pokemon!</span></div>';
   }
+  controls.innerHTML = html;
+}
+
+function showCatchWindowPanel() {
+  const controls = document.getElementById('battle-controls');
+  const balls = S.account ? S.account.pokeballs : 0;
+  let html = '<div class="catch-window-prompt">';
+  html += '<div style="font-size:16px;color:var(--yellow);text-align:center;padding:8px;font-weight:bold;animation:pulse 1s infinite">It\'s weak! Throw a Poké Ball!</div>';
+  html += '</div><div class="wild-action-bar">';
+  html += '<button class="btn btn-ball catch-window-ball" onclick="journeyBall()" ' + (balls <= 0 ? 'disabled' : '') + ' style="font-size:16px;padding:12px 24px;animation:pulse 1s infinite">THROW BALL (' + balls + ')</button>';
+  html += '<button class="btn btn-secondary" onclick="showJourneyMovePanel()">ATTACK</button>';
+  html += '<button class="btn btn-run" onclick="journeyRun()">RUN</button>';
+  html += '</div>';
   controls.innerHTML = html;
 }
 
@@ -2201,6 +2235,11 @@ async function playJourneyEvents(events) {
         setBattleText('Go, ' + evt.pokemon + '!');
         renderJourneyBattle();
         await delay(800);
+        break;
+      case 'catch_window':
+        setBattleText(evt.pokemon + ' is weak! Throw a Poké Ball!');
+        playSound('select');
+        await delay(1200);
         break;
       case 'gym_next_pokemon':
         setBattleText('Opponent sends out ' + evt.pokemon + '!');
