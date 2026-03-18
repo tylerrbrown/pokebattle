@@ -7,8 +7,8 @@ server-side without a WebSocket connection.
 import random
 import string
 
-from battle_engine import build_team
-from pokemon_data import get_type_effectiveness
+from battle_engine import build_team, PokemonInstance
+from pokemon_data import get_type_effectiveness, get_moves_at_level
 import pokemon_data
 
 BOT_NAMES = [
@@ -67,10 +67,27 @@ class BotPlayer:
     # ─── AI Decisions ─────────────────────────────────
 
     def select_team(self):
-        """Pick 6 random Pokemon."""
+        """Pick 6 random Pokemon at default level 50."""
         dex_ids = random.sample(range(1, 152), 6)
         self.team_dex_ids = dex_ids
         self.team = build_team(dex_ids, pokemon_data.POKEMON, pokemon_data.MOVES)
+        self.team_name = f"{self.name}'s Team"
+        self.ready = True
+
+    def select_team_at_level(self, avg_level):
+        """Pick 6 random Pokemon scaled to a target level."""
+        dex_ids = random.sample(range(1, 152), 6)
+        self.team_dex_ids = dex_ids
+        team = []
+        for dex_id in dex_ids:
+            species = pokemon_data.POKEMON.get(dex_id)
+            if species:
+                level = max(2, avg_level + random.randint(-2, 2))
+                moves = get_moves_at_level(dex_id, level)
+                if not moves:
+                    moves = species["moves"][:2]
+                team.append(PokemonInstance(species, pokemon_data.MOVES, level=level, custom_moves=moves))
+        self.team = team
         self.team_name = f"{self.name}'s Team"
         self.ready = True
 
