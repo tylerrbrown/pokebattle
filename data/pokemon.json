@@ -3533,5 +3533,1005 @@
     "base_experience": 270,
     "rarity": "legendary",
     "catch_rate": 45
+  },
+  {
+    "id": 152,
+    "name": "Chikorita",
+    "types": ["grass"],
+    "base_stats": {"hp": 45, "attack": 49, "defense": 65, "special": 65, "speed": 45},
+    "moves": ["tackle", "growl", "razor-leaf", "synthesis"],
+    "base_experience": 64,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 153,
+    "name": "Bayleef",
+    "types": ["grass"],
+    "base_stats": {"hp": 60, "attack": 62, "defense": 80, "special": 80, "speed": 60},
+    "moves": ["razor-leaf", "synthesis", "body-slam", "growl"],
+    "base_experience": 142,
+    "rarity": "common",
+    "catch_rate": 45
+  },
+  {
+    "id": 154,
+    "name": "Meganium",
+    "types": ["grass"],
+    "base_stats": {"hp": 80, "attack": 82, "defense": 100, "special": 100, "speed": 80},
+    "moves": ["razor-leaf", "body-slam", "solar-beam", "synthesis"],
+    "base_experience": 236,
+    "rarity": "common",
+    "catch_rate": 45
+  },
+  {
+    "id": 155,
+    "name": "Cyndaquil",
+    "types": ["fire"],
+    "base_stats": {"hp": 39, "attack": 52, "defense": 43, "special": 60, "speed": 65},
+    "moves": ["tackle", "leer", "ember", "smokescreen"],
+    "base_experience": 62,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 156,
+    "name": "Quilava",
+    "types": ["fire"],
+    "base_stats": {"hp": 58, "attack": 64, "defense": 58, "special": 80, "speed": 80},
+    "moves": ["ember", "flame-wheel", "quick-attack", "leer"],
+    "base_experience": 142,
+    "rarity": "common",
+    "catch_rate": 45
+  },
+  {
+    "id": 157,
+    "name": "Typhlosion",
+    "types": ["fire"],
+    "base_stats": {"hp": 78, "attack": 84, "defense": 78, "special": 109, "speed": 100},
+    "moves": ["flamethrower", "flame-wheel", "quick-attack", "swift"],
+    "base_experience": 240,
+    "rarity": "common",
+    "catch_rate": 45
+  },
+  {
+    "id": 158,
+    "name": "Totodile",
+    "types": ["water"],
+    "base_stats": {"hp": 50, "attack": 65, "defense": 64, "special": 44, "speed": 43},
+    "moves": ["scratch", "leer", "water-gun", "bite"],
+    "base_experience": 63,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 159,
+    "name": "Croconaw",
+    "types": ["water"],
+    "base_stats": {"hp": 65, "attack": 80, "defense": 80, "special": 59, "speed": 58},
+    "moves": ["water-gun", "bite", "slash", "scary-face"],
+    "base_experience": 142,
+    "rarity": "common",
+    "catch_rate": 45
+  },
+  {
+    "id": 160,
+    "name": "Feraligatr",
+    "types": ["water"],
+    "base_stats": {"hp": 85, "attack": 105, "defense": 100, "special": 79, "speed": 78},
+    "moves": ["surf", "slash", "crunch", "scary-face"],
+    "base_experience": 239,
+    "rarity": "common",
+    "catch_rate": 45
+  },
+  {
+    "id": 161,
+    "name": "Sentret",
+    "types": ["normal"],
+    "base_stats": {"hp": 35, "attack": 46, "defense": 34, "special": 35, "speed": 20},
+    "moves": ["tackle", "defense-curl", "quick-attack", "fury-swipes"],
+    "base_experience": 43,
+    "rarity": "common",
+    "catch_rate": 255
+  },
+  {
+    "id": 162,
+    "name": "Furret",
+    "types": ["normal"],
+    "base_stats": {"hp": 85, "attack": 76, "defense": 64, "special": 55, "speed": 90},
+    "moves": ["quick-attack", "fury-swipes", "slam", "rest"],
+    "base_experience": 145,
+    "rarity": "common",
+    "catch_rate": 90
+  },
+  {
+    "id": 163,
+    "name": "Hoothoot",
+    "types": ["normal", "flying"],
+    "base_stats": {"hp": 60, "attack": 30, "defense": 30, "special": 56, "speed": 50},
+    "moves": ["tackle", "growl", "peck", "hypnosis"],
+    "base_experience": 52,
+    "rarity": "common",
+    "catch_rate": 255
+  },
+  {
+    "id": 164,
+    "name": "Noctowl",
+    "types": ["normal", "flying"],
+    "base_stats": {"hp": 100, "attack": 50, "defense": 50, "special": 96, "speed": 70},
+    "moves": ["confusion", "hypnosis", "peck", "reflect"],
+    "base_experience": 158,
+    "rarity": "common",
+    "catch_rate": 90
+  },
+  {
+    "id": 165,
+    "name": "Ledyba",
+    "types": ["bug", "flying"],
+    "base_stats": {"hp": 40, "attack": 20, "defense": 30, "special": 55, "speed": 55},
+    "moves": ["tackle", "supersonic", "swift", "light-screen"],
+    "base_experience": 53,
+    "rarity": "common",
+    "catch_rate": 255
+  },
+  {
+    "id": 166,
+    "name": "Ledian",
+    "types": ["bug", "flying"],
+    "base_stats": {"hp": 55, "attack": 35, "defense": 50, "special": 80, "speed": 85},
+    "moves": ["swift", "light-screen", "comet-punch", "agility"],
+    "base_experience": 137,
+    "rarity": "common",
+    "catch_rate": 90
+  },
+  {
+    "id": 167,
+    "name": "Spinarak",
+    "types": ["bug", "poison"],
+    "base_stats": {"hp": 40, "attack": 60, "defense": 40, "special": 40, "speed": 30},
+    "moves": ["poison-sting", "string-shot", "leech-life", "scary-face"],
+    "base_experience": 50,
+    "rarity": "common",
+    "catch_rate": 255
+  },
+  {
+    "id": 168,
+    "name": "Ariados",
+    "types": ["bug", "poison"],
+    "base_stats": {"hp": 70, "attack": 90, "defense": 70, "special": 60, "speed": 40},
+    "moves": ["poison-sting", "leech-life", "fury-swipes", "psychic"],
+    "base_experience": 140,
+    "rarity": "common",
+    "catch_rate": 90
+  },
+  {
+    "id": 169,
+    "name": "Crobat",
+    "types": ["poison", "flying"],
+    "base_stats": {"hp": 85, "attack": 90, "defense": 80, "special": 80, "speed": 130},
+    "moves": ["wing-attack", "bite", "confuse-ray", "swift"],
+    "base_experience": 241,
+    "rarity": "uncommon",
+    "catch_rate": 90
+  },
+  {
+    "id": 170,
+    "name": "Chinchou",
+    "types": ["water", "electric"],
+    "base_stats": {"hp": 75, "attack": 38, "defense": 38, "special": 67, "speed": 67},
+    "moves": ["bubble", "thunder-shock", "supersonic", "spark"],
+    "base_experience": 66,
+    "rarity": "uncommon",
+    "catch_rate": 190
+  },
+  {
+    "id": 171,
+    "name": "Lanturn",
+    "types": ["water", "electric"],
+    "base_stats": {"hp": 125, "attack": 58, "defense": 58, "special": 86, "speed": 67},
+    "moves": ["surf", "thunderbolt", "confuse-ray", "spark"],
+    "base_experience": 161,
+    "rarity": "uncommon",
+    "catch_rate": 75
+  },
+  {
+    "id": 172,
+    "name": "Pichu",
+    "types": ["electric"],
+    "base_stats": {"hp": 20, "attack": 40, "defense": 15, "special": 35, "speed": 60},
+    "moves": ["thunder-shock", "charm", "tail-whip", "swift"],
+    "base_experience": 41,
+    "rarity": "uncommon",
+    "catch_rate": 190
+  },
+  {
+    "id": 173,
+    "name": "Cleffa",
+    "types": ["normal"],
+    "base_stats": {"hp": 50, "attack": 25, "defense": 28, "special": 55, "speed": 15},
+    "moves": ["pound", "charm", "encore", "sing"],
+    "base_experience": 44,
+    "rarity": "uncommon",
+    "catch_rate": 150
+  },
+  {
+    "id": 174,
+    "name": "Igglybuff",
+    "types": ["normal"],
+    "base_stats": {"hp": 90, "attack": 30, "defense": 15, "special": 40, "speed": 15},
+    "moves": ["sing", "charm", "pound", "defense-curl"],
+    "base_experience": 39,
+    "rarity": "uncommon",
+    "catch_rate": 170
+  },
+  {
+    "id": 175,
+    "name": "Togepi",
+    "types": ["normal"],
+    "base_stats": {"hp": 35, "attack": 20, "defense": 65, "special": 65, "speed": 20},
+    "moves": ["growl", "charm", "metronome", "sweet-kiss"],
+    "base_experience": 74,
+    "rarity": "rare",
+    "catch_rate": 190
+  },
+  {
+    "id": 176,
+    "name": "Togetic",
+    "types": ["normal", "flying"],
+    "base_stats": {"hp": 55, "attack": 40, "defense": 85, "special": 100, "speed": 40},
+    "moves": ["metronome", "swift", "ancient-power", "sweet-kiss"],
+    "base_experience": 142,
+    "rarity": "rare",
+    "catch_rate": 75
+  },
+  {
+    "id": 177,
+    "name": "Natu",
+    "types": ["psychic", "flying"],
+    "base_stats": {"hp": 40, "attack": 50, "defense": 45, "special": 70, "speed": 70},
+    "moves": ["peck", "leer", "confusion", "teleport"],
+    "base_experience": 64,
+    "rarity": "uncommon",
+    "catch_rate": 190
+  },
+  {
+    "id": 178,
+    "name": "Xatu",
+    "types": ["psychic", "flying"],
+    "base_stats": {"hp": 65, "attack": 75, "defense": 70, "special": 95, "speed": 95},
+    "moves": ["psychic", "peck", "confuse-ray", "future-sight"],
+    "base_experience": 165,
+    "rarity": "uncommon",
+    "catch_rate": 75
+  },
+  {
+    "id": 179,
+    "name": "Mareep",
+    "types": ["electric"],
+    "base_stats": {"hp": 55, "attack": 40, "defense": 40, "special": 65, "speed": 35},
+    "moves": ["tackle", "growl", "thunder-shock", "cotton-spore"],
+    "base_experience": 56,
+    "rarity": "uncommon",
+    "catch_rate": 235
+  },
+  {
+    "id": 180,
+    "name": "Flaaffy",
+    "types": ["electric"],
+    "base_stats": {"hp": 70, "attack": 55, "defense": 55, "special": 80, "speed": 45},
+    "moves": ["thunder-shock", "cotton-spore", "thunder-wave", "headbutt"],
+    "base_experience": 128,
+    "rarity": "common",
+    "catch_rate": 120
+  },
+  {
+    "id": 181,
+    "name": "Ampharos",
+    "types": ["electric"],
+    "base_stats": {"hp": 90, "attack": 75, "defense": 85, "special": 110, "speed": 55},
+    "moves": ["thunderbolt", "thunder-wave", "thunder-punch", "swift"],
+    "base_experience": 230,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 182,
+    "name": "Bellossom",
+    "types": ["grass"],
+    "base_stats": {"hp": 75, "attack": 80, "defense": 95, "special": 100, "speed": 50},
+    "moves": ["razor-leaf", "solar-beam", "stun-spore", "petal-dance"],
+    "base_experience": 221,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 183,
+    "name": "Marill",
+    "types": ["water"],
+    "base_stats": {"hp": 70, "attack": 20, "defense": 50, "special": 40, "speed": 40},
+    "moves": ["tackle", "water-gun", "tail-whip", "defense-curl"],
+    "base_experience": 88,
+    "rarity": "common",
+    "catch_rate": 190
+  },
+  {
+    "id": 184,
+    "name": "Azumarill",
+    "types": ["water"],
+    "base_stats": {"hp": 100, "attack": 50, "defense": 80, "special": 60, "speed": 50},
+    "moves": ["surf", "rollout", "tail-whip", "rain-dance"],
+    "base_experience": 189,
+    "rarity": "common",
+    "catch_rate": 75
+  },
+  {
+    "id": 185,
+    "name": "Sudowoodo",
+    "types": ["rock"],
+    "base_stats": {"hp": 70, "attack": 100, "defense": 115, "special": 45, "speed": 30},
+    "moves": ["rock-throw", "slam", "low-kick", "harden"],
+    "base_experience": 144,
+    "rarity": "rare",
+    "catch_rate": 65
+  },
+  {
+    "id": 186,
+    "name": "Politoed",
+    "types": ["water"],
+    "base_stats": {"hp": 90, "attack": 75, "defense": 75, "special": 90, "speed": 70},
+    "moves": ["surf", "hypnosis", "swagger", "rain-dance"],
+    "base_experience": 225,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 187,
+    "name": "Hoppip",
+    "types": ["grass", "flying"],
+    "base_stats": {"hp": 35, "attack": 35, "defense": 40, "special": 55, "speed": 50},
+    "moves": ["tackle", "tail-whip", "synthesis", "stun-spore"],
+    "base_experience": 50,
+    "rarity": "common",
+    "catch_rate": 255
+  },
+  {
+    "id": 188,
+    "name": "Skiploom",
+    "types": ["grass", "flying"],
+    "base_stats": {"hp": 55, "attack": 45, "defense": 50, "special": 65, "speed": 80},
+    "moves": ["tackle", "stun-spore", "leech-seed", "sleep-powder"],
+    "base_experience": 119,
+    "rarity": "common",
+    "catch_rate": 120
+  },
+  {
+    "id": 189,
+    "name": "Jumpluff",
+    "types": ["grass", "flying"],
+    "base_stats": {"hp": 75, "attack": 55, "defense": 70, "special": 75, "speed": 110},
+    "moves": ["giga-drain", "leech-seed", "sleep-powder", "stun-spore"],
+    "base_experience": 207,
+    "rarity": "common",
+    "catch_rate": 45
+  },
+  {
+    "id": 190,
+    "name": "Aipom",
+    "types": ["normal"],
+    "base_stats": {"hp": 55, "attack": 70, "defense": 55, "special": 50, "speed": 85},
+    "moves": ["scratch", "tail-whip", "swift", "fury-swipes"],
+    "base_experience": 72,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 191,
+    "name": "Sunkern",
+    "types": ["grass"],
+    "base_stats": {"hp": 30, "attack": 30, "defense": 30, "special": 30, "speed": 30},
+    "moves": ["absorb", "growth", "razor-leaf", "sunny-day"],
+    "base_experience": 36,
+    "rarity": "common",
+    "catch_rate": 235
+  },
+  {
+    "id": 192,
+    "name": "Sunflora",
+    "types": ["grass"],
+    "base_stats": {"hp": 75, "attack": 75, "defense": 55, "special": 105, "speed": 30},
+    "moves": ["razor-leaf", "solar-beam", "sunny-day", "giga-drain"],
+    "base_experience": 149,
+    "rarity": "common",
+    "catch_rate": 120
+  },
+  {
+    "id": 193,
+    "name": "Yanma",
+    "types": ["bug", "flying"],
+    "base_stats": {"hp": 65, "attack": 65, "defense": 45, "special": 75, "speed": 95},
+    "moves": ["tackle", "quick-attack", "double-team", "swift"],
+    "base_experience": 78,
+    "rarity": "uncommon",
+    "catch_rate": 75
+  },
+  {
+    "id": 194,
+    "name": "Wooper",
+    "types": ["water", "ground"],
+    "base_stats": {"hp": 55, "attack": 45, "defense": 45, "special": 25, "speed": 15},
+    "moves": ["water-gun", "tail-whip", "mud-slap", "slam"],
+    "base_experience": 42,
+    "rarity": "common",
+    "catch_rate": 255
+  },
+  {
+    "id": 195,
+    "name": "Quagsire",
+    "types": ["water", "ground"],
+    "base_stats": {"hp": 95, "attack": 85, "defense": 85, "special": 65, "speed": 35},
+    "moves": ["surf", "earthquake", "slam", "rain-dance"],
+    "base_experience": 151,
+    "rarity": "common",
+    "catch_rate": 90
+  },
+  {
+    "id": 196,
+    "name": "Espeon",
+    "types": ["psychic"],
+    "base_stats": {"hp": 65, "attack": 65, "defense": 60, "special": 130, "speed": 110},
+    "moves": ["confusion", "swift", "psychic", "morning-sun"],
+    "base_experience": 184,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 197,
+    "name": "Umbreon",
+    "types": ["dark"],
+    "base_stats": {"hp": 95, "attack": 65, "defense": 110, "special": 80, "speed": 65},
+    "moves": ["pursuit", "faint-attack", "confuse-ray", "moonlight"],
+    "base_experience": 184,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 198,
+    "name": "Murkrow",
+    "types": ["dark", "flying"],
+    "base_stats": {"hp": 60, "attack": 85, "defense": 42, "special": 85, "speed": 91},
+    "moves": ["peck", "pursuit", "faint-attack", "wing-attack"],
+    "base_experience": 81,
+    "rarity": "uncommon",
+    "catch_rate": 30
+  },
+  {
+    "id": 199,
+    "name": "Slowking",
+    "types": ["water", "psychic"],
+    "base_stats": {"hp": 95, "attack": 75, "defense": 80, "special": 110, "speed": 30},
+    "moves": ["confusion", "surf", "psychic", "headbutt"],
+    "base_experience": 172,
+    "rarity": "uncommon",
+    "catch_rate": 70
+  },
+  {
+    "id": 200,
+    "name": "Misdreavus",
+    "types": ["ghost"],
+    "base_stats": {"hp": 60, "attack": 60, "defense": 60, "special": 85, "speed": 85},
+    "moves": ["psybeam", "confuse-ray", "shadow-ball", "mean-look"],
+    "base_experience": 87,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 201,
+    "name": "Unown",
+    "types": ["psychic"],
+    "base_stats": {"hp": 48, "attack": 72, "defense": 48, "special": 72, "speed": 48},
+    "moves": ["hidden-power", "hidden-power", "hidden-power", "hidden-power"],
+    "base_experience": 118,
+    "rarity": "rare",
+    "catch_rate": 225
+  },
+  {
+    "id": 202,
+    "name": "Wobbuffet",
+    "types": ["psychic"],
+    "base_stats": {"hp": 190, "attack": 33, "defense": 58, "special": 58, "speed": 33},
+    "moves": ["tackle", "destiny-bond", "protect", "rest"],
+    "base_experience": 142,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 203,
+    "name": "Girafarig",
+    "types": ["normal", "psychic"],
+    "base_stats": {"hp": 70, "attack": 80, "defense": 65, "special": 90, "speed": 85},
+    "moves": ["confusion", "stomp", "psybeam", "crunch"],
+    "base_experience": 159,
+    "rarity": "uncommon",
+    "catch_rate": 60
+  },
+  {
+    "id": 204,
+    "name": "Pineco",
+    "types": ["bug"],
+    "base_stats": {"hp": 50, "attack": 65, "defense": 90, "special": 35, "speed": 15},
+    "moves": ["tackle", "protect", "self-destruct", "rapid-spin"],
+    "base_experience": 58,
+    "rarity": "uncommon",
+    "catch_rate": 190
+  },
+  {
+    "id": 205,
+    "name": "Forretress",
+    "types": ["bug", "steel"],
+    "base_stats": {"hp": 75, "attack": 90, "defense": 140, "special": 60, "speed": 40},
+    "moves": ["rapid-spin", "self-destruct", "earthquake", "rock-throw"],
+    "base_experience": 163,
+    "rarity": "uncommon",
+    "catch_rate": 75
+  },
+  {
+    "id": 206,
+    "name": "Dunsparce",
+    "types": ["normal"],
+    "base_stats": {"hp": 100, "attack": 70, "defense": 70, "special": 65, "speed": 45},
+    "moves": ["headbutt", "body-slam", "defense-curl", "rage"],
+    "base_experience": 145,
+    "rarity": "uncommon",
+    "catch_rate": 190
+  },
+  {
+    "id": 207,
+    "name": "Gligar",
+    "types": ["ground", "flying"],
+    "base_stats": {"hp": 65, "attack": 75, "defense": 105, "special": 45, "speed": 85},
+    "moves": ["poison-sting", "slash", "fury-cutter", "screech"],
+    "base_experience": 86,
+    "rarity": "uncommon",
+    "catch_rate": 60
+  },
+  {
+    "id": 208,
+    "name": "Steelix",
+    "types": ["steel", "ground"],
+    "base_stats": {"hp": 75, "attack": 85, "defense": 200, "special": 55, "speed": 30},
+    "moves": ["iron-tail", "rock-throw", "earthquake", "bind"],
+    "base_experience": 179,
+    "rarity": "rare",
+    "catch_rate": 25
+  },
+  {
+    "id": 209,
+    "name": "Snubbull",
+    "types": ["normal"],
+    "base_stats": {"hp": 60, "attack": 80, "defense": 50, "special": 40, "speed": 30},
+    "moves": ["tackle", "bite", "lick", "scary-face"],
+    "base_experience": 60,
+    "rarity": "common",
+    "catch_rate": 190
+  },
+  {
+    "id": 210,
+    "name": "Granbull",
+    "types": ["normal"],
+    "base_stats": {"hp": 90, "attack": 120, "defense": 75, "special": 60, "speed": 45},
+    "moves": ["bite", "body-slam", "take-down", "scary-face"],
+    "base_experience": 158,
+    "rarity": "common",
+    "catch_rate": 75
+  },
+  {
+    "id": 211,
+    "name": "Qwilfish",
+    "types": ["water", "poison"],
+    "base_stats": {"hp": 65, "attack": 95, "defense": 75, "special": 55, "speed": 85},
+    "moves": ["water-gun", "poison-sting", "harden", "swift"],
+    "base_experience": 88,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 212,
+    "name": "Scizor",
+    "types": ["bug", "steel"],
+    "base_stats": {"hp": 70, "attack": 130, "defense": 100, "special": 65, "speed": 65},
+    "moves": ["metal-claw", "fury-cutter", "slash", "quick-attack"],
+    "base_experience": 175,
+    "rarity": "rare",
+    "catch_rate": 25
+  },
+  {
+    "id": 213,
+    "name": "Shuckle",
+    "types": ["bug", "rock"],
+    "base_stats": {"hp": 20, "attack": 10, "defense": 230, "special": 230, "speed": 5},
+    "moves": ["wrap", "withdraw", "rollout", "rest"],
+    "base_experience": 177,
+    "rarity": "rare",
+    "catch_rate": 190
+  },
+  {
+    "id": 214,
+    "name": "Heracross",
+    "types": ["bug", "fighting"],
+    "base_stats": {"hp": 80, "attack": 125, "defense": 75, "special": 65, "speed": 85},
+    "moves": ["megahorn", "take-down", "horn-attack", "reversal"],
+    "base_experience": 175,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 215,
+    "name": "Sneasel",
+    "types": ["dark", "ice"],
+    "base_stats": {"hp": 55, "attack": 95, "defense": 55, "special": 55, "speed": 115},
+    "moves": ["scratch", "quick-attack", "faint-attack", "icy-wind"],
+    "base_experience": 86,
+    "rarity": "uncommon",
+    "catch_rate": 60
+  },
+  {
+    "id": 216,
+    "name": "Teddiursa",
+    "types": ["normal"],
+    "base_stats": {"hp": 60, "attack": 80, "defense": 50, "special": 50, "speed": 40},
+    "moves": ["scratch", "leer", "fury-swipes", "slash"],
+    "base_experience": 66,
+    "rarity": "uncommon",
+    "catch_rate": 120
+  },
+  {
+    "id": 217,
+    "name": "Ursaring",
+    "types": ["normal"],
+    "base_stats": {"hp": 90, "attack": 130, "defense": 75, "special": 75, "speed": 55},
+    "moves": ["slash", "thrash", "body-slam", "scary-face"],
+    "base_experience": 175,
+    "rarity": "uncommon",
+    "catch_rate": 60
+  },
+  {
+    "id": 218,
+    "name": "Slugma",
+    "types": ["fire"],
+    "base_stats": {"hp": 40, "attack": 40, "defense": 40, "special": 70, "speed": 20},
+    "moves": ["ember", "smog", "harden", "rock-throw"],
+    "base_experience": 50,
+    "rarity": "common",
+    "catch_rate": 190
+  },
+  {
+    "id": 219,
+    "name": "Magcargo",
+    "types": ["fire", "rock"],
+    "base_stats": {"hp": 60, "attack": 50, "defense": 120, "special": 90, "speed": 30},
+    "moves": ["flamethrower", "rock-throw", "harden", "body-slam"],
+    "base_experience": 151,
+    "rarity": "common",
+    "catch_rate": 75
+  },
+  {
+    "id": 220,
+    "name": "Swinub",
+    "types": ["ice", "ground"],
+    "base_stats": {"hp": 50, "attack": 50, "defense": 40, "special": 30, "speed": 50},
+    "moves": ["tackle", "powder-snow", "mud-slap", "endure"],
+    "base_experience": 50,
+    "rarity": "common",
+    "catch_rate": 225
+  },
+  {
+    "id": 221,
+    "name": "Piloswine",
+    "types": ["ice", "ground"],
+    "base_stats": {"hp": 100, "attack": 100, "defense": 80, "special": 60, "speed": 50},
+    "moves": ["ice-beam", "earthquake", "take-down", "fury-attack"],
+    "base_experience": 160,
+    "rarity": "uncommon",
+    "catch_rate": 75
+  },
+  {
+    "id": 222,
+    "name": "Corsola",
+    "types": ["water", "rock"],
+    "base_stats": {"hp": 55, "attack": 55, "defense": 85, "special": 87, "speed": 35},
+    "moves": ["tackle", "bubble", "harden", "ancient-power"],
+    "base_experience": 113,
+    "rarity": "uncommon",
+    "catch_rate": 60
+  },
+  {
+    "id": 223,
+    "name": "Remoraid",
+    "types": ["water"],
+    "base_stats": {"hp": 35, "attack": 65, "defense": 35, "special": 65, "speed": 65},
+    "moves": ["water-gun", "lock-on", "psybeam", "aurora-beam"],
+    "base_experience": 60,
+    "rarity": "common",
+    "catch_rate": 190
+  },
+  {
+    "id": 224,
+    "name": "Octillery",
+    "types": ["water"],
+    "base_stats": {"hp": 75, "attack": 105, "defense": 75, "special": 105, "speed": 45},
+    "moves": ["surf", "octazooka", "ice-beam", "psybeam"],
+    "base_experience": 168,
+    "rarity": "uncommon",
+    "catch_rate": 75
+  },
+  {
+    "id": 225,
+    "name": "Delibird",
+    "types": ["ice", "flying"],
+    "base_stats": {"hp": 45, "attack": 55, "defense": 45, "special": 65, "speed": 75},
+    "moves": ["present", "icy-wind", "peck", "quick-attack"],
+    "base_experience": 116,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 226,
+    "name": "Mantine",
+    "types": ["water", "flying"],
+    "base_stats": {"hp": 65, "attack": 40, "defense": 70, "special": 120, "speed": 70},
+    "moves": ["bubble", "wing-attack", "surf", "confuse-ray"],
+    "base_experience": 163,
+    "rarity": "rare",
+    "catch_rate": 25
+  },
+  {
+    "id": 227,
+    "name": "Skarmory",
+    "types": ["steel", "flying"],
+    "base_stats": {"hp": 65, "attack": 80, "defense": 140, "special": 50, "speed": 70},
+    "moves": ["peck", "steel-wing", "swift", "agility"],
+    "base_experience": 163,
+    "rarity": "rare",
+    "catch_rate": 25
+  },
+  {
+    "id": 228,
+    "name": "Houndour",
+    "types": ["dark", "fire"],
+    "base_stats": {"hp": 45, "attack": 60, "defense": 30, "special": 80, "speed": 65},
+    "moves": ["leer", "ember", "bite", "smog"],
+    "base_experience": 66,
+    "rarity": "uncommon",
+    "catch_rate": 120
+  },
+  {
+    "id": 229,
+    "name": "Houndoom",
+    "types": ["dark", "fire"],
+    "base_stats": {"hp": 75, "attack": 90, "defense": 50, "special": 110, "speed": 95},
+    "moves": ["flamethrower", "crunch", "faint-attack", "smog"],
+    "base_experience": 175,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 230,
+    "name": "Kingdra",
+    "types": ["water", "dragon"],
+    "base_stats": {"hp": 75, "attack": 95, "defense": 95, "special": 95, "speed": 85},
+    "moves": ["surf", "dragon-breath", "twister", "smokescreen"],
+    "base_experience": 207,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 231,
+    "name": "Phanpy",
+    "types": ["ground"],
+    "base_stats": {"hp": 90, "attack": 60, "defense": 60, "special": 40, "speed": 40},
+    "moves": ["tackle", "growl", "defense-curl", "take-down"],
+    "base_experience": 66,
+    "rarity": "uncommon",
+    "catch_rate": 120
+  },
+  {
+    "id": 232,
+    "name": "Donphan",
+    "types": ["ground"],
+    "base_stats": {"hp": 90, "attack": 120, "defense": 120, "special": 60, "speed": 50},
+    "moves": ["earthquake", "rollout", "rapid-spin", "fury-attack"],
+    "base_experience": 175,
+    "rarity": "uncommon",
+    "catch_rate": 60
+  },
+  {
+    "id": 233,
+    "name": "Porygon2",
+    "types": ["normal"],
+    "base_stats": {"hp": 85, "attack": 80, "defense": 90, "special": 105, "speed": 60},
+    "moves": ["tri-attack", "conversion", "recover", "thunderbolt"],
+    "base_experience": 180,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 234,
+    "name": "Stantler",
+    "types": ["normal"],
+    "base_stats": {"hp": 73, "attack": 95, "defense": 62, "special": 85, "speed": 85},
+    "moves": ["tackle", "hypnosis", "stomp", "take-down"],
+    "base_experience": 163,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 235,
+    "name": "Smeargle",
+    "types": ["normal"],
+    "base_stats": {"hp": 55, "attack": 20, "defense": 35, "special": 35, "speed": 75},
+    "moves": ["sketch", "tackle", "slash", "fury-swipes"],
+    "base_experience": 88,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 236,
+    "name": "Tyrogue",
+    "types": ["fighting"],
+    "base_stats": {"hp": 35, "attack": 35, "defense": 35, "special": 35, "speed": 35},
+    "moves": ["tackle", "focus-energy", "mach-punch", "rapid-spin"],
+    "base_experience": 42,
+    "rarity": "uncommon",
+    "catch_rate": 75
+  },
+  {
+    "id": 237,
+    "name": "Hitmontop",
+    "types": ["fighting"],
+    "base_stats": {"hp": 50, "attack": 95, "defense": 95, "special": 70, "speed": 70},
+    "moves": ["triple-kick", "rapid-spin", "rolling-kick", "detect"],
+    "base_experience": 159,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 238,
+    "name": "Smoochum",
+    "types": ["ice", "psychic"],
+    "base_stats": {"hp": 45, "attack": 30, "defense": 15, "special": 85, "speed": 65},
+    "moves": ["pound", "lick", "confusion", "powder-snow"],
+    "base_experience": 61,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 239,
+    "name": "Elekid",
+    "types": ["electric"],
+    "base_stats": {"hp": 45, "attack": 63, "defense": 37, "special": 65, "speed": 95},
+    "moves": ["quick-attack", "leer", "thunder-shock", "swift"],
+    "base_experience": 72,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 240,
+    "name": "Magby",
+    "types": ["fire"],
+    "base_stats": {"hp": 45, "attack": 75, "defense": 37, "special": 70, "speed": 83},
+    "moves": ["ember", "leer", "smokescreen", "fire-punch"],
+    "base_experience": 73,
+    "rarity": "uncommon",
+    "catch_rate": 45
+  },
+  {
+    "id": 241,
+    "name": "Miltank",
+    "types": ["normal"],
+    "base_stats": {"hp": 95, "attack": 80, "defense": 105, "special": 50, "speed": 100},
+    "moves": ["body-slam", "milk-drink", "stomp", "rollout"],
+    "base_experience": 172,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 242,
+    "name": "Blissey",
+    "types": ["normal"],
+    "base_stats": {"hp": 255, "attack": 10, "defense": 10, "special": 105, "speed": 55},
+    "moves": ["pound", "sing", "heal-bell", "body-slam"],
+    "base_experience": 608,
+    "rarity": "rare",
+    "catch_rate": 30
+  },
+  {
+    "id": 243,
+    "name": "Raikou",
+    "types": ["electric"],
+    "base_stats": {"hp": 90, "attack": 85, "defense": 75, "special": 115, "speed": 115},
+    "moves": ["thunderbolt", "spark", "quick-attack", "roar"],
+    "base_experience": 261,
+    "rarity": "legendary",
+    "catch_rate": 3
+  },
+  {
+    "id": 244,
+    "name": "Entei",
+    "types": ["fire"],
+    "base_stats": {"hp": 115, "attack": 115, "defense": 85, "special": 80, "speed": 100},
+    "moves": ["flamethrower", "stomp", "fire-spin", "roar"],
+    "base_experience": 261,
+    "rarity": "legendary",
+    "catch_rate": 3
+  },
+  {
+    "id": 245,
+    "name": "Suicune",
+    "types": ["water"],
+    "base_stats": {"hp": 100, "attack": 75, "defense": 115, "special": 90, "speed": 85},
+    "moves": ["surf", "aurora-beam", "rain-dance", "roar"],
+    "base_experience": 261,
+    "rarity": "legendary",
+    "catch_rate": 3
+  },
+  {
+    "id": 246,
+    "name": "Larvitar",
+    "types": ["rock", "ground"],
+    "base_stats": {"hp": 50, "attack": 64, "defense": 50, "special": 45, "speed": 41},
+    "moves": ["bite", "leer", "rock-throw", "screech"],
+    "base_experience": 60,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 247,
+    "name": "Pupitar",
+    "types": ["rock", "ground"],
+    "base_stats": {"hp": 70, "attack": 84, "defense": 70, "special": 65, "speed": 51},
+    "moves": ["rock-throw", "bite", "thrash", "scary-face"],
+    "base_experience": 144,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 248,
+    "name": "Tyranitar",
+    "types": ["rock", "dark"],
+    "base_stats": {"hp": 100, "attack": 134, "defense": 110, "special": 95, "speed": 61},
+    "moves": ["crunch", "earthquake", "rock-throw", "thrash"],
+    "base_experience": 270,
+    "rarity": "rare",
+    "catch_rate": 45
+  },
+  {
+    "id": 249,
+    "name": "Lugia",
+    "types": ["psychic", "flying"],
+    "base_stats": {"hp": 106, "attack": 90, "defense": 130, "special": 154, "speed": 110},
+    "moves": ["aeroblast", "psychic", "hydro-pump", "swift"],
+    "base_experience": 306,
+    "rarity": "legendary",
+    "catch_rate": 3
+  },
+  {
+    "id": 250,
+    "name": "Ho-Oh",
+    "types": ["fire", "flying"],
+    "base_stats": {"hp": 106, "attack": 130, "defense": 90, "special": 154, "speed": 90},
+    "moves": ["sacred-fire", "ancient-power", "swift", "recover"],
+    "base_experience": 306,
+    "rarity": "legendary",
+    "catch_rate": 3
+  },
+  {
+    "id": 251,
+    "name": "Celebi",
+    "types": ["psychic", "grass"],
+    "base_stats": {"hp": 100, "attack": 100, "defense": 100, "special": 100, "speed": 100},
+    "moves": ["confusion", "ancient-power", "giga-drain", "recover"],
+    "base_experience": 270,
+    "rarity": "legendary",
+    "catch_rate": 45
   }
 ]

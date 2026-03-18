@@ -164,7 +164,7 @@ class AccountManager:
 
     def choose_starter(self, player_id, dex_id):
         """Set starter Pokemon and add it to collection. Returns success bool."""
-        if dex_id not in (1, 4, 7):  # Bulbasaur, Charmander, Squirtle
+        if dex_id not in (1, 4, 7, 152, 155, 158):  # Gen 1 & 2 starters
             return False
 
         conn = self._conn()
