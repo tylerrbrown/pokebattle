@@ -1,13 +1,13 @@
 # PokeBattle
 
-Gen 1 Pokemon multiplayer battle game with WebSocket real-time gameplay.
+Gen 1 & Gen 2 Pokemon multiplayer battle game with WebSocket real-time gameplay.
 
 ## Architecture
 
 - **Backend**: Python 3 + `websockets` library (single external dependency)
 - **Frontend**: Vanilla JS, single `index.html` + `admin.html`, no build tools
 - **Database**: SQLite (game history)
-- **Data**: Static Gen 1 JSON dataset (151 Pokemon, 117 moves, 15-type chart)
+- **Data**: Static Gen 1+2 JSON dataset (251 Pokemon, 180+ moves, 17-type chart incl. Dark & Steel)
 
 ## Files
 
@@ -21,11 +21,11 @@ Gen 1 Pokemon multiplayer battle game with WebSocket real-time gameplay.
 | `player_accounts.py` | Account registration, login, starter selection, team management |
 | `index.html` | Full client (all screens, CSS, JS inline) |
 | `admin.html` | Admin panel (game history, active rooms, stats) |
-| `data/pokemon.json` | 151 Pokemon: stats, types, 4 moves each |
-| `data/moves.json` | 117 moves: power, accuracy, PP, type, effect |
-| `data/typechart.json` | 15x15 type effectiveness matrix |
-| `sprites/front/` | 151 front sprites (PNG) |
-| `sprites/back/` | 151 back sprites (PNG) |
+| `data/pokemon.json` | 251 Pokemon (Gen 1+2): stats, types, 4 moves each |
+| `data/moves.json` | 180+ moves: power, accuracy, PP, type, effect |
+| `data/typechart.json` | 17x17 type effectiveness matrix (incl. Dark & Steel) |
+| `sprites/front/` | 251 front sprites (PNG) |
+| `sprites/back/` | 251 back sprites (PNG) |
 
 ## Running
 
