@@ -3,7 +3,16 @@
     "allow": [
       "Bash(python*)",
       "Bash(ls *)",
-      "Bash(mkdir *)"
+      "Bash(mkdir *)",
+      "mcp__imessage__tool_find_contact",
+      "mcp__imessage__tool_get_recent_messages",
+      "Bash(\"/c/Users/tyler.TYWARE/AppData/Local/Programs/Python/Python313/python.exe\" \"C:/Claude/.claude/skills/message/scripts/msg_ops.py\" read --name \"Liam\" --hours 720)",
+      "Bash(\"/c/Users/tyler.TYWARE/AppData/Local/Programs/Python/Python313/python.exe\" \"C:/Claude/.claude/skills/message/scripts/msg_ops.py\" resolve --name \"Liam\" --json)",
+      "mcp__imessage__tool_fuzzy_search_messages",
+      "Bash(\"/c/Users/tyler.TYWARE/AppData/Local/Programs/Python/Python313/python.exe\" -c \"import sys; sys.path.insert\\(0, 'C:/Claude/apps/pokebattle'\\); import journey; import server; print\\('Imports OK'\\)\" 2>&1)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "imessage"
+  ]
 }

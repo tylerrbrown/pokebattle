@@ -127,6 +127,17 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - Speed determines move order
 - PP tracking with Struggle fallback
 
+## Shop & Items
+
+- **Shop** sells Poke Balls and healing items (SHOP_ITEMS in `journey.py`)
+- **Poke Balls**: Poke Ball ($200), Great Ball ($600), Ultra Ball ($1200) — stored in `players.pokeballs`
+- **Healing Items**: Potion ($300, 20HP), Super Potion ($700, 50HP), Hyper Potion ($1200, 200HP), Revive ($1500, 50% HP), Full Restore ($3000, full HP + cure status)
+- **Inventory**: `player_inventory` table (player_id, item_type, quantity) with UPSERT pattern
+- **Item use during battle**: costs a turn (wild/gym Pokemon attacks back); sent via `use_item` message type, NOT through `wild_action`
+- **Item use from My Team**: consumes item from inventory (HP doesn't persist between battles, so mainly cosmetic outside battle)
+- **NOT usable in PvP**: items only work in wild encounters and gym battles
+- Items are categorized: `"category": "ball"` (Poke Balls use `pokeballs` column) vs `"category": "healing"` (use `player_inventory` table)
+
 ## Tests
 
 ```bash
