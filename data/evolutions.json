@@ -129,11 +129,10 @@
     "level": 21,
     "method": "level"
   },
-  "44": {
-    "evolves_to": 45,
-    "method": "stone",
-    "item": "leaf-stone"
-  },
+  "44": [
+    {"evolves_to": 45, "method": "stone", "item": "leaf-stone"},
+    {"evolves_to": 182, "method": "stone", "item": "sun-stone"}
+  ],
   "46": {
     "evolves_to": 47,
     "level": 24,
@@ -174,11 +173,10 @@
     "level": 25,
     "method": "level"
   },
-  "61": {
-    "evolves_to": 62,
-    "method": "stone",
-    "item": "water-stone"
-  },
+  "61": [
+    {"evolves_to": 62, "method": "stone", "item": "water-stone"},
+    {"evolves_to": 186, "method": "item", "item": "link-cable"}
+  ],
   "63": {
     "evolves_to": 64,
     "level": 16,
@@ -186,7 +184,8 @@
   },
   "64": {
     "evolves_to": 65,
-    "method": "trade"
+    "method": "item",
+    "item": "link-cable"
   },
   "66": {
     "evolves_to": 67,
@@ -195,7 +194,8 @@
   },
   "67": {
     "evolves_to": 68,
-    "method": "trade"
+    "method": "item",
+    "item": "link-cable"
   },
   "69": {
     "evolves_to": 70,
@@ -219,18 +219,18 @@
   },
   "75": {
     "evolves_to": 76,
-    "method": "trade"
+    "method": "item",
+    "item": "link-cable"
   },
   "77": {
     "evolves_to": 78,
     "level": 40,
     "method": "level"
   },
-  "79": {
-    "evolves_to": 80,
-    "level": 37,
-    "method": "level"
-  },
+  "79": [
+    {"evolves_to": 80, "level": 37, "method": "level"},
+    {"evolves_to": 199, "method": "item", "item": "link-cable"}
+  ],
   "81": {
     "evolves_to": 82,
     "level": 30,
@@ -263,7 +263,8 @@
   },
   "93": {
     "evolves_to": 94,
-    "method": "trade"
+    "method": "item",
+    "item": "link-cable"
   },
   "96": {
     "evolves_to": 97,
@@ -320,11 +321,13 @@
     "level": 20,
     "method": "level"
   },
-  "133": {
-    "evolves_to": 136,
-    "method": "stone",
-    "item": "fire-stone"
-  },
+  "133": [
+    {"evolves_to": 134, "method": "stone", "item": "water-stone"},
+    {"evolves_to": 135, "method": "stone", "item": "thunder-stone"},
+    {"evolves_to": 136, "method": "stone", "item": "fire-stone"},
+    {"evolves_to": 196, "method": "level", "level": 30},
+    {"evolves_to": 197, "method": "level", "level": 30}
+  ],
   "138": {
     "evolves_to": 139,
     "level": 40,

@@ -274,6 +274,7 @@ async def handle_message(player, msg, room_mgr):
             await player.send({
                 "type": "pokemon_list",
                 "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
+                "evolutions": pokemon_data.EVOLUTIONS,
             })
         return
 
@@ -295,6 +296,7 @@ async def handle_message(player, msg, room_mgr):
             await player.send({
                 "type": "pokemon_list",
                 "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
+                "evolutions": pokemon_data.EVOLUTIONS,
             })
         else:
             await player.send({"type": "login_error", "message": "Account not found."})
@@ -766,6 +768,48 @@ async def handle_message(player, msg, room_mgr):
             await player.send({"type": "error", "message": "Not logged in."})
             return
         await _handle_use_item(player, data)
+
+    elif msg_type == "use_evolution_item":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        item_id = data.get("item_id")
+        pokemon_row_id = data.get("pokemon_id")
+        if not item_id or not pokemon_row_id:
+            await player.send({"type": "error", "message": "Missing parameters."})
+            return
+        # Validate inventory
+        inv = account_mgr.get_inventory(player.account_id)
+        if inv.get(item_id, 0) <= 0:
+            await player.send({"type": "error", "message": "You don't have that item."})
+            return
+        # Find the pokemon
+        all_pokemon = account_mgr.get_all_pokemon(player.account_id)
+        poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
+        if not poke_row:
+            await player.send({"type": "error", "message": "Pokemon not found."})
+            return
+        # Check if this pokemon can evolve with this item
+        evo = pokemon_data.get_item_evolution(poke_row["dex_id"], item_id)
+        if not evo:
+            await player.send({"type": "error", "message": "This item has no effect on that Pokemon."})
+            return
+        # Perform evolution
+        new_dex_id = evo["evolves_to"]
+        new_poke = pokemon_data.get_pokemon(new_dex_id)
+        account_mgr.update_pokemon_species(pokemon_row_id, new_dex_id)
+        account_mgr.use_item(player.account_id, item_id)
+        await player.send({
+            "type": "evolution_item_result",
+            "success": True,
+            "pokemon_id": pokemon_row_id,
+            "from_dex_id": poke_row["dex_id"],
+            "from_name": pokemon_data.POKEMON.get(poke_row["dex_id"], {}).get("name", "???"),
+            "to_dex_id": new_dex_id,
+            "to_name": new_poke["name"] if new_poke else "???",
+            "item_used": item_id,
+        })
+        return
 
     elif msg_type == "get_progression":
         if not getattr(player, 'account_id', None):

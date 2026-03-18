@@ -37,6 +37,13 @@ SHOP_ITEMS = {
     "hyper_potion":  {"name": "Hyper Potion",  "price": 1200, "category": "healing", "heal_hp": 200},
     "revive":        {"name": "Revive",        "price": 1500, "category": "healing", "revive": True, "heal_pct": 0.5},
     "full_restore":  {"name": "Full Restore",  "price": 3000, "category": "healing", "heal_full": True, "cure_status": True},
+    "fire-stone":    {"name": "Fire Stone",    "price": 2100, "category": "evolution"},
+    "water-stone":   {"name": "Water Stone",   "price": 2100, "category": "evolution"},
+    "thunder-stone": {"name": "Thunder Stone", "price": 2100, "category": "evolution"},
+    "leaf-stone":    {"name": "Leaf Stone",    "price": 2100, "category": "evolution"},
+    "moon-stone":    {"name": "Moon Stone",    "price": 2100, "category": "evolution"},
+    "sun-stone":     {"name": "Sun Stone",     "price": 2100, "category": "evolution"},
+    "link-cable":    {"name": "Link Cable",    "price": 3000, "category": "evolution"},
 }
 
 # Currency awards

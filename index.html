@@ -1107,6 +1107,7 @@ const S = {
   learnMoveCallback: null,
   _pendingLearnInfo: null,
   _moveLookup: {},  // move_id -> {name, type, power, accuracy, pp, ...}
+  _evoData: {},     // dex_id -> evolution data (object or array)
 };
 
 /* ─── Toast Notifications ──────────────────────── */
@@ -1189,6 +1190,7 @@ function handleMessage(msg) {
       break;
     case 'pokemon_list':
       S.pokemonList = msg.pokemon_list;
+      if (msg.evolutions) S._evoData = msg.evolutions;
       // Build move lookup for learn-move overlays
       msg.pokemon_list.forEach(function(pk) {
         if (pk.moves) pk.moves.forEach(function(m) { S._moveLookup[m.id] = m; });
@@ -1455,6 +1457,13 @@ function handleMessage(msg) {
       break;
     case 'learn_move_skipped':
       processLearnMoveQueue();
+      break;
+    case 'evolution_item_result':
+      if (msg.success) {
+        showEvoItemOverlay(msg);
+      } else {
+        showToast(msg.message || 'Evolution failed');
+      }
       break;
     case 'error':
       showError(msg.message);
@@ -2206,7 +2215,10 @@ function renderMyTeam(team, allPokemon) {
         }).join(' ') + '</div>' +
         '<div class="myteam-moves">' + displayMoves + '</div>' +
       '</div>' +
-      '<button class="btn btn-secondary" style="flex:none;font-size:12px;padding:8px 12px" onclick="event.stopPropagation();openMoveMgmt(' + p.id + ')">MOVES</button>';
+      '<div style="display:flex;flex-direction:column;gap:4px;flex:none">' +
+      '<button class="btn btn-secondary" style="font-size:12px;padding:8px 12px" onclick="event.stopPropagation();openMoveMgmt(' + p.id + ')">MOVES</button>' +
+      getEvolveButton(p) +
+      '</div>';
     list.appendChild(card);
 
     // Item panel (hidden by default)
@@ -2239,6 +2251,67 @@ function renderMyTeam(team, allPokemon) {
     if (itemParts.length) statsText += ' | ' + itemParts.join(', ');
   }
   stats.textContent = statsText;
+}
+
+/* ─── Evolution Items ─────────────────────────── */
+const EVO_ITEM_NAMES = {
+  'fire-stone': 'Fire Stone', 'water-stone': 'Water Stone', 'thunder-stone': 'Thunder Stone',
+  'leaf-stone': 'Leaf Stone', 'moon-stone': 'Moon Stone', 'sun-stone': 'Sun Stone', 'link-cable': 'Link Cable'
+};
+
+function getEvolveButton(pokemon) {
+  // Check if player has an evolution item that works on this pokemon
+  const inv = (S.account && S.account.inventory) || {};
+  const evoItemKeys = Object.keys(EVO_ITEM_NAMES);
+  for (const itemId of evoItemKeys) {
+    if ((inv[itemId] || 0) > 0) {
+      // Check if this pokemon can evolve with this item (client-side hint)
+      // We send the request and let server validate
+      const evos = S._evoData && S._evoData[String(pokemon.dex_id)];
+      if (evos) {
+        const paths = Array.isArray(evos) ? evos : [evos];
+        const match = paths.find(e => (e.method === 'stone' || e.method === 'item') && e.item === itemId);
+        if (match) {
+          const targetName = S.pokemonList.find(p => p.id === match.evolves_to);
+          return '<button class="btn" style="font-size:12px;padding:8px 12px;background:var(--green);color:#1a1a2e" onclick="event.stopPropagation();useEvoItem(\'' + itemId + '\',' + pokemon.id + ')">' +
+            'EVOLVE</button>';
+        }
+      }
+    }
+  }
+  return '';
+}
+
+function useEvoItem(itemId, pokemonRowId) {
+  send({type: 'use_evolution_item', item_id: itemId, pokemon_id: pokemonRowId});
+}
+
+function showEvoItemOverlay(msg) {
+  // Reuse the existing evolution overlay pattern
+  const fromSprite = String(msg.from_dex_id).padStart(3, '0');
+  const toSprite = String(msg.to_dex_id).padStart(3, '0');
+  const overlay = document.createElement('div');
+  overlay.className = 'evo-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999;cursor:pointer';
+  overlay.innerHTML =
+    '<div class="evo-text">Evolution!</div>' +
+    '<div class="evo-sprites">' +
+      '<img src="/sprites/front/' + fromSprite + '.png" style="width:96px;height:96px;image-rendering:pixelated" class="evo-glowing">' +
+      '<span class="evo-arrow">→</span>' +
+      '<img src="/sprites/front/' + toSprite + '.png" style="width:96px;height:96px;image-rendering:pixelated">' +
+    '</div>' +
+    '<div style="font-size:14px;color:var(--text)">' + msg.from_name + ' evolved into ' + msg.to_name + '!</div>' +
+    '<div style="font-size:12px;color:var(--text-dim)">Tap to continue</div>';
+  overlay.onclick = function() {
+    overlay.remove();
+    if (S.account) {
+      const inv = S.account.inventory || {};
+      if (inv[msg.item_used]) inv[msg.item_used]--;
+    }
+    showMyTeam(); // Refresh team view
+  };
+  document.body.appendChild(overlay);
+  playSound('win');
 }
 
 function toggleTeamItemPanel(idx) {
@@ -3058,6 +3131,14 @@ function renderShop(data) {
     label.textContent = 'HEALING ITEMS';
     items.appendChild(label);
     healing.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
+  }
+  const evoItems = data.items.filter(i => i.category === 'evolution');
+  if (evoItems.length) {
+    const label = document.createElement('div');
+    label.className = 'shop-section-label';
+    label.textContent = 'EVOLUTION ITEMS';
+    items.appendChild(label);
+    evoItems.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
   }
 }
 
