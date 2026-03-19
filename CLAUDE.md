@@ -144,3 +144,34 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 python tests/test_battle_engine.py
 # 53 tests covering stats, damage, types, status, turns, teams
 ```
+
+## Liam's Contact (iMessage)
+
+- **iCloud email**: liam4now@icloud.com (this is how his messages appear in iMessage DB)
+- **Phone**: (785) 761-6790 — but messages come through iCloud, not phone number
+- **To pull his messages**: Use `mcp__imessage__tool_fuzzy_search_messages` with search_term "pokemon" or "battle", hours=336, threshold=0.5. Filter results for `liam4now@icloud.com`. Do NOT use `get_recent_messages` with contact name/number — his replies don't show up that way due to iCloud routing.
+
+## Feature Request Tracker (from Liam, 3/17–3/18/2026)
+
+### Already Implemented (do not re-build)
+- Wild encounters with battle flow (attack, weaken, catch, run)
+- Catch rate scaling with HP (weaker = easier to catch, ball modifiers)
+- Gym leaders (8 gyms with teams, badges, dialog, rewards, sequential progression)
+- In-game currency (earn from battles, spend in shop)
+- Shop with Poke Balls, potions, evolution stones
+- Evolution system (level-based + stone-based)
+- Move learning system (level-up + manual swap)
+- Save/persistence (SQLite DB, token-based sessions)
+- Back/navigation buttons throughout UI
+
+### Bugs Liam Reported
+- ~~**Wild encounter attack bug**: fixed 3/18/2026~~
+- ~~**Gym leader no-AI bug**: fixed 3/18/2026~~
+- **PvP forces team pick**: "When I battle somebody I expect to use my Pokémon, not click on Pokémon" — PvP should use saved journey team, not re-pick (OPEN)
+
+### New Feature Requests (not yet built)
+1. **Backpack/PC Storage UI** — browse all caught Pokemon, swap between team and storage (DB stores them, but no UI to manage beyond team of 6)
+2. **Elite Four → Masters Eight → Champion path** — data structures exist in `journey.py` (ELITE_FOUR, CHAMPION, MASTERS_EIGHT) but no server routes or UI; need to wire up post-gym progression
+3. **All Pokemon beyond Gen 1+2** — Liam wants every Pokemon ever created; currently 251 (Gen 1+2 only)
+4. **Z-Moves & Mega Evolution** — no code exists; would need new battle mechanics, shop items, data structures
+5. **Bigger font / font size setting** — all CSS font sizes hardcoded; no settings UI

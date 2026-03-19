@@ -68,6 +68,11 @@ class PokemonInstance:
         self.sleep_turns = 0
         self.is_fainted = False
 
+        # Z-Move and Mega Evolution (per-battle, not persisted)
+        self.is_mega = False
+        self.mega_name = None
+        self._original_stats = None  # Saved for revert
+
         # Stat modifiers (Gen 1 stages: -6 to +6)
         self.attack_stage = 0
         self.defense_stage = 0
@@ -98,6 +103,27 @@ class PokemonInstance:
         """Check if any move has PP remaining."""
         return any(m["current_pp"] > 0 for m in self.moves)
 
+    def mega_evolve(self, mega_data):
+        """Apply Mega Evolution stat changes (temporary, battle-only)."""
+        if self.is_mega:
+            return
+        self._original_stats = {
+            "attack": self.attack, "defense": self.defense,
+            "special": self.special, "speed": self.speed,
+            "types": list(self.types), "name": self.name,
+        }
+        self.is_mega = True
+        self.mega_name = mega_data["name"]
+        self.name = mega_data["name"]
+        self.types = mega_data["types"]
+        # Recalculate stats from mega base stats
+        base = mega_data["base_stats"]
+        self.attack = calc_stat(base["attack"], self.level)
+        self.defense = calc_stat(base["defense"], self.level)
+        self.special = calc_stat(base["special"], self.level)
+        self.speed = calc_stat(base["speed"], self.level)
+        self.base_speed = self.speed
+
     def serialize_full(self):
         """Full serialization for the owning player."""
         return {
@@ -113,6 +139,7 @@ class PokemonInstance:
             "speed": self.speed,
             "status": self.status,
             "is_fainted": self.is_fainted,
+            "is_mega": self.is_mega,
             "moves": [
                 {
                     "id": m["id"],

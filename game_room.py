@@ -190,7 +190,7 @@ class GameRoom:
         for p in self.players:
             if p and not p.ready:
                 # Random team
-                dex_ids = random.sample(range(1, 152), 6)
+                dex_ids = random.sample(range(1, len(pokemon_data.POKEMON) + 1), 6)
                 p.team_dex_ids = dex_ids
                 p.team = build_team(dex_ids, pokemon_data.POKEMON, pokemon_data.MOVES)
                 p.team_name = f"{p.name}'s Team"
@@ -234,7 +234,7 @@ class GameRoom:
             return
 
         for pid in pokemon_ids:
-            if pid < 1 or pid > 151:
+            if pid < 1 or pid > len(pokemon_data.POKEMON):
                 await player.send({"type": "error", "message": f"Invalid Pokemon ID: {pid}"})
                 return
 
