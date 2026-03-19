@@ -1279,7 +1279,7 @@ async def _handle_use_item(player, data):
             "type": "wild_force_switch",
             "events": events,
             "available": alive,
-            "your_team": [p.serialize_full() for p in encounter.team],
+            **encounter.serialize_state(),
             "inventory": inventory,
         })
         return
@@ -1653,7 +1653,7 @@ async def _handle_wild_action(player, encounter, data):
                 "type": "wild_force_switch",
                 "events": events,
                 "available": alive,
-                "your_team": [p.serialize_full() for p in encounter.team],
+                **encounter.serialize_state(),
             })
             return
 
@@ -1746,67 +1746,74 @@ def _wild_attacks(encounter):
 
 
 def _award_encounter_xp(encounter, defeated):
-    """Award XP to the active Pokemon after defeating an opponent."""
+    """Award XP to all alive team Pokemon (EXP Share).
+    Active Pokemon gets 100% XP, alive bench Pokemon get 50%."""
     results = []
     active = encounter.get_active()
-    if not active or active.is_fainted:
-        return results
 
     base_exp = defeated.species.get("base_experience", 64)
     is_gym = getattr(encounter, 'is_gym', False)
-    xp = calc_xp_yield(defeated.level, base_exp, is_wild=not is_gym)
+    full_xp = calc_xp_yield(defeated.level, base_exp, is_wild=not is_gym)
 
-    db_id = getattr(active, 'db_id', None)
-    if db_id:
+    for poke in encounter.team:
+        if poke.is_fainted:
+            continue
+        db_id = getattr(poke, 'db_id', None)
+        if not db_id:
+            continue
+
+        # Active gets full XP, bench gets half
+        xp = full_xp if (active and poke is active) else max(1, full_xp // 2)
+
         result = account_mgr.award_xp(db_id, xp)
-        if result:
-            # Check for new moves
-            if result["leveled_up"]:
-                new_moves = pokemon_data.get_new_moves_for_level(
-                    result["dex_id"], result["old_level"], result["new_level"]
-                )
-                result["new_moves"] = [
-                    {"level": m["level"], "move_id": m["move"],
-                     "move_data": pokemon_data.MOVES.get(m["move"], {})}
-                    for m in new_moves if m["move"] in pokemon_data.MOVES
-                ]
+        if not result:
+            continue
 
-                # Auto-learn moves if fewer than 4, otherwise prompt player
-                if result["new_moves"]:
-                    # Get current moves from DB
-                    all_pokemon = account_mgr.get_all_pokemon(encounter.player.account_id)
-                    poke_row = next((p for p in all_pokemon if p["id"] == db_id), None)
-                    current_moves = json.loads(poke_row["moves"]) if poke_row and poke_row.get("moves") else []
+        if result["leveled_up"]:
+            new_moves = pokemon_data.get_new_moves_for_level(
+                result["dex_id"], result["old_level"], result["new_level"]
+            )
+            result["new_moves"] = [
+                {"level": m["level"], "move_id": m["move"],
+                 "move_data": pokemon_data.MOVES.get(m["move"], {})}
+                for m in new_moves if m["move"] in pokemon_data.MOVES
+            ]
 
-                    auto_learned = []
-                    pending_learn = []
-                    for nm in result["new_moves"]:
-                        mid = nm["move_id"]
-                        if mid in current_moves:
-                            continue  # Already knows this move
-                        if len(current_moves) < 4:
-                            current_moves.append(mid)
-                            auto_learned.append(nm)
-                        else:
-                            # Need player to choose which move to replace
-                            pending_learn.append(nm)
+            # Auto-learn moves if fewer than 4, otherwise prompt player
+            if result["new_moves"]:
+                all_pokemon = account_mgr.get_all_pokemon(encounter.player.account_id)
+                poke_row = next((p for p in all_pokemon if p["id"] == db_id), None)
+                current_moves = json.loads(poke_row["moves"]) if poke_row and poke_row.get("moves") else []
 
-                    if auto_learned:
-                        account_mgr.update_pokemon_moves(db_id, current_moves)
+                auto_learned = []
+                pending_learn = []
+                for nm in result["new_moves"]:
+                    mid = nm["move_id"]
+                    if mid in current_moves:
+                        continue
+                    if len(current_moves) < 4:
+                        current_moves.append(mid)
+                        auto_learned.append(nm)
+                    else:
+                        pending_learn.append(nm)
 
-                    result["auto_learned"] = auto_learned
-                    result["pending_learn"] = pending_learn
+                if auto_learned:
+                    account_mgr.update_pokemon_moves(db_id, current_moves)
 
-                # Check evolution
-                evo = pokemon_data.get_evolution(result["dex_id"])
-                if evo and evo.get("method") == "level" and result["new_level"] >= evo.get("level", 999):
-                    result["evolution"] = {
-                        "from_dex_id": result["dex_id"],
-                        "to_dex_id": evo["evolves_to"],
-                        "to_name": pokemon_data.POKEMON.get(evo["evolves_to"], {}).get("name", "???"),
-                    }
-                    account_mgr.update_pokemon_species(db_id, evo["evolves_to"])
-            results.append(result)
+                result["auto_learned"] = auto_learned
+                result["pending_learn"] = pending_learn
+
+            # Check evolution
+            evo = pokemon_data.get_evolution(result["dex_id"])
+            if evo and evo.get("method") == "level" and result["new_level"] >= evo.get("level", 999):
+                result["evolution"] = {
+                    "from_dex_id": result["dex_id"],
+                    "to_dex_id": evo["evolves_to"],
+                    "to_name": pokemon_data.POKEMON.get(evo["evolves_to"], {}).get("name", "???"),
+                }
+                account_mgr.update_pokemon_species(db_id, evo["evolves_to"])
+
+        results.append(result)
 
     return results
 
