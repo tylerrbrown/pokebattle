@@ -1615,6 +1615,9 @@ function handleMessage(msg) {
         showToast(msg.message || 'Evolution failed');
       }
       break;
+    case 'rare_candy_result':
+      handleRareCandyResult(msg);
+      break;
     case 'error':
       showError(msg.message);
       break;
@@ -2409,7 +2412,9 @@ function renderMyTeam(team, allPokemon) {
   });
 
   const inv = (S.account && S.account.inventory) || {};
-  const hasItems = Object.keys(HEALING_ITEMS).some(k => (inv[k] || 0) > 0);
+  const hasHealingItems = Object.keys(HEALING_ITEMS).some(k => (inv[k] || 0) > 0);
+  const hasRareCandy = Object.keys(RARE_CANDY_ITEMS).some(k => (inv[k] || 0) > 0);
+  const hasItems = hasHealingItems || hasRareCandy;
   list.innerHTML = '';
   team.forEach((p, idx) => {
     const pokeData = S.pokemonList.find(pk => pk.id === p.dex_id);
@@ -2437,11 +2442,12 @@ function renderMyTeam(team, allPokemon) {
     }
     var xpPct = (p.xp_progress !== undefined) ? (p.xp_progress * 100).toFixed(1) : 0;
     var xpText = (p.xp_to_next !== undefined) ? p.xp_to_next + ' XP to next' : '';
+    var atMax = p.level >= 100;
     card.innerHTML =
       '<img src="/sprites/front/' + String(p.dex_id).padStart(3,'0') + '.png" alt="' + name + '">' +
       '<div class="myteam-info">' +
         '<div class="pname">' + (p.nickname || name) + '</div>' +
-        '<div class="plevel">Lv. ' + p.level + '</div>' +
+        '<div class="plevel">Lv. ' + p.level + (atMax ? ' (MAX)' : '') + '</div>' +
         '<div class="xp-bar-container"><div class="xp-bar-bg"><div class="xp-bar-fill" style="width:' + xpPct + '%"></div></div>' +
         '<div class="xp-text">' + xpText + '</div></div>' +
         '<div class="ptypes">' + types.map(function(t) {
@@ -2460,7 +2466,7 @@ function renderMyTeam(team, allPokemon) {
     itemPanel.id = 'myteam-items-' + idx;
     itemPanel.className = 'myteam-item-bar';
     itemPanel.style.display = 'none';
-    if (hasItems) {
+    if (hasHealingItems) {
       for (const [key, info] of Object.entries(HEALING_ITEMS)) {
         const qty = inv[key] || 0;
         if (qty <= 0) continue;
@@ -2468,6 +2474,18 @@ function renderMyTeam(team, allPokemon) {
         btn.className = 'myteam-item-btn';
         btn.textContent = info.name + ' (' + qty + ')';
         btn.onclick = (e) => { e.stopPropagation(); useTeamItem(key, idx); };
+        itemPanel.appendChild(btn);
+      }
+    }
+    if (hasRareCandy && !atMax) {
+      for (const [key, info] of Object.entries(RARE_CANDY_ITEMS)) {
+        const qty = inv[key] || 0;
+        if (qty <= 0) continue;
+        const btn = document.createElement('button');
+        btn.className = 'myteam-item-btn';
+        btn.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+        btn.textContent = info.name + ' (' + qty + ')';
+        btn.onclick = (e) => { e.stopPropagation(); useRareCandy(key, p.id); };
         itemPanel.appendChild(btn);
       }
     }
@@ -2479,6 +2497,10 @@ function renderMyTeam(team, allPokemon) {
   if (hasItems) {
     const itemParts = [];
     for (const [k, info] of Object.entries(HEALING_ITEMS)) {
+      const qty = inv[k] || 0;
+      if (qty > 0) itemParts.push(info.name + ': ' + qty);
+    }
+    for (const [k, info] of Object.entries(RARE_CANDY_ITEMS)) {
       const qty = inv[k] || 0;
       if (qty > 0) itemParts.push(info.name + ': ' + qty);
     }
@@ -3151,6 +3173,13 @@ const HEALING_ITEMS = {
   full_restore: {name:'Full Restore', desc:'Full HP + cure status', revive:false},
 };
 
+const RARE_CANDY_ITEMS = {
+  rare_candy:       {name:'Rare Candy',       levels:1,  desc:'+1 Level'},
+  rare_candy_xl:    {name:'Rare Candy XL',    levels:5,  desc:'+5 Levels'},
+  rare_candy_xxl:   {name:'Rare Candy XXL',   levels:10, desc:'+10 Levels'},
+  rare_candy_ultra: {name:'Rare Candy Ultra',  levels:50, desc:'+50 Levels'},
+};
+
 function _countHealingItems() {
   const inv = (S.account && S.account.inventory) || {};
   let total = 0;
@@ -3551,6 +3580,14 @@ function renderShop(data) {
     items.appendChild(label);
     heldItems.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
   }
+  const candyItems = data.items.filter(i => i.category === 'rare_candy');
+  if (candyItems.length) {
+    const label = document.createElement('div');
+    label.className = 'shop-section-label';
+    label.textContent = 'RARE CANDY';
+    items.appendChild(label);
+    candyItems.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
+  }
   const evoItems = data.items.filter(i => i.category === 'evolution');
   if (evoItems.length) {
     const label = document.createElement('div');
@@ -3602,6 +3639,29 @@ function handleItemUsed(msg) {
   if (S.screen === 'myteam') {
     send({ type: 'get_team' });
   }
+}
+
+function handleRareCandyResult(msg) {
+  if (!msg.success) {
+    showToast(msg.message || 'Failed to use Rare Candy');
+    return;
+  }
+  if (S.account && msg.inventory) S.account.inventory = msg.inventory;
+  const xpResult = msg.xp_result;
+  if (xpResult && xpResult.leveled_up) {
+    // Use the existing level-up overlay chain (handles moves + evolution)
+    processAllXpResults([xpResult], function() {
+      showMyTeam();
+    });
+  } else {
+    showToast(msg.item_name + ' used!');
+    showMyTeam();
+  }
+}
+
+function useRareCandy(itemType, pokemonId) {
+  send({type:'use_rare_candy', item_type:itemType, pokemon_id:pokemonId});
+  playSound('select');
 }
 
 /* ─── Gyms ─────────────────────────────────────── */

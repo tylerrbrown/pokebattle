@@ -160,6 +160,12 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **Poke Balls**: Poke Ball ($200), Great Ball ($600), Ultra Ball ($1200) — stored in `players.pokeballs`
 - **Healing Items**: Potion ($300, 20HP), Super Potion ($700, 50HP), Hyper Potion ($1200, 200HP), Revive ($1500, 50% HP), Full Restore ($3000, full HP + cure status)
 - **Held Items**: Lucky Egg ($1500) — passive item, owning one doubles all XP gains (not consumed on use)
+- **Rare Candy**: Tiered level-up items usable from My Team screen only (not in battle)
+  - Rare Candy ($500, +1 level), Rare Candy XL ($2000, +5 levels), Rare Candy XXL ($5000, +10 levels), Rare Candy Ultra ($20000, +50 levels)
+  - Uses `use_rare_candy` WebSocket message with `pokemon_id` and `item_type`
+  - Calculates XP to reach target level (capped at 100), awards via `award_xp()`, checks move learning + chain evolution at each level
+  - Returns `rare_candy_result` with `xp_result` containing level-up/move/evolution data; frontend chains existing overlays via `processAllXpResults()`
+  - Category: `"rare_candy"` in SHOP_ITEMS; stored in `player_inventory` table
 - **Inventory**: `player_inventory` table (player_id, item_type, quantity) with UPSERT pattern
 - **Item use during battle**: costs a turn (wild/gym Pokemon attacks back); sent via `use_item` message type, NOT through `wild_action`
 - **Item use from My Team**: consumes item from inventory (HP doesn't persist between battles, so mainly cosmetic outside battle)
