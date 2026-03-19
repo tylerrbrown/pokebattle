@@ -21,7 +21,7 @@ from websockets.http11 import Response as HttpResponse, Headers as HttpHeaders
 import pokemon_data
 from ai_player import BotPlayer
 from game_room import Player, RoomManager
-from player_accounts import AccountManager, calc_xp_yield
+from player_accounts import AccountManager, calc_xp_yield, xp_for_level
 from journey import (
     generate_wild_pokemon, attempt_catch, WildEncounter,
     build_trainer_team, GYM_LEADERS, ELITE_FOUR, CHAMPION, MASTERS_EIGHT,
@@ -1090,6 +1090,12 @@ async def handle_message(player, msg, room_mgr):
         })
         return
 
+    elif msg_type == "use_rare_candy":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        await _handle_use_rare_candy(player, data)
+
     elif msg_type == "get_progression":
         if not getattr(player, 'account_id', None):
             return
@@ -1128,6 +1134,9 @@ def _item_description(key, item):
         return "Revives fainted to 50% HP"
     if key == "full_restore":
         return "Full HP + cure status"
+    if item.get("category") == "rare_candy":
+        levels = item.get("levels", 1)
+        return f"+{levels} level{'s' if levels > 1 else ''}"
     return ""
 
 
@@ -1288,6 +1297,136 @@ async def _handle_use_item(player, data):
         "type": "wild_turn_result",
         "events": events,
         **encounter.serialize_state(),
+        "inventory": inventory,
+    })
+
+
+# ─── Rare Candy Handler ───────────────────────────────
+
+async def _handle_use_rare_candy(player, data):
+    """Handle using a Rare Candy item on a Pokemon from My Team screen."""
+    item_type = data.get("item_type", "")
+    pokemon_row_id = data.get("pokemon_id")
+
+    if item_type not in SHOP_ITEMS:
+        await player.send({"type": "error", "message": "Invalid item."})
+        return
+
+    item = SHOP_ITEMS[item_type]
+    if item.get("category") != "rare_candy":
+        await player.send({"type": "error", "message": "Not a Rare Candy."})
+        return
+
+    if not pokemon_row_id:
+        await player.send({"type": "error", "message": "Missing pokemon_id."})
+        return
+
+    # Check inventory
+    if not account_mgr.use_item(player.account_id, item_type):
+        await player.send({"type": "error", "message": f"No {item['name']} left!"})
+        return
+
+    # Get the Pokemon from DB
+    all_pokemon = account_mgr.get_all_pokemon(player.account_id)
+    poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
+    if not poke_row:
+        # Refund
+        account_mgr.add_item(player.account_id, item_type, 1)
+        await player.send({"type": "error", "message": "Pokemon not found."})
+        return
+
+    levels_to_gain = item.get("levels", 1)
+    old_level = poke_row["level"]
+    current_xp = poke_row["xp"]
+    dex_id = poke_row["dex_id"]
+
+    if old_level >= 100:
+        # Refund
+        account_mgr.add_item(player.account_id, item_type, 1)
+        await player.send({"type": "error", "message": "Already at max level!"})
+        return
+
+    # Calculate target level (capped at 100)
+    target_level = min(100, old_level + levels_to_gain)
+
+    # Calculate XP needed to reach target level
+    target_xp = xp_for_level(target_level)
+    xp_to_add = max(0, target_xp - current_xp)
+
+    # Award the XP (this updates DB)
+    result = account_mgr.award_xp(pokemon_row_id, xp_to_add)
+    if not result:
+        account_mgr.add_item(player.account_id, item_type, 1)
+        await player.send({"type": "error", "message": "Failed to award XP."})
+        return
+
+    # Process level-by-level: moves and evolution at each level
+    # We need to check moves for each level gained
+    if result["leveled_up"]:
+        new_moves_all = pokemon_data.get_new_moves_for_level(
+            dex_id, old_level, result["new_level"]
+        )
+        result["new_moves"] = [
+            {"level": m["level"], "move_id": m["move"],
+             "move_data": pokemon_data.MOVES.get(m["move"], {})}
+            for m in new_moves_all if m["move"] in pokemon_data.MOVES
+        ]
+
+        # Auto-learn moves if fewer than 4, otherwise queue for player
+        if result["new_moves"]:
+            # Re-fetch to get latest moves
+            all_pokemon = account_mgr.get_all_pokemon(player.account_id)
+            poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
+            current_moves = json.loads(poke_row["moves"]) if poke_row and poke_row.get("moves") else []
+
+            auto_learned = []
+            pending_learn = []
+            for nm in result["new_moves"]:
+                mid = nm["move_id"]
+                if mid in current_moves:
+                    continue
+                if len(current_moves) < 4:
+                    current_moves.append(mid)
+                    auto_learned.append(nm)
+                else:
+                    pending_learn.append(nm)
+
+            if auto_learned:
+                account_mgr.update_pokemon_moves(pokemon_row_id, current_moves)
+
+            result["auto_learned"] = auto_learned
+            result["pending_learn"] = pending_learn
+
+        # Check evolution at each level gained (handle chain evolutions)
+        current_dex = dex_id
+        evolutions = []
+        for lvl in range(old_level + 1, result["new_level"] + 1):
+            evo = pokemon_data.get_evolution(current_dex)
+            if evo and evo.get("method") == "level" and lvl >= evo.get("level", 999):
+                new_dex = evo["evolves_to"]
+                evolutions.append({
+                    "from_dex_id": current_dex,
+                    "to_dex_id": new_dex,
+                    "to_name": pokemon_data.POKEMON.get(new_dex, {}).get("name", "???"),
+                    "at_level": lvl,
+                })
+                current_dex = new_dex
+
+        # Apply all evolutions (final species)
+        if evolutions:
+            final_dex = evolutions[-1]["to_dex_id"]
+            account_mgr.update_pokemon_species(pokemon_row_id, final_dex)
+            result["evolution"] = evolutions[-1]  # Primary evolution for overlay
+            result["all_evolutions"] = evolutions  # Full chain
+
+    inventory = account_mgr.get_inventory(player.account_id)
+    await player.send({
+        "type": "rare_candy_result",
+        "success": True,
+        "item_type": item_type,
+        "item_name": item["name"],
+        "levels_gained": result["new_level"] - old_level,
+        "xp_result": result,
         "inventory": inventory,
     })
 
