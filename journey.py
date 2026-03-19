@@ -203,6 +203,7 @@ class WildEncounter:
             "active_index": self.active_idx,
             "zmove_used": getattr(self, '_zmove_used', False),
             "mega_used": getattr(self, '_mega_used', False),
+            "dynamax_used": getattr(self, '_dynamax_used', False),
         }
 
 

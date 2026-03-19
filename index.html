@@ -789,7 +789,7 @@ input.invalid { border-color: var(--red); }
   border:2px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s;
 }
 .movemgmt-move:hover { border-color:var(--blue); background:var(--bg3); }
-.movemgmt-move.selected { border-color:var(--accent); background:rgba(233,69,96,0.15); }
+.movemgmt-move.selected { border-color:var(--accent); background:rgba(233,69,96,0.15); box-shadow:0 0 8px rgba(233,69,96,0.3); }
 .movemgmt-move-name { font-size:var(--fs-sm); flex:1; }
 .movemgmt-move-stats { font-size:var(--fs-xs); color:var(--text-dim); display:flex; gap:8px; }
 .movemgmt-move-stats span { white-space:nowrap; }
@@ -806,7 +806,27 @@ input.invalid { border-color: var(--red); }
 .movemgmt-learn-name { font-size:var(--fs-xs); flex:1; }
 .movemgmt-learn-stats { font-size:var(--fs-xs); color:var(--text-dim); display:flex; gap:6px; }
 .movemgmt-learn-lvl { font-size:var(--fs-xs); color:var(--yellow); min-width:40px; }
-.movemgmt-hint { font-size:var(--fs-xs); color:var(--text-dim); text-align:center; padding:8px; line-height:1.8; }
+.movemgmt-hint { font-size:var(--fs-sm); color:#1a1a2e; text-align:center; padding:10px 12px; line-height:1.8; background:var(--yellow); border-radius:8px; font-weight:bold; }
+.movemgmt-learn-btn { display:inline-block; padding:4px 10px; border-radius:5px; background:var(--green); color:#1a1a2e; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; border:none; font-weight:bold; margin-left:auto; flex-shrink:0; }
+.movemgmt-learn-btn:hover { filter:brightness(1.15); }
+.movemgmt-confirm { display:flex; align-items:center; gap:8px; padding:10px 12px; background:rgba(250,204,21,0.15); border:2px solid var(--yellow); border-radius:8px; font-size:var(--fs-xs); line-height:1.6; }
+.movemgmt-confirm-text { flex:1; color:var(--text); }
+.movemgmt-confirm-yes { padding:6px 14px; border-radius:5px; background:var(--green); color:#1a1a2e; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; border:none; font-weight:bold; }
+.movemgmt-confirm-no { padding:6px 14px; border-radius:5px; background:var(--red); color:#fff; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; border:none; font-weight:bold; }
+
+/* ─── XP Bar ──────────────────────────────────── */
+.xp-bar-container { width:100%; margin-top:2px; }
+.xp-bar-bg { width:100%; height:4px; background:var(--bg); border-radius:2px; border:1px solid var(--border); overflow:hidden; }
+.xp-bar-fill { height:100%; border-radius:2px; background:var(--blue); transition:width 1s ease-out; }
+.xp-text { font-size:var(--fs-2xs); color:var(--blue); margin-top:1px; }
+.battle-xp-bar { width:160px; margin-top:2px; }
+.battle-xp-bar .xp-bar-bg { height:3px; }
+
+/* ─── Dynamax ─────────────────────────────────── */
+.dynamaxed-sprite { transform:scale(1.5); filter:drop-shadow(0 0 15px rgba(239,68,68,0.7)); transition:transform 0.5s, filter 0.5s; }
+.dynamax-turns { font-size:var(--fs-xs); color:var(--red); font-weight:bold; margin-left:6px; }
+@keyframes dynamax-pulse { 0%,100%{filter:drop-shadow(0 0 10px rgba(239,68,68,0.5))} 50%{filter:drop-shadow(0 0 20px rgba(239,68,68,0.9))} }
+.dynamaxed-sprite { animation:dynamax-pulse 2s ease-in-out infinite; }
 
 /* ─── Learn Move Overlay (level-up) ───────────── */
 .learnmove-overlay {
@@ -936,10 +956,11 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="showMyTeam()">BACK</button>
     </div>
     <div class="movemgmt-pokemon" id="movemgmt-pokemon"></div>
-    <div class="movemgmt-section-title">Current Moves (tap to select for replacement)</div>
+    <div class="movemgmt-hint" id="movemgmt-hint">Tap a learnable move below to add it.</div>
+    <div id="movemgmt-confirm-bar"></div>
+    <div class="movemgmt-section-title">Current Moves</div>
     <div class="movemgmt-current" id="movemgmt-current"></div>
-    <div class="movemgmt-section-title">Learnable Moves (tap to learn)</div>
-    <div class="movemgmt-hint" id="movemgmt-hint">Select a current move first, then tap a learnable move to swap it in.</div>
+    <div class="movemgmt-section-title">Learnable Moves</div>
     <div class="movemgmt-learnable" id="movemgmt-learnable"></div>
   </div>
 
@@ -1192,6 +1213,8 @@ const S = {
   _moveLookup: {},  // move_id -> {name, type, power, accuracy, pp, ...}
   _evoData: {},     // dex_id -> evolution data (object or array)
   _megaData: {},    // dex_id -> mega evolution data
+  _dynamaxData: {}, // dynamax data: max_move_powers, max_move_names, gigantamax
+  _dynamaxUsed: false,
 };
 
 /* ─── Toast Notifications ──────────────────────── */
@@ -1280,6 +1303,7 @@ function handleMessage(msg) {
       S.pokemonList = msg.pokemon_list;
       if (msg.evolutions) S._evoData = msg.evolutions;
       if (msg.mega_evolutions) S._megaData = msg.mega_evolutions;
+      if (msg.dynamax) S._dynamaxData = msg.dynamax;
       // Build move lookup for learn-move overlays
       msg.pokemon_list.forEach(function(pk) {
         if (pk.moves) pk.moves.forEach(function(m) { S._moveLookup[m.id] = m; });
@@ -1415,6 +1439,12 @@ function handleMessage(msg) {
     case 'mega_evolved':
       updateJourneyState(msg);
       showToast(msg.pokemon_name + '!');
+      renderJourneyBattle();
+      showJourneyMovePanel();
+      break;
+    case 'dynamaxed':
+      updateJourneyState(msg);
+      showToast(msg.pokemon_name);
       renderJourneyBattle();
       showJourneyMovePanel();
       break;
@@ -2401,11 +2431,15 @@ function renderMyTeam(team, allPokemon) {
     if (hasItems) {
       card.onclick = () => toggleTeamItemPanel(idx);
     }
+    var xpPct = (p.xp_progress !== undefined) ? (p.xp_progress * 100).toFixed(1) : 0;
+    var xpText = (p.xp_to_next !== undefined) ? p.xp_to_next + ' XP to next' : '';
     card.innerHTML =
       '<img src="/sprites/front/' + String(p.dex_id).padStart(3,'0') + '.png" alt="' + name + '">' +
       '<div class="myteam-info">' +
         '<div class="pname">' + (p.nickname || name) + '</div>' +
         '<div class="plevel">Lv. ' + p.level + '</div>' +
+        '<div class="xp-bar-container"><div class="xp-bar-bg"><div class="xp-bar-fill" style="width:' + xpPct + '%"></div></div>' +
+        '<div class="xp-text">' + xpText + '</div></div>' +
         '<div class="ptypes">' + types.map(function(t) {
           return '<span class="move-type-badge" style="background:var(--type-' + t + ')">' + t + '</span>';
         }).join(' ') + '</div>' +
@@ -2538,7 +2572,11 @@ function openMoveMgmt(pokemonRowId) {
   send({ type: 'get_learnable_moves', pokemon_id: pokemonRowId });
 }
 
+// Store last move mgmt data for client-side interactions
+var _moveMgmtData = null;
+
 function renderMoveMgmt(data) {
+  _moveMgmtData = data;
   data.current_moves.forEach(function(m) { S._moveLookup[m.move_id] = m; });
   data.learnable_moves.forEach(function(m) { S._moveLookup[m.move_id] = m; });
 
@@ -2551,6 +2589,28 @@ function renderMoveMgmt(data) {
       '<div class="plevel">Lv. ' + data.level + '</div>' +
     '</div>';
 
+  // Hint at top — prominent
+  const hintEl = document.getElementById('movemgmt-hint');
+  if (data.current_moves.length >= 4) {
+    if (S.moveMgmtSelectedMove) {
+      var selMove = data.current_moves.find(function(m) { return m.move_id === S.moveMgmtSelectedMove; });
+      hintEl.textContent = 'Replacing: ' + (selMove ? selMove.name : '???') + ' — tap a move below';
+      hintEl.style.background = 'var(--accent)';
+      hintEl.style.color = '#fff';
+    } else {
+      hintEl.textContent = 'Tap a current move to select it for replacement';
+      hintEl.style.background = 'var(--yellow)';
+      hintEl.style.color = '#1a1a2e';
+    }
+  } else {
+    hintEl.textContent = 'Tap LEARN on any move below to add it (' + data.current_moves.length + '/4 slots)';
+    hintEl.style.background = 'var(--green)';
+    hintEl.style.color = '#1a1a2e';
+  }
+
+  // Clear confirmation bar
+  document.getElementById('movemgmt-confirm-bar').innerHTML = '';
+
   const currentEl = document.getElementById('movemgmt-current');
   currentEl.innerHTML = '';
   if (data.current_moves.length === 0) {
@@ -2559,6 +2619,7 @@ function renderMoveMgmt(data) {
     data.current_moves.forEach(function(m) {
       const div = document.createElement('div');
       div.className = 'movemgmt-move' + (S.moveMgmtSelectedMove === m.move_id ? ' selected' : '');
+      div.setAttribute('data-move-id', m.move_id);
       div.innerHTML =
         '<span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.type.toUpperCase() + '</span>' +
         '<span class="movemgmt-move-name">' + m.name + '</span>' +
@@ -2567,16 +2628,11 @@ function renderMoveMgmt(data) {
           '<span>Acc ' + m.accuracy + '</span>' +
           '<span>PP ' + m.pp + '</span>' +
         '</span>';
-      div.onclick = function() { selectCurrentMove(m.move_id); };
+      if (data.current_moves.length >= 4) {
+        div.onclick = function() { selectCurrentMove(m.move_id); };
+      }
       currentEl.appendChild(div);
     });
-  }
-
-  const hintEl = document.getElementById('movemgmt-hint');
-  if (data.current_moves.length >= 4) {
-    hintEl.textContent = 'Select a current move to replace, then tap a learnable move.';
-  } else {
-    hintEl.textContent = 'Tap a learnable move to add it (' + data.current_moves.length + '/4 slots used).';
   }
 
   const learnEl = document.getElementById('movemgmt-learnable');
@@ -2604,8 +2660,9 @@ function renderMoveMgmt(data) {
           '<span>' + (m.power > 0 ? 'Pow ' + m.power : 'Status') + '</span>' +
           '<span>Acc ' + m.accuracy + '</span>' +
           '<span>PP ' + m.pp + '</span>' +
-        '</span>';
-      if (!isKnown) {
+        '</span>' +
+        (!isKnown && data.current_moves.length < 4 ? '<button class="movemgmt-learn-btn" onclick="event.stopPropagation();learnMoveFromMgmt(_moveMgmtData,{move_id:\'' + m.move_id + '\'})">LEARN</button>' : '');
+      if (!isKnown && data.current_moves.length >= 4) {
         div.onclick = function() { learnMoveFromMgmt(data, m); };
       }
       learnEl.appendChild(div);
@@ -2614,13 +2671,27 @@ function renderMoveMgmt(data) {
 }
 
 function selectCurrentMove(moveId) {
+  // Pure client-side toggle — no server round-trip
   S.moveMgmtSelectedMove = (S.moveMgmtSelectedMove === moveId) ? null : moveId;
+  // Update CSS
   document.querySelectorAll('#movemgmt-current .movemgmt-move').forEach(function(el) {
-    el.classList.remove('selected');
+    el.classList.toggle('selected', el.getAttribute('data-move-id') === S.moveMgmtSelectedMove);
   });
-  if (S.moveMgmtPokemonId) {
-    send({ type: 'get_learnable_moves', pokemon_id: S.moveMgmtPokemonId });
+  // Update hint
+  if (_moveMgmtData) {
+    var hintEl = document.getElementById('movemgmt-hint');
+    if (S.moveMgmtSelectedMove) {
+      var selMove = _moveMgmtData.current_moves.find(function(m) { return m.move_id === S.moveMgmtSelectedMove; });
+      hintEl.textContent = 'Replacing: ' + (selMove ? selMove.name : '???') + ' — tap a move below';
+      hintEl.style.background = 'var(--accent)';
+      hintEl.style.color = '#fff';
+    } else {
+      hintEl.textContent = 'Tap a current move to select it for replacement';
+      hintEl.style.background = 'var(--yellow)';
+      hintEl.style.color = '#1a1a2e';
+    }
   }
+  playSound('select');
 }
 
 function learnMoveFromMgmt(data, newMove) {
@@ -2629,13 +2700,10 @@ function learnMoveFromMgmt(data, newMove) {
       showToast('Select a current move to replace first!');
       return;
     }
-    send({
-      type: 'swap_move',
-      pokemon_id: S.moveMgmtPokemonId,
-      old_move: S.moveMgmtSelectedMove,
-      new_move: newMove.move_id,
-    });
-    S.moveMgmtSelectedMove = null;
+    // Show inline confirmation bar
+    var selMove = data.current_moves.find(function(m) { return m.move_id === S.moveMgmtSelectedMove; });
+    var newMoveData = S._moveLookup[newMove.move_id] || newMove;
+    showMoveSwapConfirm(selMove, newMoveData);
   } else {
     send({
       type: 'swap_move',
@@ -2644,6 +2712,33 @@ function learnMoveFromMgmt(data, newMove) {
       new_move: newMove.move_id,
     });
   }
+}
+
+function showMoveSwapConfirm(oldMove, newMove) {
+  var bar = document.getElementById('movemgmt-confirm-bar');
+  bar.innerHTML =
+    '<div class="movemgmt-confirm">' +
+      '<span class="movemgmt-confirm-text">Replace <b>' + (oldMove ? oldMove.name : '?') + '</b> with <b>' + (newMove.name || newMove.move_id) + '</b>?</span>' +
+      '<button class="movemgmt-confirm-yes" onclick="confirmMoveSwap(\'' + (newMove.move_id || newMove) + '\')">YES</button>' +
+      '<button class="movemgmt-confirm-no" onclick="cancelMoveSwap()">NO</button>' +
+    '</div>';
+  playSound('select');
+}
+
+function confirmMoveSwap(newMoveId) {
+  send({
+    type: 'swap_move',
+    pokemon_id: S.moveMgmtPokemonId,
+    old_move: S.moveMgmtSelectedMove,
+    new_move: newMoveId,
+  });
+  S.moveMgmtSelectedMove = null;
+  document.getElementById('movemgmt-confirm-bar').innerHTML = '';
+}
+
+function cancelMoveSwap() {
+  document.getElementById('movemgmt-confirm-bar').innerHTML = '';
+  playSound('select');
 }
 
 /* ─── Learn Move Overlay (level-up) ──────────── */
@@ -2807,6 +2902,7 @@ function setupJourneyBattle(msg) {
   S._zMoveActive = false;
   S._zMoveUsed = false;
   S._megaUsed = false;
+  S._dynamaxUsed = false;
   showScreen('battle');
   renderJourneyBattle();
   if (S.encounterType === 'wild') {
@@ -2826,6 +2922,7 @@ function updateJourneyState(msg) {
   if (msg.inventory && S.account) S.account.inventory = msg.inventory;
   if (msg.zmove_used) S._zMoveUsed = true;
   if (msg.mega_used) S._megaUsed = true;
+  if (msg.dynamax_used) S._dynamaxUsed = true;
 }
 
 function renderJourneyBattle() {
@@ -2836,18 +2933,40 @@ function renderJourneyBattle() {
     ps.src = '/sprites/back/' + String(myPoke.dex_id).padStart(3,'0') + '.png';
     ps.classList.remove('faint');
     ps.style.display = myPoke.is_fainted ? 'none' : '';
+    // Dynamax sprite effect
+    if (myPoke.is_dynamaxed) { ps.classList.add('dynamaxed-sprite'); } else { ps.classList.remove('dynamaxed-sprite'); }
     let nh = myPoke.name + ' <span class="journey-level">Lv.' + (myPoke.level || '?') + '</span>';
+    if (myPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + myPoke.dynamax_turns_left + ' turns]</span>';
     if (myPoke.status) nh += ' <span class="poke-status-badge status-' + myPoke.status + '">' + myPoke.status.toUpperCase().slice(0,3) + '</span>';
     document.getElementById('player-name-battle').innerHTML = nh;
     setHpBar('player-hp-bar', 'player-hp-text', myPoke.current_hp, myPoke.max_hp, true);
+    // XP bar in battle (journey mode)
+    var xpBarEl = document.getElementById('player-xp-bar');
+    if (!xpBarEl) {
+      var playerInfo = document.querySelector('.player-info');
+      if (playerInfo) {
+        var xpDiv = document.createElement('div');
+        xpDiv.className = 'battle-xp-bar';
+        xpDiv.id = 'player-xp-bar';
+        xpDiv.innerHTML = '<div class="xp-bar-bg"><div class="xp-bar-fill" id="player-xp-fill"></div></div>';
+        playerInfo.appendChild(xpDiv);
+      }
+    }
+    var xpFill = document.getElementById('player-xp-fill');
+    if (xpFill && myPoke.xp_progress !== undefined) {
+      xpFill.style.width = (myPoke.xp_progress * 100) + '%';
+    }
   }
   if (oppPoke) {
     const os = document.getElementById('opp-sprite');
     os.src = '/sprites/front/' + String(oppPoke.dex_id).padStart(3,'0') + '.png';
     os.classList.remove('faint');
+    os.classList.remove('dynamaxed-sprite');
     os.style.display = (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'none' : '';
+    if (oppPoke.is_dynamaxed) os.classList.add('dynamaxed-sprite');
     const prefix = S.encounterType === 'gym' ? (S.gymData ? S.gymData.name + "'s " : '') : 'Wild ';
     let nh = prefix + oppPoke.name + ' <span class="journey-level">Lv.' + (oppPoke.level || '?') + '</span>';
+    if (oppPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + oppPoke.dynamax_turns_left + ' turns]</span>';
     if (oppPoke.status) nh += ' <span class="poke-status-badge status-' + oppPoke.status + '">' + oppPoke.status.toUpperCase().slice(0,3) + '</span>';
     document.getElementById('opp-name').innerHTML = nh;
     setHpBar('opp-hp-bar', 'opp-hp-text', oppPoke.current_hp, oppPoke.max_hp, false);
@@ -2881,31 +3000,50 @@ function showJourneyMovePanel() {
   if (!myPoke || myPoke.is_fainted) return;
   let html = '';
 
-  // Z-Move and Mega buttons
+  // Z-Move, Mega, and Dynamax buttons
   var inv = S.account ? (S.account.inventory || {}) : {};
   var zActive = S._zMoveActive || false;
   var zUsed = S._zMoveUsed || false;
   var megaUsed = S._megaUsed || false;
-  var hasZCrystal = !zUsed && myPoke.moves.some(function(m) { return m.power > 0 && inv['z-' + m.type] > 0; });
+  var dynamaxUsed = S._dynamaxUsed || false;
+  var isDynamaxed = myPoke.is_dynamaxed || false;
+  var hasZCrystal = !zUsed && !dynamaxUsed && !isDynamaxed && myPoke.moves.some(function(m) { return m.power > 0 && inv['z-' + m.type] > 0; });
   var megaData = S._megaData || {};
-  var hasMega = !megaUsed && !myPoke.is_mega && megaData[String(myPoke.dex_id)];
-  if (hasZCrystal || hasMega) {
-    html += '<div style="display:flex;gap:6px;margin-bottom:6px;justify-content:center">';
+  var hasMega = !megaUsed && !dynamaxUsed && !isDynamaxed && !myPoke.is_mega && megaData[String(myPoke.dex_id)];
+  var canDynamax = !dynamaxUsed && !megaUsed && !zUsed && !myPoke.is_mega && !isDynamaxed;
+  if (hasZCrystal || hasMega || canDynamax) {
+    html += '<div style="display:flex;gap:6px;margin-bottom:6px;justify-content:center;flex-wrap:wrap">';
     if (hasZCrystal) {
       html += '<button class="btn" style="font-size:var(--fs-xs);padding:6px 12px;background:' + (zActive ? '#fbbf24' : 'var(--bg3)') + ';color:' + (zActive ? '#000' : 'var(--yellow)') + ';border:2px solid var(--yellow)" onclick="toggleZMove()">' + (zActive ? 'Z-MOVE ON' : 'Z-MOVE') + '</button>';
     }
     if (hasMega) {
       html += '<button class="btn" style="font-size:var(--fs-xs);padding:6px 12px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none" onclick="activateMega()">MEGA</button>';
     }
+    if (canDynamax) {
+      html += '<button class="btn" style="font-size:var(--fs-xs);padding:6px 12px;background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;border:none" onclick="activateDynamax()">DYNAMAX</button>';
+    }
     html += '</div>';
+  }
+
+  // Max Move name/power lookup helper
+  function getMaxMoveName(move) {
+    var dmx = S._dynamaxData || {};
+    if (move.power <= 0) return 'Max Guard';
+    var gmax = (dmx.gigantamax || {})[String(myPoke.dex_id)];
+    if (gmax && move.type === gmax.gmax_type) return gmax.gmax_move;
+    return (dmx.max_move_names || {})[move.type] || 'Max Strike';
   }
 
   html += '<div class="move-panel">';
   myPoke.moves.forEach((m, i) => {
     const dis = m.current_pp <= 0 ? 'disabled' : '';
     var zGlow = (zActive && m.power > 0 && inv['z-' + m.type] > 0) ? ';box-shadow:0 0 10px rgba(250,204,21,0.5);border-color:var(--yellow)' : '';
-    html += '<button class="move-btn" ' + dis + ' style="' + zGlow + '" onclick="journeyMove(' + i + ')">' +
-      '<span class="move-name">' + (zActive && m.power > 0 && inv['z-' + m.type] > 0 ? 'Z-' : '') + m.name + '</span>' +
+    var dmxGlow = isDynamaxed ? ';box-shadow:0 0 10px rgba(239,68,68,0.4);border-color:var(--red)' : '';
+    var displayName = m.name;
+    if (isDynamaxed) displayName = getMaxMoveName(m);
+    else if (zActive && m.power > 0 && inv['z-' + m.type] > 0) displayName = 'Z-' + m.name;
+    html += '<button class="move-btn" ' + dis + ' style="' + zGlow + dmxGlow + '" onclick="journeyMove(' + i + ')">' +
+      '<span class="move-name">' + displayName + '</span>' +
       '<span class="move-meta"><span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.type + '</span>' +
       '<span>PP ' + m.current_pp + '/' + (m.pp || '??') + '</span></span></button>';
   });
@@ -2990,6 +3128,10 @@ function activateMega() {
   if (!stoneId) return;
   send({type:'wild_action',action_type:'mega_evolve',mega_stone:stoneId});
   S._megaUsed = true;
+}
+function activateDynamax() {
+  send({type:'wild_action',action_type:'dynamax'});
+  S._dynamaxUsed = true;
 }
 function journeyBall() { send({type:'wild_action',action_type:'ball'}); showWaiting(''); playSound('select'); }
 function journeyRun() { send({type:'wild_action',action_type:'run'}); showWaiting(''); playSound('select'); }
@@ -3137,6 +3279,11 @@ async function playJourneyEvents(events) {
         break;
       case 'gym_next_pokemon':
         setBattleText('Opponent sends out ' + evt.pokemon + '!');
+        renderJourneyBattle();
+        await delay(1000);
+        break;
+      case 'dynamax_end':
+        setBattleText(evt.pokemon + "'s Dynamax ended!");
         renderJourneyBattle();
         await delay(1000);
         break;

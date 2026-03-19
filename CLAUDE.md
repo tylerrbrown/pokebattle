@@ -1,5 +1,7 @@
 # PokeBattle
 
+> **Workflow**: When done building a plan's implementation, always commit and push so Tyler can deploy.
+
 Gen 1 & Gen 2 Pokemon multiplayer battle game with WebSocket real-time gameplay.
 
 ## Architecture
@@ -102,6 +104,7 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **Module init order**: In `server.py`, `room_manager = RoomManager(...)` must come AFTER all functions it references (e.g., `record_game`) are defined — Python executes top-level statements in order
 - **Query strings in static serving**: `request.path` in websockets includes query string; must strip `?...` before file path resolution or `admin.html?k=SECRET` returns 404
 - **websockets version**: EC2 system apt has v9.1 (incompatible API); must use `pip3 install 'websockets>=14'`
+- **Never use `cd` in Bash commands** — `Bash(cd *)` permission patterns don't match chained commands (`cd path && python ...`). Always use absolute paths so commands start with the Python executable and match `Bash("/c/Users/..." *)`. Example: `"/c/.../python.exe" C:/Claude/apps/pokebattle/tests/test_battle_engine.py` instead of `cd "C:/Claude/apps/pokebattle" && python tests/test_battle_engine.py`
 
 ## Move Learning & Management
 
@@ -126,6 +129,25 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - Quick-time tapping: 0.85x–1.15x damage multiplier
 - Speed determines move order
 - PP tracking with Struggle fallback
+
+## XP Bar System
+
+- XP formula: medium-fast growth `(4/5) * N^3` total XP at level N
+- `xp_progress_info()` in `player_accounts.py` computes progress float (0-1), XP to next, XP thresholds
+- `_enrich_pokemon_xp()` adds XP fields to all Pokemon dicts from `get_team()`, `get_all_pokemon()`, `get_storage()`, `get_profile()`
+- `award_xp()` returns `xp_progress`, `xp_for_current_level`, `xp_for_next_level`
+- `build_journey_team()` computes `xp_progress` inline (avoids circular import)
+- Frontend: thin blue XP bar on My Team cards (with "X XP to next" text) and battle HUD (journey mode)
+
+## Dynamax / Gigantamax
+
+- **Data**: `data/dynamax.json` — max move power lookup, max move names by type, G-Max Pokemon list
+- **PokemonInstance state**: `is_dynamaxed`, `dynamax_turns_left`, `pre_dynamax_hp/max_hp`
+- **Mechanics**: `dynamax()` doubles HP for 3 turns; `revert_dynamax()` restores HP proportionally; `tick_dynamax()` decrements turns, auto-reverts at 0
+- **Server**: `dynamax` action in `_handle_wild_action()`, moves converted to Max Moves when dynamaxed (power from lookup table), G-Max moves for eligible Pokemon
+- **Mutual exclusivity**: Dynamax, Mega Evolution, and Z-Move are mutually exclusive per battle (server enforces, frontend hides buttons)
+- **Frontend**: DYNAMAX button in battle, sprite scale(1.5) + red glow, turn counter badge, Max Move names replace normal moves
+- **Edge cases**: fainted Pokemon don't tick/revert; forced switch after faint — new Pokemon is NOT dynamaxed; `_dynamaxUsed` reset in `setupJourneyBattle()`
 
 ## Shop & Items
 
@@ -177,7 +199,7 @@ python tests/test_battle_engine.py
 - Font size bump (+2px via CSS variables)
 - PvP uses saved journey team
 
-### New Feature Requests (not yet built)
-1. **XP bar UI** — "Show the XP bar when you earn XP and when you start off at low levels, you get more XP but when you get higher levels, it gets harder to earn XP" (3/18)
-2. **Move learning bug** — "your team has problems learning moves. There should be a button that says click on the button and it'll put the move up there" (3/19) — move management screen exists but may have UX issues
-3. **Gigantamax** — mentioned alongside Z-Moves/Mega (3/18) — not yet implemented
+### Implemented 3/19/2026
+1. **XP bar UI** — Thin blue XP bar on My Team cards and battle HUD; shows "X XP to next" text; XP scaling via medium-fast growth formula
+2. **Move learning UX fix** — Prominent hint box at top, client-side selection (no server round-trip), inline confirmation "Replace X with Y? [YES] [NO]" for 4-move swaps, green LEARN button for <4 moves
+3. **Gigantamax/Dynamax** — DYNAMAX button in battle, 3-turn HP doubling, Max Move names/powers, G-Max moves for eligible Pokemon, sprite scale+glow effect, mutually exclusive with Mega/Z-Move
