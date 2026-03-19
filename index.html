@@ -3352,7 +3352,9 @@ function showJourneyVictory(msg) {
   S.journeyMode = false;
   const currency = msg.currency_gained || 0;
   const xp = msg.xp_results || [];
-  setBattleText('You won! +$' + currency);
+  const luckyEgg = xp.length > 0 && xp[0].lucky_egg_active;
+  const xpText = luckyEgg ? ' (Lucky Egg: 2x XP!)' : '';
+  setBattleText('You won! +$' + currency + xpText);
   playSound('win');
   setTimeout(() => {
     processAllXpResults(xp, function() { goHome(true); });
@@ -3407,12 +3409,14 @@ function dismissCatchOverlay() {
 
 function showCaughtResult(msg) {
   const p = msg.pokemon;
-  setBattleText('You caught ' + p.name + ' Lv.' + p.level + '! +$' + msg.currency_gained);
+  const xp = msg.xp_results || [];
+  const luckyEgg = xp.length > 0 && xp[0].lucky_egg_active;
+  const xpText = luckyEgg ? ' (Lucky Egg: 2x XP!)' : '';
+  setBattleText('You caught ' + p.name + ' Lv.' + p.level + '! +$' + msg.currency_gained + xpText);
   if (S.account) {
     S.account.pokeballs = Math.max(0, (S.account.pokeballs || 0) - 1);
   }
   setTimeout(() => {
-    const xp = msg.xp_results || [];
     processAllXpResults(xp, function() { goHome(true); });
   }, 2500);
 }
@@ -3538,6 +3542,14 @@ function renderShop(data) {
     label.textContent = 'HEALING ITEMS';
     items.appendChild(label);
     healing.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
+  }
+  const heldItems = data.items.filter(i => i.category === 'held');
+  if (heldItems.length) {
+    const label = document.createElement('div');
+    label.className = 'shop-section-label';
+    label.textContent = 'HELD ITEMS';
+    items.appendChild(label);
+    heldItems.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
   }
   const evoItems = data.items.filter(i => i.category === 'evolution');
   if (evoItems.length) {
@@ -3753,7 +3765,9 @@ function showTrainerVictory(msg) {
   document.getElementById('gym-result-title').className = 'gameover-title win';
   document.getElementById('gym-result-dialog').textContent = msg.dialog_win;
   document.getElementById('gym-result-badge').textContent = badge;
-  document.getElementById('gym-result-currency').textContent = '+$' + msg.currency_gained;
+  var xpArr = msg.xp_results || [];
+  var luckyEggText = (xpArr.length > 0 && xpArr[0].lucky_egg_active) ? '  (Lucky Egg: 2x XP!)' : '';
+  document.getElementById('gym-result-currency').textContent = '+$' + msg.currency_gained + luckyEggText;
   o.classList.add('active');
   playSound('win');
   // Refresh milestones for hub buttons
@@ -3782,7 +3796,9 @@ function showGymVictory(msg) {
   document.getElementById('gym-result-title').className = 'gameover-title win';
   document.getElementById('gym-result-dialog').textContent = msg.dialog_win;
   document.getElementById('gym-result-badge').textContent = 'Earned: ' + msg.badge + '!';
-  document.getElementById('gym-result-currency').textContent = '+$' + msg.currency_gained;
+  var xpArr = msg.xp_results || [];
+  var luckyEggText = (xpArr.length > 0 && xpArr[0].lucky_egg_active) ? '  (Lucky Egg: 2x XP!)' : '';
+  document.getElementById('gym-result-currency').textContent = '+$' + msg.currency_gained + luckyEggText;
   o.classList.add('active');
   playSound('win');
 }
