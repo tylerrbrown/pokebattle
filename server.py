@@ -1128,6 +1128,8 @@ def _item_description(key, item):
         return "Revives fainted to 50% HP"
     if key == "full_restore":
         return "Full HP + cure status"
+    if key == "lucky-egg":
+        return "2x XP from all battles!"
     return ""
 
 
@@ -1747,13 +1749,23 @@ def _wild_attacks(encounter):
 
 def _award_encounter_xp(encounter, defeated):
     """Award XP to all alive team Pokemon (EXP Share).
-    Active Pokemon gets 100% XP, alive bench Pokemon get 50%."""
+    Active Pokemon gets 100% XP, alive bench Pokemon get 50%.
+    Lucky Egg doubles all XP if the player owns one."""
     results = []
     active = encounter.get_active()
 
     base_exp = defeated.species.get("base_experience", 64)
     is_gym = getattr(encounter, 'is_gym', False)
     full_xp = calc_xp_yield(defeated.level, base_exp, is_wild=not is_gym)
+
+    # Lucky Egg: 2x XP if player owns one (passive held item, not consumed)
+    has_lucky_egg = False
+    player_id = getattr(encounter.player, 'account_id', None)
+    if player_id:
+        inv = account_mgr.get_inventory(player_id)
+        has_lucky_egg = inv.get("lucky-egg", 0) > 0
+    if has_lucky_egg:
+        full_xp *= 2
 
     for poke in encounter.team:
         if poke.is_fainted:
@@ -1813,6 +1825,7 @@ def _award_encounter_xp(encounter, defeated):
                 }
                 account_mgr.update_pokemon_species(db_id, evo["evolves_to"])
 
+        result["lucky_egg_active"] = has_lucky_egg
         results.append(result)
 
     return results

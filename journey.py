@@ -77,6 +77,8 @@ SHOP_ITEMS = {
     "mewtwonite-y":    {"name": "Mewtwonite Y",    "price": 10000, "category": "mega-stone", "mega_for": 150},
     "scizorite":       {"name": "Scizorite",        "price": 10000, "category": "mega-stone", "mega_for": 212},
     "tyranitarite":    {"name": "Tyranitarite",     "price": 10000, "category": "mega-stone", "mega_for": 248},
+    # Held Items
+    "lucky-egg":       {"name": "Lucky Egg",        "price": 1500, "category": "held"},
 }
 
 # Currency awards

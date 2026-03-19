@@ -135,6 +135,9 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 ## XP Bar System
 
 - XP formula: medium-fast growth `(4/5) * N^3` total XP at level N
+- **XP yield has 1.5x base boost** for faster kid-friendly progression; trainer battles get additional 1.5x
+- **Lucky Egg**: passive inventory item ($1500 in shop) — owning one doubles all XP (stacks with base boost)
+- Effective XP rates: Lv20->21 takes ~4 wild fights (2 with Lucky Egg), Lv49->50 takes ~9 fights (5 with egg)
 - `xp_progress_info()` in `player_accounts.py` computes progress float (0-1), XP to next, XP thresholds
 - `_enrich_pokemon_xp()` adds XP fields to all Pokemon dicts from `get_team()`, `get_all_pokemon()`, `get_storage()`, `get_profile()`
 - `award_xp()` returns `xp_progress`, `xp_for_current_level`, `xp_for_next_level`
@@ -153,14 +156,15 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 
 ## Shop & Items
 
-- **Shop** sells Poke Balls and healing items (SHOP_ITEMS in `journey.py`)
+- **Shop** sells Poke Balls, healing items, and held items (SHOP_ITEMS in `journey.py`)
 - **Poke Balls**: Poke Ball ($200), Great Ball ($600), Ultra Ball ($1200) — stored in `players.pokeballs`
 - **Healing Items**: Potion ($300, 20HP), Super Potion ($700, 50HP), Hyper Potion ($1200, 200HP), Revive ($1500, 50% HP), Full Restore ($3000, full HP + cure status)
+- **Held Items**: Lucky Egg ($1500) — passive item, owning one doubles all XP gains (not consumed on use)
 - **Inventory**: `player_inventory` table (player_id, item_type, quantity) with UPSERT pattern
 - **Item use during battle**: costs a turn (wild/gym Pokemon attacks back); sent via `use_item` message type, NOT through `wild_action`
 - **Item use from My Team**: consumes item from inventory (HP doesn't persist between battles, so mainly cosmetic outside battle)
 - **NOT usable in PvP**: items only work in wild encounters and gym battles
-- Items are categorized: `"category": "ball"` (Poke Balls use `pokeballs` column) vs `"category": "healing"` (use `player_inventory` table)
+- Items are categorized: `"category": "ball"` (Poke Balls use `pokeballs` column) vs `"category": "healing"` (use `player_inventory` table) vs `"category": "held"` (passive effects)
 
 ## Tests
 
@@ -207,3 +211,4 @@ python tests/test_battle_engine.py
 1. **XP bar UI** — Thin blue XP bar on My Team cards and battle HUD; shows "X XP to next" text; XP scaling via medium-fast growth formula
 2. **Move learning UX fix** — Prominent hint box at top, client-side selection (no server round-trip), inline confirmation "Replace X with Y? [YES] [NO]" for 4-move swaps, green LEARN button for <4 moves
 3. **Gigantamax/Dynamax** — DYNAMAX button in battle, 3-turn HP doubling, Max Move names/powers, G-Max moves for eligible Pokemon, sprite scale+glow effect, mutually exclusive with Mega/Z-Move
+4. **Faster XP progression** — 1.5x base XP boost to `calc_xp_yield()`, Lucky Egg shop item ($1500) doubles all XP gains passively, "Lucky Egg: 2x XP!" shown in victory text
