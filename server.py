@@ -1059,6 +1059,12 @@ async def handle_message(player, msg, room_mgr):
             return
         await _handle_use_item(player, data)
 
+    elif msg_type == "use_rare_candy":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        await _handle_use_rare_candy(player, data)
+
     elif msg_type == "use_evolution_item":
         if not getattr(player, 'account_id', None):
             await player.send({"type": "error", "message": "Not logged in."})
@@ -1317,17 +1323,26 @@ async def _handle_use_item(player, data):
 # ─── Rare Candy Handler ───────────────────────────────
 
 async def _handle_use_rare_candy(player, data):
-    """Handle using a Rare Candy item on a Pokemon from My Team screen."""
-    item_type = data.get("item_type", "")
+    """Handle using a Rare Candy item on a Pokemon from My Team screen.
+    Supports both tiered shop candy (rare_candy, rare_candy_xl, etc.) and
+    battle-drop rare_candy (plain +1 level)."""
+    item_type = data.get("item_type", "rare_candy")
     pokemon_row_id = data.get("pokemon_id")
 
-    if item_type not in SHOP_ITEMS:
+    # Validate item type — must be in SHOP_ITEMS (tiered) or plain rare_candy (battle drop)
+    if item_type in SHOP_ITEMS:
+        item = SHOP_ITEMS[item_type]
+        if item.get("category") != "rare_candy":
+            await player.send({"type": "error", "message": "Not a Rare Candy."})
+            return
+        levels_to_gain = item.get("levels", 1)
+        item_name = item["name"]
+    elif item_type == "rare_candy":
+        # Battle-drop rare candy (+1 level, not in SHOP_ITEMS)
+        levels_to_gain = 1
+        item_name = "Rare Candy"
+    else:
         await player.send({"type": "error", "message": "Invalid item."})
-        return
-
-    item = SHOP_ITEMS[item_type]
-    if item.get("category") != "rare_candy":
-        await player.send({"type": "error", "message": "Not a Rare Candy."})
         return
 
     if not pokemon_row_id:
@@ -1336,7 +1351,7 @@ async def _handle_use_rare_candy(player, data):
 
     # Check inventory
     if not account_mgr.use_item(player.account_id, item_type):
-        await player.send({"type": "error", "message": f"No {item['name']} left!"})
+        await player.send({"type": "error", "message": f"No {item_name} left!"})
         return
 
     # Get the Pokemon from DB
@@ -1348,7 +1363,6 @@ async def _handle_use_rare_candy(player, data):
         await player.send({"type": "error", "message": "Pokemon not found."})
         return
 
-    levels_to_gain = item.get("levels", 1)
     old_level = poke_row["level"]
     current_xp = poke_row["xp"]
     dex_id = poke_row["dex_id"]
@@ -1374,7 +1388,6 @@ async def _handle_use_rare_candy(player, data):
         return
 
     # Process level-by-level: moves and evolution at each level
-    # We need to check moves for each level gained
     if result["leveled_up"]:
         new_moves_all = pokemon_data.get_new_moves_for_level(
             dex_id, old_level, result["new_level"]
@@ -1437,7 +1450,7 @@ async def _handle_use_rare_candy(player, data):
         "type": "rare_candy_result",
         "success": True,
         "item_type": item_type,
-        "item_name": item["name"],
+        "item_name": item_name,
         "levels_gained": result["new_level"] - old_level,
         "xp_result": result,
         "inventory": inventory,
@@ -1487,12 +1500,15 @@ async def _handle_wild_action(player, encounter, data):
             account_mgr.add_currency(player.account_id, CURRENCY_WILD_CATCH)
             # Award XP to active Pokemon
             xp_results = _award_encounter_xp(encounter, wild)
+            # Rare Candy drop
+            rare_candy = _award_rare_candy(player, "wild")
             del active_encounters[player.id]
             await player.send({
                 "type": "wild_caught",
                 "pokemon": {"dex_id": wild.dex_id, "name": wild.name, "level": wild.level},
                 "added_to_team": added,
                 "currency_gained": CURRENCY_WILD_CATCH,
+                "rare_candy_gained": rare_candy,
                 "xp_results": xp_results,
             })
         else:
@@ -1716,23 +1732,27 @@ async def _handle_wild_action(player, encounter, data):
 
                     if category == "e4":
                         account_mgr.record_milestone(player.account_id, f"{trainer['id']}_defeated")
+                        rare_candy = _award_rare_candy(player, "e4")
                         await player.send({
                             "type": "trainer_victory",
                             "events": events,
                             "trainer_name": trainer["name"],
                             "dialog_win": trainer["dialog_win"],
                             "currency_gained": reward,
+                            "rare_candy_gained": rare_candy,
                             "category": "e4",
                             "xp_results": xp_results,
                         })
                     elif category == "champion":
                         account_mgr.record_milestone(player.account_id, "champion_defeated")
+                        rare_candy = _award_rare_candy(player, "champion")
                         await player.send({
                             "type": "trainer_victory",
                             "events": events,
                             "trainer_name": trainer["name"],
                             "dialog_win": trainer["dialog_win"],
                             "currency_gained": reward,
+                            "rare_candy_gained": rare_candy,
                             "category": "champion",
                             "xp_results": xp_results,
                         })
@@ -1741,12 +1761,14 @@ async def _handle_wild_action(player, encounter, data):
                         # Check if all Masters beaten
                         milestones = account_mgr.get_milestones(player.account_id)
                         all_beaten = all(f"{m['id']}_defeated" in milestones for m in MASTERS_EIGHT)
+                        rare_candy = _award_rare_candy(player, "masters")
                         await player.send({
                             "type": "trainer_victory",
                             "events": events,
                             "trainer_name": trainer["name"],
                             "dialog_win": trainer["dialog_win"],
                             "currency_gained": reward,
+                            "rare_candy_gained": rare_candy,
                             "category": "masters",
                             "all_masters_beaten": all_beaten,
                             "xp_results": xp_results,
@@ -1754,6 +1776,7 @@ async def _handle_wild_action(player, encounter, data):
                     else:
                         # Regular gym
                         account_mgr.earn_badge(player.account_id, trainer["id"])
+                        rare_candy = _award_rare_candy(player, "gym")
                         await player.send({
                             "type": "gym_victory",
                             "events": events,
@@ -1761,16 +1784,20 @@ async def _handle_wild_action(player, encounter, data):
                             "badge": trainer.get("badge", ""),
                             "dialog_win": trainer.get("dialog_win", ""),
                             "currency_gained": reward,
+                            "rare_candy_gained": rare_candy,
                             "xp_results": xp_results,
                         })
                     del active_encounters[player.id]
                     return
 
+            # Rare Candy drop for wild encounter win
+            rare_candy = _award_rare_candy(player, "wild")
             del active_encounters[player.id]
             await player.send({
                 "type": "wild_fainted",
                 "events": events,
                 "currency_gained": CURRENCY_WILD_WIN,
+                "rare_candy_gained": rare_candy,
                 "xp_results": xp_results,
             })
             return
@@ -1895,6 +1922,26 @@ def _wild_attacks(encounter):
 
     tap = random.uniform(0.3, 0.7)
     return _resolve_single_move(wild, target, wild_move, tap, "wild")
+
+
+def _award_rare_candy(player, battle_type):
+    """Award Rare Candy based on battle type. Returns quantity awarded (0 if none).
+    Drop rates: wild=10%, gym=100% x1, e4=100% x2, champion/masters=100% x3."""
+    if battle_type == "wild":
+        if random.random() < 0.10:
+            qty = 1
+        else:
+            return 0
+    elif battle_type == "gym":
+        qty = 1
+    elif battle_type == "e4":
+        qty = 2
+    elif battle_type in ("champion", "masters"):
+        qty = 3
+    else:
+        return 0
+    account_mgr.add_item(player.account_id, "rare_candy", qty)
+    return qty
 
 
 def _award_encounter_xp(encounter, defeated):

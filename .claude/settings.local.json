@@ -1,12 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash"
+      "Bash",
+      "mcp__imessage__tool_get_recent_messages"
     ],
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push --force *)",
       "Bash(git reset --hard *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "imessage"
+  ]
 }
