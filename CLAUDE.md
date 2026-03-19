@@ -129,6 +129,8 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - Quick-time tapping: 0.85x–1.15x damage multiplier
 - Speed determines move order
 - PP tracking with Struggle fallback
+- **EXP Share**: All alive team Pokemon earn XP from defeats — active gets 100%, bench gets 50%, fainted get 0%
+- `_award_encounter_xp()` loops all `encounter.team`; frontend `processAllXpResults()` chains level-up overlays for multiple Pokemon
 
 ## XP Bar System
 
@@ -189,6 +191,8 @@ python tests/test_battle_engine.py
 ### Bugs Liam Reported
 - ~~**Wild encounter attack bug**: fixed 3/18/2026~~
 - ~~**Gym leader no-AI bug**: fixed 3/18/2026~~
+- ~~**Faint/switch freeze**: `wild_force_switch` was missing encounter state; fixed 3/19/2026~~
+- ~~**Only active Pokemon earned XP**: added EXP Share (100% active, 50% bench); fixed 3/19/2026~~
 - **PvP forces team pick**: "When I battle somebody I expect to use my Pokémon, not click on Pokémon" — PvP should use saved journey team, not re-pick (OPEN)
 
 ### Implemented in "Liam's Feature Pack" (3/19/2026)
