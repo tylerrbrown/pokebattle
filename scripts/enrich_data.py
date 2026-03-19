@@ -64,13 +64,28 @@ def fetch_json(url, retries=3):
                 return None
 
 
-def get_rarity(dex_id):
+def get_rarity(dex_id, species_data=None, base_stats=None):
+    """Assign rarity. Uses hardcoded Gen 1+2 sets, then falls back to auto-assign."""
     if dex_id in LEGENDARY:
         return "legendary"
     if dex_id in RARE:
         return "rare"
     if dex_id in UNCOMMON:
         return "uncommon"
+    # For Pokemon beyond Gen 1+2 hardcoded sets, auto-assign
+    if dex_id > 251:
+        is_legend = False
+        if species_data:
+            is_legend = species_data.get("is_legendary", False) or species_data.get("is_mythical", False)
+        if is_legend:
+            return "legendary"
+        if base_stats:
+            bst = sum(base_stats.values())
+            if bst >= 580:
+                return "rare"
+            elif bst >= 450:
+                return "uncommon"
+        return "common"
     return "common"
 
 
@@ -93,7 +108,7 @@ def main():
 
     for i, poke in enumerate(pokemon_list):
         dex_id = poke["id"]
-        print(f"  [{i+1}/151] #{dex_id} {poke['name']}...", end=" ", flush=True)
+        print(f"  [{i+1}/{len(pokemon_list)}] #{dex_id} {poke['name']}...", end=" ", flush=True)
 
         # Fetch Pokemon data
         data = fetch_json(f"https://pokeapi.co/api/v2/pokemon/{dex_id}")
@@ -105,12 +120,12 @@ def main():
             continue
 
         poke["base_experience"] = data.get("base_experience") or 64
-        poke["rarity"] = get_rarity(dex_id)
 
         # Fetch species for catch_rate and evolution chain
         species_data = fetch_json(f"https://pokeapi.co/api/v2/pokemon-species/{dex_id}")
         if species_data:
             poke["catch_rate"] = species_data.get("capture_rate", 45)
+            poke["rarity"] = get_rarity(dex_id, species_data, poke.get("base_stats"))
 
             # Evolution chain
             chain_url = species_data.get("evolution_chain", {}).get("url")
@@ -121,18 +136,31 @@ def main():
                     _parse_chain(chain_data["chain"], evolutions)
         else:
             poke["catch_rate"] = 45
+            poke["rarity"] = get_rarity(dex_id, None, poke.get("base_stats"))
 
-        # Learnset: level-up moves from red-blue
+        # Learnset: level-up moves from best available version group
+        VG_PRIORITY = [
+            "red-blue", "gold-silver", "crystal",
+            "ruby-sapphire", "emerald", "firered-leafgreen",
+            "diamond-pearl", "platinum", "heartgold-soulsilver",
+            "black-white", "black-2-white-2",
+            "x-y", "omega-ruby-alpha-sapphire",
+            "sun-moon", "ultra-sun-ultra-moon",
+            "sword-shield", "scarlet-violet",
+        ]
         level_moves = []
-        for mv in data.get("moves", []):
-            for vg in mv.get("version_group_details", []):
-                if (vg.get("version_group", {}).get("name") == "red-blue" and
-                        vg.get("move_learn_method", {}).get("name") == "level-up"):
-                    move_name = mv["move"]["name"]
-                    level_moves.append({
-                        "level": vg["level_learned_at"],
-                        "move": move_name
-                    })
+        for vg_name in VG_PRIORITY:
+            for mv in data.get("moves", []):
+                for vg in mv.get("version_group_details", []):
+                    if (vg.get("version_group", {}).get("name") == vg_name and
+                            vg.get("move_learn_method", {}).get("name") == "level-up"):
+                        move_name = mv["move"]["name"]
+                        level_moves.append({
+                            "level": vg["level_learned_at"],
+                            "move": move_name
+                        })
+            if level_moves:
+                break
 
         # Sort by level, then alphabetically
         level_moves.sort(key=lambda x: (x["level"], x["move"]))
@@ -170,7 +198,7 @@ def _parse_chain(chain, evolutions):
         to_url = evo.get("species", {}).get("url", "")
         to_id = _id_from_url(to_url)
 
-        if from_id and to_id and from_id <= 151 and to_id <= 151:
+        if from_id and to_id:
             # Get evolution details
             details = evo.get("evolution_details", [{}])
             detail = details[0] if details else {}

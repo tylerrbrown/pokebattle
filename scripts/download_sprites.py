@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Download Gen 1 Pokemon sprites from PokeAPI GitHub repository.
+"""Download Pokemon sprites from PokeAPI GitHub repository.
 
-Downloads front and back sprites for all 151 Gen 1 Pokemon.
-Source: PokeAPI sprites repo (generation-i/red-blue).
+Usage:
+  python download_sprites.py                       # Default: 1-251
+  python download_sprites.py --start 252 --end 386 # Gen 3 only
+
+Source: PokeAPI sprites repo.
 """
 
+import argparse
 import os
 import sys
 import time
@@ -45,13 +49,18 @@ def download_file(url, dest_path, retries=3):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Download Pokemon sprites")
+    parser.add_argument("--start", type=int, default=1, help="Starting dex ID (default: 1)")
+    parser.add_argument("--end", type=int, default=251, help="Ending dex ID (default: 251)")
+    args = parser.parse_args()
+
     os.makedirs(FRONT_DIR, exist_ok=True)
     os.makedirs(BACK_DIR, exist_ok=True)
 
     success = 0
     failed = []
 
-    for dex_id in range(1, 152):
+    for dex_id in range(args.start, args.end + 1):
         name = f"{dex_id:03d}.png"
         front_path = os.path.join(FRONT_DIR, name)
         back_path = os.path.join(BACK_DIR, name)

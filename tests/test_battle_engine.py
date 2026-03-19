@@ -315,11 +315,12 @@ def test_serialization():
 
 
 def test_all_pokemon_valid():
-    print("\n=== All 151 Pokemon Validation ===")
+    total_pokemon = len(pokemon_data.POKEMON)
+    print(f"\n=== All {total_pokemon} Pokemon Validation ===")
 
     all_valid = True
     issues = []
-    for dex_id in range(1, 152):
+    for dex_id in range(1, total_pokemon + 1):
         try:
             poke = make_pokemon(dex_id)
             if len(poke.moves) != 4:
@@ -335,7 +336,7 @@ def test_all_pokemon_valid():
             issues.append(f"#{dex_id}: {e}")
             all_valid = False
 
-    test("All 151 Pokemon create successfully with valid data", all_valid,
+    test(f"All {total_pokemon} Pokemon create successfully with valid data", all_valid,
          f"\n    " + "\n    ".join(issues) if issues else "")
 
 

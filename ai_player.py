@@ -68,7 +68,7 @@ class BotPlayer:
 
     def select_team(self):
         """Pick 6 random Pokemon at default level 50."""
-        dex_ids = random.sample(range(1, 152), 6)
+        dex_ids = random.sample(range(1, len(pokemon_data.POKEMON) + 1), 6)
         self.team_dex_ids = dex_ids
         self.team = build_team(dex_ids, pokemon_data.POKEMON, pokemon_data.MOVES)
         self.team_name = f"{self.name}'s Team"
@@ -76,7 +76,7 @@ class BotPlayer:
 
     def select_team_at_level(self, avg_level):
         """Pick 6 random Pokemon scaled to a target level."""
-        dex_ids = random.sample(range(1, 152), 6)
+        dex_ids = random.sample(range(1, len(pokemon_data.POKEMON) + 1), 6)
         self.team_dex_ids = dex_ids
         team = []
         for dex_id in dex_ids:

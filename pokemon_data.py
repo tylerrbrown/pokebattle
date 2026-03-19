@@ -1,4 +1,4 @@
-"""Load and validate Gen 1 Pokemon data at startup."""
+"""Load and validate Pokemon data at startup."""
 
 import json
 import os
@@ -11,12 +11,14 @@ MOVES = {}        # move_id (str) -> move dict
 TYPE_CHART = {}   # atk_type -> def_type -> multiplier
 LEARNSETS = {}    # str(dex_id) -> [{level, move}]
 EVOLUTIONS = {}   # str(dex_id) -> {evolves_to, level, method}
+ZMOVES = {}       # type (str) -> {name, power_mult}
+MEGA_EVOLUTIONS = {}  # str(dex_id) -> mega form data (or list for dual megas)
 POKEMON_LIST = [] # ordered list for client
 
 
 def load_data():
     """Load all JSON data files. Call once at startup."""
-    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, POKEMON_LIST
+    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, ZMOVES, MEGA_EVOLUTIONS, POKEMON_LIST
 
     with open(os.path.join(DATA_DIR, "pokemon.json")) as f:
         pokemon_list = json.load(f)
@@ -36,6 +38,16 @@ def load_data():
     if os.path.exists(evolutions_path):
         with open(evolutions_path) as f:
             EVOLUTIONS = json.load(f)
+
+    zmoves_path = os.path.join(DATA_DIR, "zmoves.json")
+    if os.path.exists(zmoves_path):
+        with open(zmoves_path) as f:
+            ZMOVES = json.load(f)
+
+    mega_path = os.path.join(DATA_DIR, "mega_evolutions.json")
+    if os.path.exists(mega_path):
+        with open(mega_path) as f:
+            MEGA_EVOLUTIONS = json.load(f)
 
     # Index by dex ID
     POKEMON = {p["id"]: p for p in pokemon_list}

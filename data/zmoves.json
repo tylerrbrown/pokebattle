@@ -1,0 +1,20 @@
+{
+  "normal": {"name": "Breakneck Blitz", "power_mult": 1.8},
+  "fire": {"name": "Inferno Overdrive", "power_mult": 1.8},
+  "water": {"name": "Hydro Vortex", "power_mult": 1.8},
+  "electric": {"name": "Gigavolt Havoc", "power_mult": 1.8},
+  "grass": {"name": "Bloom Doom", "power_mult": 1.8},
+  "ice": {"name": "Subzero Slammer", "power_mult": 1.8},
+  "fighting": {"name": "All-Out Pummeling", "power_mult": 1.8},
+  "poison": {"name": "Acid Downpour", "power_mult": 1.8},
+  "ground": {"name": "Tectonic Rage", "power_mult": 1.8},
+  "flying": {"name": "Supersonic Skystrike", "power_mult": 1.8},
+  "psychic": {"name": "Shattered Psyche", "power_mult": 1.8},
+  "bug": {"name": "Savage Spin-Out", "power_mult": 1.8},
+  "rock": {"name": "Continental Crush", "power_mult": 1.8},
+  "ghost": {"name": "Never-Ending Nightmare", "power_mult": 1.8},
+  "dragon": {"name": "Devastating Drake", "power_mult": 1.8},
+  "dark": {"name": "Black Hole Eclipse", "power_mult": 1.8},
+  "steel": {"name": "Corkscrew Crash", "power_mult": 1.8},
+  "fairy": {"name": "Twinkle Tackle", "power_mult": 1.8}
+}

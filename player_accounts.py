@@ -223,6 +223,105 @@ class AccountManager:
         conn.close()
         return [dict(r) for r in rows]
 
+    def get_storage(self, player_id):
+        """Get Pokemon NOT in the active team (storage/backpack)."""
+        conn = self._conn()
+        rows = conn.execute(
+            """SELECT * FROM player_pokemon
+               WHERE player_id = ? AND is_in_team = 0
+               ORDER BY caught_at""",
+            (player_id,)
+        ).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def swap_team_member(self, player_id, team_pokemon_id, storage_pokemon_id):
+        """Swap a team member with a storage Pokemon."""
+        conn = self._conn()
+        team_row = conn.execute(
+            "SELECT team_slot FROM player_pokemon WHERE id = ? AND player_id = ? AND is_in_team = 1",
+            (team_pokemon_id, player_id)
+        ).fetchone()
+        if not team_row:
+            conn.close()
+            return False
+        slot = team_row["team_slot"]
+        storage_row = conn.execute(
+            "SELECT id FROM player_pokemon WHERE id = ? AND player_id = ? AND is_in_team = 0",
+            (storage_pokemon_id, player_id)
+        ).fetchone()
+        if not storage_row:
+            conn.close()
+            return False
+        conn.execute(
+            "UPDATE player_pokemon SET is_in_team = 0, team_slot = NULL WHERE id = ?",
+            (team_pokemon_id,)
+        )
+        conn.execute(
+            "UPDATE player_pokemon SET is_in_team = 1, team_slot = ? WHERE id = ?",
+            (slot, storage_pokemon_id)
+        )
+        conn.commit()
+        conn.close()
+        return True
+
+    def move_to_team(self, player_id, pokemon_id):
+        """Move a storage Pokemon to team (if team < 6)."""
+        conn = self._conn()
+        team_count = conn.execute(
+            "SELECT COUNT(*) as cnt FROM player_pokemon WHERE player_id = ? AND is_in_team = 1",
+            (player_id,)
+        ).fetchone()["cnt"]
+        if team_count >= 6:
+            conn.close()
+            return False
+        row = conn.execute(
+            "SELECT id FROM player_pokemon WHERE id = ? AND player_id = ? AND is_in_team = 0",
+            (pokemon_id, player_id)
+        ).fetchone()
+        if not row:
+            conn.close()
+            return False
+        conn.execute(
+            "UPDATE player_pokemon SET is_in_team = 1, team_slot = ? WHERE id = ?",
+            (team_count, pokemon_id)
+        )
+        conn.commit()
+        conn.close()
+        return True
+
+    def move_to_storage(self, player_id, pokemon_id):
+        """Move a team Pokemon to storage (must keep at least 1 on team)."""
+        conn = self._conn()
+        team_count = conn.execute(
+            "SELECT COUNT(*) as cnt FROM player_pokemon WHERE player_id = ? AND is_in_team = 1",
+            (player_id,)
+        ).fetchone()["cnt"]
+        if team_count <= 1:
+            conn.close()
+            return False
+        row = conn.execute(
+            "SELECT team_slot FROM player_pokemon WHERE id = ? AND player_id = ? AND is_in_team = 1",
+            (pokemon_id, player_id)
+        ).fetchone()
+        if not row:
+            conn.close()
+            return False
+        removed_slot = row["team_slot"]
+        conn.execute(
+            "UPDATE player_pokemon SET is_in_team = 0, team_slot = NULL WHERE id = ?",
+            (pokemon_id,)
+        )
+        # Compact team slots: shift higher slots down
+        conn.execute(
+            """UPDATE player_pokemon SET team_slot = team_slot - 1
+               WHERE player_id = ? AND is_in_team = 1 AND team_slot > ?""",
+            (player_id, removed_slot)
+        )
+        conn.commit()
+        conn.close()
+        return True
+
     def get_profile(self, player_id):
         """Get full player profile with team."""
         conn = self._conn()

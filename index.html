@@ -31,7 +31,20 @@
   --type-fighting: #c03028; --type-poison: #a040a0; --type-ground: #e0c068;
   --type-flying: #a890f0; --type-psychic: #f85888; --type-bug: #a8b820;
   --type-rock: #b8a038; --type-ghost: #705898; --type-dragon: #7038f8;
-  --type-dark: #705848; --type-steel: #b8b8d0;
+  --type-dark: #705848; --type-steel: #b8b8d0; --type-fairy: #ee99ac;
+  /* Font sizes (bumped +2px from original) */
+  --fs-2xs: 12px;  /* was 10 */
+  --fs-xs: 14px;   /* was 12 */
+  --fs-sm: 15px;   /* was 13 */
+  --fs-base: 16px; /* was 14 */
+  --fs-md: 17px;   /* was 15 */
+  --fs-lg: 18px;   /* was 16 */
+  --fs-xl: 20px;   /* was 18 */
+  --fs-2xl: 22px;  /* was 20 */
+  --fs-3xl: 24px;  /* was 22 */
+  --fs-4xl: 26px;  /* was 24 */
+  --fs-5xl: 30px;  /* was 28 */
+  --fs-6xl: 50px;  /* was 48 */
 }
 html, body { height: 100%; overflow: hidden; }
 body {
@@ -56,7 +69,7 @@ input {
   color: var(--text);
   border: 2px solid var(--border);
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: var(--fs-base);
   border-radius: 6px;
 }
 input:focus { border-color: var(--accent); }
@@ -82,19 +95,19 @@ input.invalid { border-color: var(--red); }
   padding: 20px;
 }
 .title-logo {
-  font-size: 28px;
+  font-size: var(--fs-5xl);
   color: var(--accent);
   text-shadow: 0 0 20px rgba(233,69,96,0.5), 0 4px 0 #8b1a2b;
   text-align: center;
   line-height: 1.6;
 }
 .title-subtitle {
-  font-size: 14px;
+  font-size: var(--fs-base);
   color: var(--text-dim);
   text-align: center;
 }
 .title-instructions {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   line-height: 2.2;
   text-align: left;
@@ -114,7 +127,7 @@ input.invalid { border-color: var(--red); }
 .btn {
   padding: 12px 20px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--fs-base);
   transition: all 0.15s;
   flex: 1;
 }
@@ -126,7 +139,7 @@ input.invalid { border-color: var(--red); }
 .btn-ai { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: #1a1a2e; font-weight: bold; }
 .btn-ai:hover { filter: brightness(1.1); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.error-text { color: var(--red); font-size: 12px; min-height: 16px; text-align: center; }
+.error-text { color: var(--red); font-size: var(--fs-xs); min-height: 16px; text-align: center; }
 
 /* ─── Lobby Screen ──────────────────────────────── */
 .lobby-screen {
@@ -136,14 +149,14 @@ input.invalid { border-color: var(--red); }
   padding: 20px;
 }
 .room-code {
-  font-size: 48px;
+  font-size: var(--fs-6xl);
   letter-spacing: 12px;
   color: var(--accent);
   text-shadow: 0 0 30px rgba(233,69,96,0.4);
   cursor: pointer;
 }
 .room-code:hover { text-shadow: 0 0 40px rgba(233,69,96,0.7); }
-.lobby-status { font-size: 14px; color: var(--text-dim); }
+.lobby-status { font-size: var(--fs-base); color: var(--text-dim); }
 .dots-anim::after {
   content: '';
   animation: dots 1.5s infinite;
@@ -155,9 +168,9 @@ input.invalid { border-color: var(--red); }
 /* ─── Team Select Screen ────────────────────────── */
 .team-screen { padding: 10px; gap: 8px; }
 .team-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.team-header input { flex: 1; font-size: 12px; padding: 6px 10px; }
-.team-timer { font-size: 16px; color: var(--yellow); min-width: 50px; text-align: right; }
-.team-search { width: 100%; font-size: 12px; padding: 6px 10px; }
+.team-header input { flex: 1; font-size: var(--fs-xs); padding: 6px 10px; }
+.team-timer { font-size: var(--fs-lg); color: var(--yellow); min-width: 50px; text-align: right; }
+.team-search { width: 100%; font-size: var(--fs-xs); padding: 6px 10px; }
 
 .pokemon-grid {
   flex: 1;
@@ -187,7 +200,7 @@ input.invalid { border-color: var(--red); }
   height: 48px;
   image-rendering: pixelated;
 }
-.pokemon-card .pname { font-size: 12px; text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+.pokemon-card .pname { font-size: var(--fs-xs); text-align: center; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
 .team-bar {
   display: flex;
@@ -219,15 +232,15 @@ input.invalid { border-color: var(--red); }
   border-radius: 50%;
   background: var(--red);
   color: #fff;
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 .team-footer { display: flex; gap: 8px; align-items: center; }
-.team-footer .btn { font-size: 13px; padding: 10px 16px; }
-.opponent-status { font-size: 12px; color: var(--text-dim); flex: 1; text-align: right; }
+.team-footer .btn { font-size: var(--fs-sm); padding: 10px 16px; }
+.opponent-status { font-size: var(--fs-xs); color: var(--text-dim); flex: 1; text-align: right; }
 
 /* ─── Battle Screen ─────────────────────────────── */
 .battle-screen { background: var(--bg); position: relative; }
@@ -276,10 +289,10 @@ input.invalid { border-color: var(--red); }
 }
 .player-sprite.faint { animation: faint-anim 0.8s forwards; }
 
-.poke-name { font-size: 14px; margin-bottom: 4px; }
+.poke-name { font-size: var(--fs-base); margin-bottom: 4px; }
 .poke-status-badge {
   display: inline-block;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   padding: 1px 4px;
   border-radius: 3px;
   margin-left: 4px;
@@ -304,7 +317,7 @@ input.invalid { border-color: var(--red); }
   border-radius: 4px;
   transition: width 0.8s ease-out, background-color 0.3s;
 }
-.hp-text { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.hp-text { font-size: var(--fs-xs); color: var(--text-dim); margin-top: 2px; }
 
 /* Pokeball team indicators */
 .team-balls {
@@ -331,7 +344,7 @@ input.invalid { border-color: var(--red); }
   align-items: center;
 }
 .battle-text {
-  font-size: 14px;
+  font-size: var(--fs-base);
   line-height: 1.6;
   min-height: 20px;
 }
@@ -356,13 +369,13 @@ input.invalid { border-color: var(--red); }
 }
 .move-btn:hover:not(:disabled) { border-color: var(--blue); }
 .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.move-btn .move-name { font-size: 13px; display: block; }
-.move-btn .move-meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
+.move-btn .move-name { font-size: var(--fs-sm); display: block; }
+.move-btn .move-meta { font-size: var(--fs-xs); color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
 .move-type-badge {
   display: inline-block;
   padding: 1px 5px;
   border-radius: 3px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #fff;
   text-transform: uppercase;
 }
@@ -375,9 +388,9 @@ input.invalid { border-color: var(--red); }
   padding: 4px 8px;
   background: var(--bg2);
 }
-.action-bar .btn { font-size: 12px; padding: 6px 12px; flex: none; }
-.action-timer { font-size: 12px; color: var(--yellow); }
-.waiting-text { font-size: 13px; color: var(--text-dim); text-align: center; padding: 20px; }
+.action-bar .btn { font-size: var(--fs-xs); padding: 6px 12px; flex: none; }
+.action-timer { font-size: var(--fs-xs); color: var(--yellow); }
+.waiting-text { font-size: var(--fs-sm); color: var(--text-dim); text-align: center; padding: 20px; }
 
 /* Switch panel (replaces move panel) */
 .switch-panel {
@@ -400,8 +413,8 @@ input.invalid { border-color: var(--red); }
 .switch-btn:hover:not(:disabled) { border-color: var(--green); }
 .switch-btn:disabled { opacity: 0.3; }
 .switch-btn img { width: 32px; height: 32px; image-rendering: pixelated; }
-.switch-btn .sw-name { font-size: 12px; display: block; margin-top: 2px; }
-.switch-btn .sw-hp { font-size: 12px; color: var(--text-dim); }
+.switch-btn .sw-name { font-size: var(--fs-xs); display: block; margin-top: 2px; }
+.switch-btn .sw-hp { font-size: var(--fs-xs); color: var(--text-dim); }
 
 /* ─── Tap Phase Overlay ─────────────────────────── */
 .tap-overlay {
@@ -416,8 +429,8 @@ input.invalid { border-color: var(--red); }
   gap: 16px;
 }
 .tap-overlay.active { display: flex; }
-.tap-move-name { font-size: 14px; color: var(--accent); }
-.tap-timer { font-size: 22px; color: var(--yellow); }
+.tap-move-name { font-size: var(--fs-base); color: var(--accent); }
+.tap-timer { font-size: var(--fs-3xl); color: var(--yellow); }
 .tap-meter-container {
   width: 60px;
   height: 200px;
@@ -436,11 +449,11 @@ input.invalid { border-color: var(--red); }
   border-radius: 0 0 5px 5px;
 }
 .tap-prompt {
-  font-size: 18px;
+  font-size: var(--fs-xl);
   color: #fff;
   animation: pulse 0.3s infinite alternate;
 }
-.tap-multiplier { font-size: 16px; color: var(--green); }
+.tap-multiplier { font-size: var(--fs-lg); color: var(--green); }
 .tap-area {
   position: absolute;
   inset: 0;
@@ -466,7 +479,7 @@ input.invalid { border-color: var(--red); }
 }
 .login-form input { width: 100%; text-align: center; }
 .login-welcome {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   text-align: center;
   line-height: 2;
@@ -479,8 +492,8 @@ input.invalid { border-color: var(--red); }
   gap: 20px;
   padding: 20px;
 }
-.starter-title { font-size: 16px; color: var(--yellow); text-align: center; }
-.starter-subtitle { font-size: 13px; color: var(--text-dim); text-align: center; }
+.starter-title { font-size: var(--fs-lg); color: var(--yellow); text-align: center; }
+.starter-subtitle { font-size: var(--fs-sm); color: var(--text-dim); text-align: center; }
 .starter-grid {
   display: flex;
   gap: 16px;
@@ -501,8 +514,8 @@ input.invalid { border-color: var(--red); }
 }
 .starter-card:hover { border-color: var(--accent); background: var(--bg3); transform: scale(1.05); }
 .starter-card img { width: 80px; height: 80px; image-rendering: pixelated; }
-.starter-card .starter-name { font-size: 12px; margin-top: 8px; text-align: center; }
-.starter-card .starter-type { font-size: 12px; margin-top: 4px; }
+.starter-card .starter-name { font-size: var(--fs-xs); margin-top: 8px; text-align: center; }
+.starter-card .starter-type { font-size: var(--fs-xs); margin-top: 4px; }
 
 /* ─── My Team Screen ───────────────────────────── */
 .myteam-screen {
@@ -514,7 +527,7 @@ input.invalid { border-color: var(--red); }
   justify-content: space-between;
   align-items: center;
 }
-.myteam-title { font-size: 18px; color: var(--accent); }
+.myteam-title { font-size: var(--fs-xl); color: var(--accent); }
 .myteam-list {
   flex: 1;
   overflow-y: auto;
@@ -533,25 +546,25 @@ input.invalid { border-color: var(--red); }
 }
 .myteam-card img { width: 56px; height: 56px; image-rendering: pixelated; }
 .myteam-info { flex: 1; }
-.myteam-info .pname { font-size: 13px; margin-bottom: 4px; }
-.myteam-info .plevel { font-size: 12px; color: var(--yellow); }
-.myteam-info .ptypes { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.myteam-info .pname { font-size: var(--fs-sm); margin-bottom: 4px; }
+.myteam-info .plevel { font-size: var(--fs-xs); color: var(--yellow); }
+.myteam-info .ptypes { font-size: var(--fs-xs); color: var(--text-dim); margin-top: 2px; }
 .myteam-moves {
   display: flex;
   gap: 4px;
   margin-top: 4px;
   flex-wrap: wrap;
 }
-.myteam-moves .move-type-badge { font-size: 10px; }
+.myteam-moves .move-type-badge { font-size: var(--fs-2xs); }
 .myteam-empty {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   text-align: center;
   padding: 40px 20px;
   line-height: 2;
 }
 .myteam-stats {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-dim);
   text-align: center;
   padding: 8px;
@@ -566,12 +579,12 @@ input.invalid { border-color: var(--red); }
   padding: 20px;
 }
 .gameover-title {
-  font-size: 28px;
+  font-size: var(--fs-5xl);
   text-align: center;
 }
 .gameover-title.win { color: var(--green); text-shadow: 0 0 20px rgba(74,222,128,0.5); }
 .gameover-title.lose { color: var(--red); text-shadow: 0 0 20px rgba(239,68,68,0.5); }
-.gameover-summary { font-size: 13px; color: var(--text-dim); text-align: center; line-height: 2; }
+.gameover-summary { font-size: var(--fs-sm); color: var(--text-dim); text-align: center; line-height: 2; }
 .gameover-btns { display: flex; gap: 10px; }
 
 /* ─── Animations ────────────────────────────────── */
@@ -623,13 +636,13 @@ input.invalid { border-color: var(--red); }
 
 /* ─── Hub Screen ───────────────────────────────── */
 .hub-screen { align-items:center; justify-content:center; gap:16px; padding:20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); }
-.hub-profile { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px; color:var(--text-dim); background:var(--bg2); padding:8px 14px; border-radius:8px; border:1px solid var(--border); width:360px; max-width:95%; }
+.hub-profile { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:var(--fs-xs); color:var(--text-dim); background:var(--bg2); padding:8px 14px; border-radius:8px; border:1px solid var(--border); width:360px; max-width:95%; }
 .hub-profile .stat { color:var(--yellow); }
 .hub-badges { display:flex; gap:4px; align-items:center; }
 .hub-badge { width:14px; height:14px; border-radius:50%; background:var(--bg); border:1px solid var(--border); }
 .hub-badge.earned { border:2px solid var(--yellow); }
 .hub-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:320px; max-width:95%; }
-.btn-wild { grid-column:1/-1; background:linear-gradient(135deg,var(--green),#22c55e); color:#1a1a2e; font-size:15px; font-weight:bold; padding:16px; }
+.btn-wild { grid-column:1/-1; background:linear-gradient(135deg,var(--green),#22c55e); color:#1a1a2e; font-size:var(--fs-md); font-weight:bold; padding:16px; }
 .btn-wild:hover { filter:brightness(1.1); }
 .btn-gym { background:linear-gradient(135deg,#7038f8,#a890f0); color:#fff; }
 .btn-gym:hover { filter:brightness(1.1); }
@@ -637,31 +650,55 @@ input.invalid { border-color: var(--red); }
 .btn-shop:hover { filter:brightness(1.1); }
 .btn-home { background:var(--bg3); color:var(--text); border:2px solid var(--accent); }
 .btn-home:hover { border-color:var(--green); }
+.btn-backpack { background:linear-gradient(135deg,#8b5cf6,#6d28d9); color:#fff; }
+.btn-backpack:hover { filter:brightness(1.1); }
+.btn-e4 { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+.btn-e4:hover { filter:brightness(1.1); }
+.btn-champion { background:linear-gradient(135deg,#f59e0b,#d97706); color:#1a1a2e; font-weight:bold; }
+.btn-champion:hover { filter:brightness(1.1); }
+.btn-masters { grid-column:1/-1; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a1a2e; font-weight:bold; }
+.btn-masters:hover { filter:brightness(1.1); }
+
+/* ─── Backpack / Storage ──────────────────────── */
+.backpack-screen { padding:16px; gap:10px; }
+.backpack-header { display:flex; justify-content:space-between; align-items:center; }
+.backpack-title { font-size:var(--fs-xl); color:#a78bfa; }
+.backpack-section-label { font-size:var(--fs-xs); color:var(--text-dim); padding:4px 0; border-bottom:1px solid var(--border); }
+.backpack-team { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.backpack-storage { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:6px; overflow-y:auto; flex:1; }
+.bp-card { display:flex; flex-direction:column; align-items:center; padding:8px 4px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s; }
+.bp-card:hover { border-color:var(--accent); background:var(--bg3); }
+.bp-card.selected { border-color:var(--yellow); box-shadow:0 0 10px rgba(250,204,21,0.3); }
+.bp-card img { width:48px; height:48px; image-rendering:pixelated; }
+.bp-card .bp-name { font-size:var(--fs-2xs); text-align:center; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
+.bp-card .bp-level { font-size:var(--fs-2xs); color:var(--yellow); }
+.bp-card .bp-types { font-size:9px; margin-top:2px; display:flex; gap:2px; justify-content:center; }
+.bp-card .bp-action { font-size:9px; color:var(--text-dim); margin-top:3px; }
 
 /* ─── Shop ─────────────────────────────────────── */
 .shop-screen { padding:16px; gap:12px; }
 .shop-header { display:flex; justify-content:space-between; align-items:center; }
-.shop-title { font-size:16px; color:var(--yellow); }
-.shop-currency { font-size:13px; color:var(--green); }
+.shop-title { font-size:var(--fs-lg); color:var(--yellow); }
+.shop-currency { font-size:var(--fs-sm); color:var(--green); }
 .shop-items { flex:1; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
-.shop-section-label { font-size:12px; color:var(--text-dim); padding:4px 0; border-bottom:1px solid var(--border); margin-top:4px; }
+.shop-section-label { font-size:var(--fs-xs); color:var(--text-dim); padding:4px 0; border-bottom:1px solid var(--border); margin-top:4px; }
 .shop-item { display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; }
-.shop-item-name { font-size:13px; }
-.shop-item-desc { font-size:12px; color:var(--text-dim); margin-top:2px; }
-.shop-item-price { font-size:12px; color:var(--green); margin-top:2px; }
-.shop-item-owned { font-size:12px; color:var(--yellow); margin-top:1px; }
-.shop-buy-btn { padding:8px 14px; border-radius:6px; background:var(--green); color:#1a1a2e; font-size:12px; }
+.shop-item-name { font-size:var(--fs-sm); }
+.shop-item-desc { font-size:var(--fs-xs); color:var(--text-dim); margin-top:2px; }
+.shop-item-price { font-size:var(--fs-xs); color:var(--green); margin-top:2px; }
+.shop-item-owned { font-size:var(--fs-xs); color:var(--yellow); margin-top:1px; }
+.shop-buy-btn { padding:8px 14px; border-radius:6px; background:var(--green); color:#1a1a2e; font-size:var(--fs-xs); }
 .shop-buy-btn:hover { filter:brightness(1.1); }
 .shop-buy-btn:disabled { opacity:0.4; cursor:not-allowed; }
 /* ─── Item Use UI ─────────────────────────────── */
 .btn-item { background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; }
 .btn-item:hover { filter:brightness(1.15); }
 .item-panel { display:flex; flex-direction:column; gap:6px; padding:8px; max-height:180px; overflow-y:auto; }
-.item-btn { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg2); border:2px solid var(--border); border-radius:6px; cursor:pointer; font-family:inherit; color:var(--text); font-size:12px; transition:all 0.15s; }
+.item-btn { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg2); border:2px solid var(--border); border-radius:6px; cursor:pointer; font-family:inherit; color:var(--text); font-size:var(--fs-xs); transition:all 0.15s; }
 .item-btn:hover:not(:disabled) { border-color:#a855f7; background:var(--bg3); }
 .item-btn:disabled { opacity:0.4; cursor:not-allowed; }
-.item-btn-name { font-size:12px; }
-.item-btn-qty { font-size:12px; color:var(--yellow); }
+.item-btn-name { font-size:var(--fs-xs); }
+.item-btn-qty { font-size:var(--fs-xs); color:var(--yellow); }
 .item-heal-flash { animation:heal-flash 0.6s ease-out; }
 @keyframes heal-flash { 0%{filter:brightness(1) drop-shadow(0 0 0 transparent)} 30%{filter:brightness(1.8) drop-shadow(0 0 12px #4ade80)} 100%{filter:brightness(1) drop-shadow(0 0 0 transparent)} }
 /* ─── My Team Item Use ────────────────────────── */
@@ -669,36 +706,36 @@ input.invalid { border-color: var(--red); }
 .myteam-card:hover { border-color:var(--accent); background:var(--bg3); }
 .myteam-card.selected { border-color:#a855f7; box-shadow:0 0 10px rgba(168,85,247,0.3); }
 .myteam-item-bar { display:flex; gap:6px; flex-wrap:wrap; padding:6px 0; }
-.myteam-item-btn { padding:6px 10px; border-radius:6px; background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; font-size:12px; font-family:inherit; cursor:pointer; border:none; transition:all 0.15s; }
+.myteam-item-btn { padding:6px 10px; border-radius:6px; background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; font-size:var(--fs-xs); font-family:inherit; cursor:pointer; border:none; transition:all 0.15s; }
 .myteam-item-btn:hover:not(:disabled) { filter:brightness(1.15); }
 .myteam-item-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
 /* ─── Gym List ─────────────────────────────────── */
 .gymlist-screen { padding:16px; gap:12px; }
 .gymlist-header { display:flex; justify-content:space-between; align-items:center; }
-.gymlist-title { font-size:16px; color:#a890f0; }
+.gymlist-title { font-size:var(--fs-lg); color:#a890f0; }
 .gym-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
 .gym-card { display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s; }
 .gym-card:hover:not(.locked):not(.completed) { border-color:var(--accent); background:var(--bg3); }
 .gym-card.completed { border-color:var(--green); opacity:0.7; }
 .gym-card.locked { opacity:0.4; cursor:not-allowed; }
 .gym-card.next { border-color:var(--yellow); box-shadow:0 0 10px rgba(250,204,21,0.2); }
-.gym-badge-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid var(--border); flex-shrink:0; }
+.gym-badge-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:var(--fs-lg); border:2px solid var(--border); flex-shrink:0; }
 .gym-card.completed .gym-badge-icon { border-color:var(--green); }
 .gym-card-info { flex:1; }
-.gym-card-name { font-size:12px; margin-bottom:3px; }
-.gym-card-detail { font-size:12px; color:var(--text-dim); }
+.gym-card-name { font-size:var(--fs-xs); margin-bottom:3px; }
+.gym-card-detail { font-size:var(--fs-xs); color:var(--text-dim); }
 
 /* ─── Gym Intro ────────────────────────────────── */
 .gymintro-screen { align-items:center; justify-content:center; gap:16px; padding:20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); }
-.gymintro-name { font-size:20px; color:var(--accent); text-shadow:0 0 15px rgba(233,69,96,0.4); }
-.gymintro-title { font-size:12px; color:var(--text-dim); margin-top:4px; }
-.gymintro-dialog { font-size:12px; line-height:2.2; text-align:center; max-width:340px; color:var(--text); background:var(--bg2); padding:14px; border-radius:8px; border:1px solid var(--border); }
-.gymintro-info { font-size:12px; color:var(--text-dim); text-align:center; line-height:2; }
+.gymintro-name { font-size:var(--fs-2xl); color:var(--accent); text-shadow:0 0 15px rgba(233,69,96,0.4); }
+.gymintro-title { font-size:var(--fs-xs); color:var(--text-dim); margin-top:4px; }
+.gymintro-dialog { font-size:var(--fs-xs); line-height:2.2; text-align:center; max-width:340px; color:var(--text); background:var(--bg2); padding:14px; border-radius:8px; border:1px solid var(--border); }
+.gymintro-info { font-size:var(--fs-xs); color:var(--text-dim); text-align:center; line-height:2; }
 
 /* ─── Wild Battle Controls ─────────────────────── */
 .wild-action-bar { display:flex; gap:6px; padding:6px 8px; background:var(--bg2); }
-.wild-action-bar .btn { font-size:12px; padding:8px 10px; flex:1; }
+.wild-action-bar .btn { font-size:var(--fs-xs); padding:8px 10px; flex:1; }
 .btn-ball { background:var(--red); color:#fff; }
 .btn-ball:hover { filter:brightness(1.2); }
 .btn-run { background:var(--bg3); color:var(--text); border:2px solid var(--border); }
@@ -712,26 +749,26 @@ input.invalid { border-color: var(--red); }
 @keyframes ball-drop { 0%{transform:translateY(-100px);opacity:0} 60%{transform:translateY(10px);opacity:1} 100%{transform:translateY(0);opacity:1} }
 .catch-ball.shaking { animation:ball-shake 0.5s ease-in-out; }
 .catch-ball.dropping { animation:ball-drop 0.5s ease-out; }
-.catch-text { font-size:13px; color:var(--text); text-align:center; }
-.catch-result { font-size:16px; text-align:center; }
+.catch-text { font-size:var(--fs-sm); color:var(--text); text-align:center; }
+.catch-result { font-size:var(--fs-lg); text-align:center; }
 .catch-result.caught { color:var(--green); }
 .catch-result.escaped { color:var(--red); }
-.levelup-text { font-size:18px; color:var(--yellow); text-shadow:0 0 20px rgba(250,204,21,0.5); }
-.levelup-pokemon { font-size:14px; color:var(--text); margin-top:4px; }
-.levelup-detail { font-size:12px; color:var(--text-dim); line-height:2.2; text-align:center; margin-top:8px; }
-.evo-text { font-size:16px; color:var(--green); text-align:center; }
+.levelup-text { font-size:var(--fs-xl); color:var(--yellow); text-shadow:0 0 20px rgba(250,204,21,0.5); }
+.levelup-pokemon { font-size:var(--fs-base); color:var(--text); margin-top:4px; }
+.levelup-detail { font-size:var(--fs-xs); color:var(--text-dim); line-height:2.2; text-align:center; margin-top:8px; }
+.evo-text { font-size:var(--fs-lg); color:var(--green); text-align:center; }
 .evo-sprites { display:flex; align-items:center; gap:16px; }
 .evo-sprites img { width:96px; height:96px; image-rendering:pixelated; }
-.evo-arrow { font-size:24px; color:var(--yellow); }
+.evo-arrow { font-size:var(--fs-4xl); color:var(--yellow); }
 @keyframes evo-glow { 0%,100%{filter:brightness(1)} 50%{filter:brightness(2)} }
 .evo-glowing { animation:evo-glow 0.8s ease-in-out 3; }
-.gym-result-badge { font-size:13px; color:var(--yellow); margin-top:4px; }
-.gym-result-dialog { font-size:12px; color:var(--text); text-align:center; line-height:2; max-width:320px; }
-.gym-result-currency { font-size:12px; color:var(--green); margin-top:4px; }
-.journey-level { font-size:12px; color:var(--yellow); margin-left:6px; }
+.gym-result-badge { font-size:var(--fs-sm); color:var(--yellow); margin-top:4px; }
+.gym-result-dialog { font-size:var(--fs-xs); color:var(--text); text-align:center; line-height:2; max-width:320px; }
+.gym-result-currency { font-size:var(--fs-xs); color:var(--green); margin-top:4px; }
+.journey-level { font-size:var(--fs-xs); color:var(--yellow); margin-left:6px; }
 /* Toast notifications */
 .toast-container { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:9999; pointer-events:none; }
-.toast { background:var(--green); color:#000; padding:8px 20px; border-radius:20px; font-size:13px; font-weight:bold; text-align:center;
+.toast { background:var(--green); color:#000; padding:8px 20px; border-radius:20px; font-size:var(--fs-sm); font-weight:bold; text-align:center;
   opacity:0; transform:translateY(-10px); animation:toast-in 0.3s ease forwards, toast-out 0.3s ease 1.8s forwards; }
 @keyframes toast-in { to { opacity:1; transform:translateY(0); } }
 @keyframes toast-out { to { opacity:0; transform:translateY(-10px); } }
@@ -739,13 +776,13 @@ input.invalid { border-color: var(--red); }
 /* ─── Move Management Screen ──────────────────── */
 .movemgmt-screen { padding:16px; gap:12px; }
 .movemgmt-header { display:flex; justify-content:space-between; align-items:center; }
-.movemgmt-title { font-size:16px; color:var(--accent); }
+.movemgmt-title { font-size:var(--fs-lg); color:var(--accent); }
 .movemgmt-pokemon { display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; }
 .movemgmt-pokemon img { width:64px; height:64px; image-rendering:pixelated; }
 .movemgmt-pokemon-info { flex:1; }
-.movemgmt-pokemon-info .pname { font-size:14px; margin-bottom:4px; }
-.movemgmt-pokemon-info .plevel { font-size:12px; color:var(--yellow); }
-.movemgmt-section-title { font-size:13px; color:var(--text-dim); margin-top:4px; }
+.movemgmt-pokemon-info .pname { font-size:var(--fs-base); margin-bottom:4px; }
+.movemgmt-pokemon-info .plevel { font-size:var(--fs-xs); color:var(--yellow); }
+.movemgmt-section-title { font-size:var(--fs-sm); color:var(--text-dim); margin-top:4px; }
 .movemgmt-current { display:flex; flex-direction:column; gap:6px; }
 .movemgmt-move {
   display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg2);
@@ -753,8 +790,8 @@ input.invalid { border-color: var(--red); }
 }
 .movemgmt-move:hover { border-color:var(--blue); background:var(--bg3); }
 .movemgmt-move.selected { border-color:var(--accent); background:rgba(233,69,96,0.15); }
-.movemgmt-move-name { font-size:13px; flex:1; }
-.movemgmt-move-stats { font-size:12px; color:var(--text-dim); display:flex; gap:8px; }
+.movemgmt-move-name { font-size:var(--fs-sm); flex:1; }
+.movemgmt-move-stats { font-size:var(--fs-xs); color:var(--text-dim); display:flex; gap:8px; }
 .movemgmt-move-stats span { white-space:nowrap; }
 .movemgmt-learnable {
   flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;
@@ -766,10 +803,10 @@ input.invalid { border-color: var(--red); }
 .movemgmt-learn-move:hover { border-color:var(--green); background:var(--bg3); }
 .movemgmt-learn-move.known { opacity:0.35; cursor:not-allowed; border-color:var(--border); }
 .movemgmt-learn-move.known:hover { background:var(--bg2); border-color:var(--border); }
-.movemgmt-learn-name { font-size:12px; flex:1; }
-.movemgmt-learn-stats { font-size:12px; color:var(--text-dim); display:flex; gap:6px; }
-.movemgmt-learn-lvl { font-size:12px; color:var(--yellow); min-width:40px; }
-.movemgmt-hint { font-size:12px; color:var(--text-dim); text-align:center; padding:8px; line-height:1.8; }
+.movemgmt-learn-name { font-size:var(--fs-xs); flex:1; }
+.movemgmt-learn-stats { font-size:var(--fs-xs); color:var(--text-dim); display:flex; gap:6px; }
+.movemgmt-learn-lvl { font-size:var(--fs-xs); color:var(--yellow); min-width:40px; }
+.movemgmt-hint { font-size:var(--fs-xs); color:var(--text-dim); text-align:center; padding:8px; line-height:1.8; }
 
 /* ─── Learn Move Overlay (level-up) ───────────── */
 .learnmove-overlay {
@@ -777,24 +814,24 @@ input.invalid { border-color: var(--red); }
   flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:20px;
 }
 .learnmove-overlay.active { display:flex; }
-.learnmove-title { font-size:16px; color:var(--green); text-align:center; }
-.learnmove-subtitle { font-size:13px; color:var(--text); text-align:center; }
+.learnmove-title { font-size:var(--fs-lg); color:var(--green); text-align:center; }
+.learnmove-subtitle { font-size:var(--fs-sm); color:var(--text); text-align:center; }
 .learnmove-new-move {
   padding:12px 16px; background:var(--bg2); border:3px solid var(--green); border-radius:8px;
   text-align:center; min-width:250px;
 }
-.learnmove-new-move .lm-name { font-size:14px; color:var(--green); }
-.learnmove-new-move .lm-stats { font-size:12px; color:var(--text-dim); margin-top:4px; }
-.learnmove-current-title { font-size:12px; color:var(--text-dim); margin-top:4px; }
+.learnmove-new-move .lm-name { font-size:var(--fs-base); color:var(--green); }
+.learnmove-new-move .lm-stats { font-size:var(--fs-xs); color:var(--text-dim); margin-top:4px; }
+.learnmove-current-title { font-size:var(--fs-xs); color:var(--text-dim); margin-top:4px; }
 .learnmove-current-list { display:flex; flex-direction:column; gap:6px; width:280px; max-width:95%; }
 .learnmove-current-move {
   display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg2);
   border:2px solid var(--border); border-radius:6px; cursor:pointer; transition:all 0.15s;
 }
 .learnmove-current-move:hover { border-color:var(--accent); background:var(--bg3); }
-.learnmove-current-move .lm-name { font-size:13px; flex:1; }
-.learnmove-current-move .lm-stats { font-size:12px; color:var(--text-dim); }
-.learnmove-skip { font-size:12px; color:var(--text-dim); cursor:pointer; margin-top:4px; text-decoration:underline; }
+.learnmove-current-move .lm-name { font-size:var(--fs-sm); flex:1; }
+.learnmove-current-move .lm-stats { font-size:var(--fs-xs); color:var(--text-dim); }
+.learnmove-skip { font-size:var(--fs-xs); color:var(--text-dim); cursor:pointer; margin-top:4px; text-decoration:underline; }
 .learnmove-skip:hover { color:var(--text); }
 </style>
 </head>
@@ -853,16 +890,20 @@ input.invalid { border-color: var(--red); }
 
   <!-- HUB SCREEN (Journey Mode main menu) -->
   <div id="screen-hub" class="screen hub-screen">
-    <div class="title-logo" style="font-size:22px">POKE<br>BATTLE</div>
+    <div class="title-logo" style="font-size:var(--fs-3xl)">POKE<br>BATTLE</div>
     <div class="hub-profile" id="hub-profile"></div>
     <div class="hub-btns">
       <button class="btn btn-wild" onclick="startWildEncounter()">WILD ENCOUNTER</button>
       <button class="btn btn-gym" onclick="showGyms()">GYM LEADERS</button>
+      <button class="btn btn-e4" id="hub-e4-btn" style="display:none" onclick="showEliteFour()">ELITE FOUR</button>
+      <button class="btn btn-champion" id="hub-champion-btn" style="display:none" onclick="showChampion()">CHAMPION</button>
+      <button class="btn btn-masters" id="hub-masters-btn" style="display:none" onclick="showMastersEight()">MASTERS 8</button>
       <button class="btn btn-shop" onclick="showShop()">SHOP</button>
       <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
+      <button class="btn btn-backpack" onclick="showBackpack()">BACKPACK</button>
       <button class="btn btn-ai" onclick="createJourneyBattle()">BATTLE AI</button>
-      <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:12px">QUICK BATTLE</button>
-      <button class="btn btn-secondary" style="font-size:12px" onclick="logout()">LOG OUT</button>
+      <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:var(--fs-xs)">QUICK BATTLE</button>
+      <button class="btn btn-secondary" style="font-size:var(--fs-xs)" onclick="logout()">LOG OUT</button>
     </div>
   </div>
 
@@ -870,17 +911,29 @@ input.invalid { border-color: var(--red); }
   <div id="screen-myteam" class="screen myteam-screen">
     <div class="myteam-header">
       <span class="myteam-title">My Team</span>
-      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="goHome()">BACK</button>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
     </div>
     <div class="myteam-list" id="myteam-list"></div>
     <div class="myteam-stats" id="myteam-stats"></div>
+  </div>
+
+  <!-- BACKPACK / STORAGE SCREEN -->
+  <div id="screen-backpack" class="screen backpack-screen">
+    <div class="backpack-header">
+      <span class="backpack-title">Backpack</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div class="backpack-section-label">Team <span id="backpack-team-count"></span></div>
+    <div class="backpack-team" id="backpack-team"></div>
+    <div class="backpack-section-label">Storage <span id="backpack-storage-count"></span></div>
+    <div class="backpack-storage" id="backpack-storage"></div>
   </div>
 
   <!-- MOVE MANAGEMENT SCREEN -->
   <div id="screen-movemgmt" class="screen movemgmt-screen">
     <div class="movemgmt-header">
       <span class="movemgmt-title">MOVES</span>
-      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="showMyTeam()">BACK</button>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="showMyTeam()">BACK</button>
     </div>
     <div class="movemgmt-pokemon" id="movemgmt-pokemon"></div>
     <div class="movemgmt-section-title">Current Moves (tap to select for replacement)</div>
@@ -892,7 +945,7 @@ input.invalid { border-color: var(--red); }
 
   <!-- TITLE SCREEN (Quick Battle menu) -->
   <div id="screen-title" class="screen title-screen">
-    <div class="title-logo" style="font-size:22px">QUICK<br>BATTLE</div>
+    <div class="title-logo" style="font-size:var(--fs-3xl)">QUICK<br>BATTLE</div>
     <div class="title-subtitle" id="title-greeting">Pick 6 from all 251 and battle!</div>
     <div class="title-instructions">
       <p>1. CREATE a room and share the 4-letter code</p>
@@ -914,7 +967,7 @@ input.invalid { border-color: var(--red); }
 
   <!-- LOBBY SCREEN -->
   <div id="screen-lobby" class="screen lobby-screen">
-    <div class="title-logo" style="font-size:20px">WAITING</div>
+    <div class="title-logo" style="font-size:var(--fs-2xl)">WAITING</div>
     <div class="room-code" id="lobby-code" onclick="copyCode()" title="Click to copy"></div>
     <div class="lobby-status">Share this code with your opponent</div>
     <div class="lobby-status dots-anim" id="lobby-waiting">Waiting for opponent</div>
@@ -1004,7 +1057,7 @@ input.invalid { border-color: var(--red); }
     </div>
     <div class="shop-items" id="shop-items"></div>
     <div class="shop-header" style="margin-top:8px">
-      <span style="font-size:12px;color:var(--text-dim)" id="shop-inventory-summary"></span>
+      <span style="font-size:var(--fs-xs);color:var(--text-dim)" id="shop-inventory-summary"></span>
     </div>
     <button class="btn btn-secondary" onclick="goHome()">BACK</button>
   </div>
@@ -1013,7 +1066,7 @@ input.invalid { border-color: var(--red); }
   <div id="screen-gymlist" class="screen gymlist-screen">
     <div class="gymlist-header">
       <span class="gymlist-title">GYM LEADERS</span>
-      <button class="btn btn-secondary" style="flex:none;font-size:12px" onclick="goHome()">BACK</button>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
     </div>
     <div class="gym-list" id="gym-list"></div>
   </div>
@@ -1027,6 +1080,36 @@ input.invalid { border-color: var(--red); }
     <div style="display:flex;gap:10px">
       <button class="btn btn-primary" id="gymintro-battle-btn" onclick="beginGymBattle()">BATTLE!</button>
       <button class="btn btn-secondary" onclick="showGyms()">BACK</button>
+    </div>
+  </div>
+
+  <!-- E4 LIST SCREEN -->
+  <div id="screen-e4list" class="screen gymlist-screen">
+    <div class="gymlist-header">
+      <span class="gymlist-title" style="color:#f87171">ELITE FOUR</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div class="gym-list" id="e4-list"></div>
+  </div>
+
+  <!-- MASTERS EIGHT LIST SCREEN -->
+  <div id="screen-masterslist" class="screen gymlist-screen">
+    <div class="gymlist-header">
+      <span class="gymlist-title" style="color:#fbbf24">MASTERS EIGHT</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div class="gym-list" id="masters-list"></div>
+  </div>
+
+  <!-- TRAINER INTRO SCREEN (shared for E4/Champion/Masters) -->
+  <div id="screen-trainerintro" class="screen gymintro-screen">
+    <div class="gymintro-name" id="trainerintro-name"></div>
+    <div class="gymintro-title" id="trainerintro-title"></div>
+    <div class="gymintro-dialog" id="trainerintro-dialog"></div>
+    <div class="gymintro-info" id="trainerintro-info"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" id="trainerintro-battle-btn">BATTLE!</button>
+      <button class="btn btn-secondary" id="trainerintro-back-btn">BACK</button>
     </div>
   </div>
 
@@ -1188,9 +1271,13 @@ function handleMessage(msg) {
     case 'team_data':
       renderMyTeam(msg.team, msg.all_pokemon);
       break;
+    case 'storage_data':
+      renderBackpack(msg.team, msg.storage);
+      break;
     case 'pokemon_list':
       S.pokemonList = msg.pokemon_list;
       if (msg.evolutions) S._evoData = msg.evolutions;
+      if (msg.mega_evolutions) S._megaData = msg.mega_evolutions;
       // Build move lookup for learn-move overlays
       msg.pokemon_list.forEach(function(pk) {
         if (pk.moves) pk.moves.forEach(function(m) { S._moveLookup[m.id] = m; });
@@ -1323,6 +1410,12 @@ function handleMessage(msg) {
       S.encounter = msg;
       setupJourneyBattle(msg);
       break;
+    case 'mega_evolved':
+      updateJourneyState(msg);
+      showToast(msg.pokemon_name + '!');
+      renderJourneyBattle();
+      showJourneyMovePanel();
+      break;
     case 'wild_turn_result':
       updateJourneyState(msg);
       if (msg.events && msg.events.length) {
@@ -1412,6 +1505,29 @@ function handleMessage(msg) {
         showGymDefeat(msg);
       }
       break;
+    case 'e4_list':
+      renderE4List(msg);
+      break;
+    case 'masters_list':
+      renderMastersList(msg);
+      break;
+    case 'trainer_intro':
+      showTrainerIntro(msg.trainer);
+      break;
+    case 'trainer_victory':
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(function() { showTrainerVictory(msg); });
+      } else {
+        showTrainerVictory(msg);
+      }
+      break;
+    case 'trainer_defeat':
+      if (msg.events && msg.events.length) {
+        playJourneyEvents(msg.events).then(function() { showTrainerDefeat(msg); });
+      } else {
+        showTrainerDefeat(msg);
+      }
+      break;
     case 'shop_data':
       renderShop(msg);
       break;
@@ -1424,10 +1540,12 @@ function handleMessage(msg) {
     case 'progression_data':
       if (S.account) {
         S.account.badges = msg.badges;
+        S.account.milestones = msg.milestones;
         S.account.currency = msg.currency;
         S.account.pokeballs = msg.pokeballs;
         S.account.total_pokemon = msg.total_pokemon;
       }
+      updateHubProgression();
       break;
     // ─── Move Management Messages ─────────────────
     case 'learnable_moves':
@@ -1807,7 +1925,7 @@ function showSwitchPanel(available, forced) {
     </div>`;
   } else {
     html += `<div class="action-bar">
-      <span style="font-size:12px;color:var(--yellow)">Choose your next Pokemon!</span>
+      <span style="font-size:var(--fs-xs);color:var(--yellow)">Choose your next Pokemon!</span>
       <span class="action-timer" id="action-timer"></span>
     </div>`;
   }
@@ -2162,6 +2280,82 @@ function showMyTeam() {
   document.getElementById('myteam-list').innerHTML = '<div class="myteam-empty">Loading...</div>';
 }
 
+// ─── Backpack / Storage ──────────────────────────
+var _bpSelectedTeamId = null;
+
+function showBackpack() {
+  showScreen('backpack');
+  _bpSelectedTeamId = null;
+  send({ type: 'get_storage' });
+  document.getElementById('backpack-team').innerHTML = '<div style="color:var(--text-dim);font-size:var(--fs-xs);text-align:center;padding:12px;grid-column:1/-1">Loading...</div>';
+  document.getElementById('backpack-storage').innerHTML = '';
+}
+
+function _bpCard(p, isTeam) {
+  var pk = S.pokemonList.find(function(x) { return x.id === p.dex_id; });
+  var name = p.nickname || (pk ? pk.name : 'Unknown');
+  var types = pk ? pk.types : [];
+  var sel = (isTeam && _bpSelectedTeamId === p.id) ? ' selected' : '';
+  var html = '<div class="bp-card' + sel + '" onclick="bpTap(' + p.id + ',' + isTeam + ')">';
+  html += '<img src="/sprites/front/' + p.dex_id + '.png">';
+  html += '<div class="bp-name">' + name + '</div>';
+  html += '<div class="bp-level">Lv.' + p.level + '</div>';
+  html += '<div class="bp-types">';
+  types.forEach(function(t) {
+    html += '<span class="move-type-badge" style="background:var(--type-' + t + ');font-size:9px;padding:1px 4px">' + t + '</span>';
+  });
+  html += '</div>';
+  if (isTeam) {
+    html += '<div class="bp-action">' + (_bpSelectedTeamId === p.id ? 'SELECTED' : 'tap to select') + '</div>';
+  } else {
+    html += '<div class="bp-action">' + (_bpSelectedTeamId ? 'tap to swap' : 'tap to add') + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderBackpack(team, storage) {
+  var teamEl = document.getElementById('backpack-team');
+  var storageEl = document.getElementById('backpack-storage');
+  document.getElementById('backpack-team-count').textContent = '(' + team.length + '/6)';
+  document.getElementById('backpack-storage-count').textContent = '(' + storage.length + ')';
+
+  var html = '';
+  team.forEach(function(p) { html += _bpCard(p, true); });
+  // Fill empty team slots
+  for (var i = team.length; i < 6; i++) {
+    html += '<div class="bp-card" style="opacity:0.3;cursor:default"><div class="bp-name" style="padding:20px 0">Empty</div></div>';
+  }
+  teamEl.innerHTML = html;
+
+  html = '';
+  if (storage.length === 0) {
+    html = '<div style="color:var(--text-dim);font-size:var(--fs-xs);text-align:center;padding:20px;grid-column:1/-1">No Pokemon in storage. Catch more!</div>';
+  } else {
+    storage.forEach(function(p) { html += _bpCard(p, false); });
+  }
+  storageEl.innerHTML = html;
+}
+
+function bpTap(pokemonId, isTeam) {
+  if (isTeam) {
+    // Toggle team selection
+    _bpSelectedTeamId = (_bpSelectedTeamId === pokemonId) ? null : pokemonId;
+    // Re-render with current data (request fresh)
+    send({ type: 'get_storage' });
+  } else {
+    // Storage Pokemon tapped
+    if (_bpSelectedTeamId) {
+      // Swap with selected team member
+      send({ type: 'swap_to_team', team_pokemon_id: _bpSelectedTeamId, storage_pokemon_id: pokemonId });
+      _bpSelectedTeamId = null;
+    } else {
+      // No team member selected — try to add to team
+      send({ type: 'move_to_team', pokemon_id: pokemonId });
+    }
+  }
+}
+
 function renderMyTeam(team, allPokemon) {
   const list = document.getElementById('myteam-list');
   const stats = document.getElementById('myteam-stats');
@@ -2216,7 +2410,7 @@ function renderMyTeam(team, allPokemon) {
         '<div class="myteam-moves">' + displayMoves + '</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:4px;flex:none">' +
-      '<button class="btn btn-secondary" style="font-size:12px;padding:8px 12px" onclick="event.stopPropagation();openMoveMgmt(' + p.id + ')">MOVES</button>' +
+      '<button class="btn btn-secondary" style="font-size:var(--fs-xs);padding:8px 12px" onclick="event.stopPropagation();openMoveMgmt(' + p.id + ')">MOVES</button>' +
       getEvolveButton(p) +
       '</div>';
     list.appendChild(card);
@@ -2273,7 +2467,7 @@ function getEvolveButton(pokemon) {
         const match = paths.find(e => (e.method === 'stone' || e.method === 'item') && e.item === itemId);
         if (match) {
           const targetName = S.pokemonList.find(p => p.id === match.evolves_to);
-          return '<button class="btn" style="font-size:12px;padding:8px 12px;background:var(--green);color:#1a1a2e" onclick="event.stopPropagation();useEvoItem(\'' + itemId + '\',' + pokemon.id + ')">' +
+          return '<button class="btn" style="font-size:var(--fs-xs);padding:8px 12px;background:var(--green);color:#1a1a2e" onclick="event.stopPropagation();useEvoItem(\'' + itemId + '\',' + pokemon.id + ')">' +
             'EVOLVE</button>';
         }
       }
@@ -2300,8 +2494,8 @@ function showEvoItemOverlay(msg) {
       '<span class="evo-arrow">→</span>' +
       '<img src="/sprites/front/' + toSprite + '.png" style="width:96px;height:96px;image-rendering:pixelated">' +
     '</div>' +
-    '<div style="font-size:14px;color:var(--text)">' + msg.from_name + ' evolved into ' + msg.to_name + '!</div>' +
-    '<div style="font-size:12px;color:var(--text-dim)">Tap to continue</div>';
+    '<div style="font-size:var(--fs-base);color:var(--text)">' + msg.from_name + ' evolved into ' + msg.to_name + '!</div>' +
+    '<div style="font-size:var(--fs-xs);color:var(--text-dim)">Tap to continue</div>';
   overlay.onclick = function() {
     overlay.remove();
     if (S.account) {
@@ -2337,7 +2531,7 @@ function openMoveMgmt(pokemonRowId) {
   S.moveMgmtPokemonId = pokemonRowId;
   S.moveMgmtSelectedMove = null;
   showScreen('movemgmt');
-  document.getElementById('movemgmt-current').innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:12px">Loading...</div>';
+  document.getElementById('movemgmt-current').innerHTML = '<div style="color:var(--text-dim);font-size:var(--fs-xs);text-align:center;padding:12px">Loading...</div>';
   document.getElementById('movemgmt-learnable').innerHTML = '';
   send({ type: 'get_learnable_moves', pokemon_id: pokemonRowId });
 }
@@ -2358,7 +2552,7 @@ function renderMoveMgmt(data) {
   const currentEl = document.getElementById('movemgmt-current');
   currentEl.innerHTML = '';
   if (data.current_moves.length === 0) {
-    currentEl.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:12px">No moves known</div>';
+    currentEl.innerHTML = '<div style="color:var(--text-dim);font-size:var(--fs-xs);text-align:center;padding:12px">No moves known</div>';
   } else {
     data.current_moves.forEach(function(m) {
       const div = document.createElement('div');
@@ -2394,7 +2588,7 @@ function renderMoveMgmt(data) {
   });
 
   if (filtered.length === 0) {
-    learnEl.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:12px">No learnable moves at this level.</div>';
+    learnEl.innerHTML = '<div style="color:var(--text-dim);font-size:var(--fs-xs);text-align:center;padding:12px">No learnable moves at this level.</div>';
   } else {
     filtered.forEach(function(m) {
       const isKnown = knownIds.has(m.move_id);
@@ -2562,8 +2756,10 @@ function goHome(showSave) {
   S.encounterType = null;
   S.gymData = null;
   send({ type: 'get_profile' });
+  send({ type: 'get_progression' });
   showScreen('hub');
   updateHubProfile();
+  updateHubProgression();
   if (showSave) showToast('Progress Saved!');
 }
 
@@ -2595,7 +2791,7 @@ function updateHubProfile() {
     '<span>$<span class="stat">' + (a.currency || 0) + '</span></span>' +
     '<span>Balls: <span class="stat">' + (a.pokeballs || 0) + '</span></span>' +
     '<span>Items: <span class="stat">' + itemTotal + '</span></span>' +
-    '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '/251</span></span>' +
+    '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '/' + (S.pokemonList ? S.pokemonList.length : '?') + '</span></span>' +
     '<span>Best Lv: <span class="stat">' + maxLv + '</span></span>' +
     '<div class="hub-badges">' + badgeHtml + '</div>';
 }
@@ -2606,6 +2802,9 @@ function setupJourneyBattle(msg) {
   S.myActive = msg.active_index || 0;
   S.oppTeam = [msg.wild_pokemon];
   S.oppActive = 0;
+  S._zMoveActive = false;
+  S._zMoveUsed = false;
+  S._megaUsed = false;
   showScreen('battle');
   renderJourneyBattle();
   if (S.encounterType === 'wild') {
@@ -2676,11 +2875,33 @@ function showJourneyMovePanel() {
   const controls = document.getElementById('battle-controls');
   const myPoke = S.myTeam[S.myActive];
   if (!myPoke || myPoke.is_fainted) return;
-  let html = '<div class="move-panel">';
+  let html = '';
+
+  // Z-Move and Mega buttons
+  var inv = S.account ? (S.account.inventory || {}) : {};
+  var zActive = S._zMoveActive || false;
+  var zUsed = S._zMoveUsed || false;
+  var megaUsed = S._megaUsed || false;
+  var hasZCrystal = !zUsed && myPoke.moves.some(function(m) { return m.power > 0 && inv['z-' + m.type] > 0; });
+  var megaData = S._megaData || {};
+  var hasMega = !megaUsed && !myPoke.is_mega && megaData[String(myPoke.dex_id)];
+  if (hasZCrystal || hasMega) {
+    html += '<div style="display:flex;gap:6px;margin-bottom:6px;justify-content:center">';
+    if (hasZCrystal) {
+      html += '<button class="btn" style="font-size:var(--fs-xs);padding:6px 12px;background:' + (zActive ? '#fbbf24' : 'var(--bg3)') + ';color:' + (zActive ? '#000' : 'var(--yellow)') + ';border:2px solid var(--yellow)" onclick="toggleZMove()">' + (zActive ? 'Z-MOVE ON' : 'Z-MOVE') + '</button>';
+    }
+    if (hasMega) {
+      html += '<button class="btn" style="font-size:var(--fs-xs);padding:6px 12px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none" onclick="activateMega()">MEGA</button>';
+    }
+    html += '</div>';
+  }
+
+  html += '<div class="move-panel">';
   myPoke.moves.forEach((m, i) => {
     const dis = m.current_pp <= 0 ? 'disabled' : '';
-    html += '<button class="move-btn" ' + dis + ' onclick="journeyMove(' + i + ')">' +
-      '<span class="move-name">' + m.name + '</span>' +
+    var zGlow = (zActive && m.power > 0 && inv['z-' + m.type] > 0) ? ';box-shadow:0 0 10px rgba(250,204,21,0.5);border-color:var(--yellow)' : '';
+    html += '<button class="move-btn" ' + dis + ' style="' + zGlow + '" onclick="journeyMove(' + i + ')">' +
+      '<span class="move-name">' + (zActive && m.power > 0 && inv['z-' + m.type] > 0 ? 'Z-' : '') + m.name + '</span>' +
       '<span class="move-meta"><span class="move-type-badge" style="background:var(--type-' + m.type + ')">' + m.type + '</span>' +
       '<span>PP ' + m.current_pp + '/' + (m.pp || '??') + '</span></span></button>';
   });
@@ -2690,7 +2911,7 @@ function showJourneyMovePanel() {
     const opp = S.oppTeam[0];
     const hpPct = opp.current_hp / opp.max_hp;
     if (hpPct > 0 && hpPct <= 0.3) {
-      html += '<div style="text-align:center;color:var(--yellow);font-size:13px;padding:4px;font-weight:bold">It\'s weak — try throwing a Poké Ball!</div>';
+      html += '<div style="text-align:center;color:var(--yellow);font-size:var(--fs-sm);padding:4px;font-weight:bold">It\'s weak — try throwing a Poké Ball!</div>';
     }
   }
   html += '<div class="wild-action-bar">';
@@ -2726,7 +2947,7 @@ function showJourneySwitchPanel(available) {
   if (!forced) {
     html += '<div class="wild-action-bar"><button class="btn btn-secondary" onclick="showJourneyMovePanel()">MOVES</button></div>';
   } else {
-    html += '<div class="wild-action-bar"><span style="font-size:12px;color:var(--yellow);padding:4px">Choose your next Pokemon!</span></div>';
+    html += '<div class="wild-action-bar"><span style="font-size:var(--fs-xs);color:var(--yellow);padding:4px">Choose your next Pokemon!</span></div>';
   }
   controls.innerHTML = html;
 }
@@ -2735,16 +2956,37 @@ function showCatchWindowPanel() {
   const controls = document.getElementById('battle-controls');
   const balls = S.account ? S.account.pokeballs : 0;
   let html = '<div class="catch-window-prompt">';
-  html += '<div style="font-size:16px;color:var(--yellow);text-align:center;padding:8px;font-weight:bold;animation:pulse 1s infinite">It\'s weak! Throw a Poké Ball!</div>';
+  html += '<div style="font-size:var(--fs-lg);color:var(--yellow);text-align:center;padding:8px;font-weight:bold;animation:pulse 1s infinite">It\'s weak! Throw a Poké Ball!</div>';
   html += '</div><div class="wild-action-bar">';
-  html += '<button class="btn btn-ball catch-window-ball" onclick="journeyBall()" ' + (balls <= 0 ? 'disabled' : '') + ' style="font-size:16px;padding:12px 24px;animation:pulse 1s infinite">THROW BALL (' + balls + ')</button>';
+  html += '<button class="btn btn-ball catch-window-ball" onclick="journeyBall()" ' + (balls <= 0 ? 'disabled' : '') + ' style="font-size:var(--fs-lg);padding:12px 24px;animation:pulse 1s infinite">THROW BALL (' + balls + ')</button>';
   html += '<button class="btn btn-secondary" onclick="showJourneyMovePanel()">ATTACK</button>';
   html += '<button class="btn btn-run" onclick="journeyRun()">RUN</button>';
   html += '</div>';
   controls.innerHTML = html;
 }
 
-function journeyMove(i) { send({type:'wild_action',action_type:'move',move_index:i,tap_score:0.5}); showWaiting(''); playSound('select'); }
+function journeyMove(i) {
+  var msg = {type:'wild_action',action_type:'move',move_index:i,tap_score:0.5};
+  if (S._zMoveActive) { msg.z_move = true; S._zMoveActive = false; }
+  send(msg); showWaiting(''); playSound('select');
+}
+function toggleZMove() { S._zMoveActive = !S._zMoveActive; showJourneyMovePanel(); }
+function activateMega() {
+  var myPoke = S.myTeam[S.myActive];
+  var megaData = (S._megaData || {})[String(myPoke.dex_id)];
+  if (!megaData) return;
+  // Find correct mega stone from inventory
+  var inv = S.account ? (S.account.inventory || {}) : {};
+  var stoneId = null;
+  if (Array.isArray(megaData)) {
+    for (var j = 0; j < megaData.length; j++) { if (inv[megaData[j].mega_stone] > 0) { stoneId = megaData[j].mega_stone; break; } }
+  } else {
+    if (inv[megaData.mega_stone] > 0) stoneId = megaData.mega_stone;
+  }
+  if (!stoneId) return;
+  send({type:'wild_action',action_type:'mega_evolve',mega_stone:stoneId});
+  S._megaUsed = true;
+}
 function journeyBall() { send({type:'wild_action',action_type:'ball'}); showWaiting(''); playSound('select'); }
 function journeyRun() { send({type:'wild_action',action_type:'run'}); showWaiting(''); playSound('select'); }
 function journeySwitch(i) { send({type:'wild_action',action_type:'switch',pokemon_index:i}); showWaiting(''); playSound('select'); }
@@ -2796,7 +3038,7 @@ function showJourneyItemPanel() {
 function showReviveTargets(itemType) {
   const controls = document.getElementById('battle-controls');
   let html = '<div class="item-panel">';
-  html += '<div style="font-size:12px;color:var(--yellow);padding:4px;text-align:center">Choose a fainted Pokemon to revive:</div>';
+  html += '<div style="font-size:var(--fs-xs);color:var(--yellow);padding:4px;text-align:center">Choose a fainted Pokemon to revive:</div>';
   S.myTeam.forEach((p, i) => {
     const canRevive = p.is_fainted;
     html += '<button class="item-btn" ' + (!canRevive ? 'disabled' : '') + ' onclick="journeyUseItem(\'' + itemType + '\',' + i + ')">' +
@@ -3207,7 +3449,7 @@ function renderGymList(data) {
     card.innerHTML =
       '<div class="gym-badge-icon" style="background:' + (completed ? bc : 'var(--bg)') + ';color:' + (completed ? '#fff' : bc) + '">' + (completed ? 'V' : gym.id) + '</div>' +
       '<div class="gym-card-info"><div class="gym-card-name">' + gym.name +
-      ' <span class="move-type-badge" style="background:var(--type-' + gym.type + ');font-size:10px">' + gym.type + '</span></div>' +
+      ' <span class="move-type-badge" style="background:var(--type-' + gym.type + ');font-size:var(--fs-2xs)">' + gym.type + '</span></div>' +
       '<div class="gym-card-detail">' + gym.badge + ' | ' + gym.team_size + ' Pokemon (Lv.' + gym.max_level + ')</div>' +
       '<div class="gym-card-detail">' + (completed ? 'DEFEATED' : isNext ? 'CHALLENGE READY' : locked ? 'LOCKED' : '') + '</div></div>';
     if (!locked && !completed) {
@@ -3229,6 +3471,142 @@ function showGymIntro(gym) {
 }
 
 function beginGymBattle() { send({type:'gym_battle_start',gym_id:S.currentGymId}); }
+
+/* ─── Elite Four / Champion / Masters Eight ────── */
+var _currentTrainer = null;
+
+function updateHubProgression() {
+  var badges = S.account ? (S.account.badges || []) : [];
+  var milestones = S.account ? (S.account.milestones || []) : [];
+  var e4Btn = document.getElementById('hub-e4-btn');
+  var champBtn = document.getElementById('hub-champion-btn');
+  var mastersBtn = document.getElementById('hub-masters-btn');
+  if (e4Btn) e4Btn.style.display = badges.length >= 8 ? '' : 'none';
+  var allE4 = ['e4_1','e4_2','e4_3','e4_4'].every(function(id) { return milestones.indexOf(id + '_defeated') >= 0; });
+  if (champBtn) champBtn.style.display = allE4 ? '' : 'none';
+  if (mastersBtn) mastersBtn.style.display = milestones.indexOf('champion_defeated') >= 0 ? '' : 'none';
+}
+
+function showEliteFour() {
+  showScreen('e4list');
+  send({ type: 'get_elite_four' });
+  document.getElementById('e4-list').innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px">Loading...</div>';
+}
+
+function renderE4List(data) {
+  var list = document.getElementById('e4-list');
+  list.innerHTML = '';
+  var E4_COLORS = ['#98d8d8','#c03028','#705898','#7038f8'];
+  data.members.forEach(function(m, i) {
+    var completed = m.completed;
+    var isNext = !completed && (i === 0 || data.members[i-1].completed);
+    var locked = !completed && !isNext;
+    var card = document.createElement('div');
+    card.className = 'gym-card' + (completed ? ' completed' : '') + (isNext ? ' next' : '') + (locked ? ' locked' : '');
+    var bc = E4_COLORS[i] || '#888';
+    card.innerHTML =
+      '<div class="gym-badge-icon" style="background:' + (completed ? bc : 'var(--bg)') + ';color:' + (completed ? '#fff' : bc) + '">' + (completed ? 'V' : (i+1)) + '</div>' +
+      '<div class="gym-card-info"><div class="gym-card-name">' + m.name +
+      ' <span class="move-type-badge" style="background:var(--type-' + m.type + ');font-size:var(--fs-2xs)">' + m.type + '</span></div>' +
+      '<div class="gym-card-detail">' + m.title + ' | ' + m.team_size + ' Pokemon (Lv.' + m.max_level + ')</div>' +
+      '<div class="gym-card-detail">' + (completed ? 'DEFEATED' : isNext ? 'CHALLENGE READY' : 'LOCKED') + '</div></div>';
+    if (!locked && !completed) {
+      (function(id) { card.onclick = function() { send({type:'start_e4', e4_id: id}); }; })(m.id);
+    }
+    list.appendChild(card);
+  });
+}
+
+function showChampion() {
+  send({ type: 'get_champion' });
+}
+
+function showMastersEight() {
+  showScreen('masterslist');
+  send({ type: 'get_masters' });
+  document.getElementById('masters-list').innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px">Loading...</div>';
+}
+
+function renderMastersList(data) {
+  var list = document.getElementById('masters-list');
+  list.innerHTML = '';
+  var M8_COLORS = ['#f08030','#7038f8','#b8b8d0','#f85888','#7038f8','#7038f8','#a8b820','#a8a878'];
+  data.members.forEach(function(m, i) {
+    var completed = m.completed;
+    var card = document.createElement('div');
+    card.className = 'gym-card' + (completed ? ' completed' : ' next');
+    var bc = M8_COLORS[i] || '#888';
+    card.innerHTML =
+      '<div class="gym-badge-icon" style="background:' + (completed ? bc : 'var(--bg)') + ';color:' + (completed ? '#fff' : bc) + '">' + (completed ? 'V' : (i+1)) + '</div>' +
+      '<div class="gym-card-info"><div class="gym-card-name">' + m.name +
+      ' <span class="move-type-badge" style="background:var(--type-' + m.type + ');font-size:var(--fs-2xs)">' + m.type + '</span></div>' +
+      '<div class="gym-card-detail">' + m.title + ' | ' + m.team_size + ' Pokemon (Lv.' + m.max_level + ')</div>' +
+      '<div class="gym-card-detail">' + (completed ? 'DEFEATED' : 'CHALLENGE') + '</div></div>';
+    if (!completed) {
+      (function(id) { card.onclick = function() { send({type:'start_masters', m8_id: id}); }; })(m.id);
+    }
+    list.appendChild(card);
+  });
+}
+
+function showTrainerIntro(trainer) {
+  _currentTrainer = trainer;
+  showScreen('trainerintro');
+  document.getElementById('trainerintro-name').textContent = trainer.name;
+  document.getElementById('trainerintro-title').textContent = trainer.title;
+  document.getElementById('trainerintro-dialog').textContent = trainer.dialog_intro;
+  document.getElementById('trainerintro-info').innerHTML =
+    '<span class="move-type-badge" style="background:var(--type-' + trainer.type + ')">' + trainer.type + '</span> Type<br>' +
+    trainer.team_size + ' Pokemon (up to Lv.' + trainer.max_level + ')';
+  var battleBtn = document.getElementById('trainerintro-battle-btn');
+  var backBtn = document.getElementById('trainerintro-back-btn');
+  if (trainer.category === 'e4') {
+    battleBtn.onclick = function() { send({type:'e4_battle_start', e4_id: trainer.id}); };
+    backBtn.onclick = function() { showEliteFour(); };
+  } else if (trainer.category === 'champion') {
+    battleBtn.onclick = function() { send({type:'champion_battle_start'}); };
+    backBtn.onclick = function() { goHome(); };
+  } else if (trainer.category === 'masters') {
+    battleBtn.onclick = function() { send({type:'masters_battle_start', m8_id: trainer.id}); };
+    backBtn.onclick = function() { showMastersEight(); };
+  }
+}
+
+function showTrainerVictory(msg) {
+  S.journeyMode = false;
+  S.pendingXpResults = msg.xp_results || [];
+  var o = document.getElementById('gym-result-overlay');
+  var title = 'VICTORY!';
+  var badge = '';
+  if (msg.category === 'e4') badge = msg.trainer_name + ' defeated!';
+  else if (msg.category === 'champion') { title = 'CHAMPION!'; badge = 'You are the new Pokemon Champion!'; }
+  else if (msg.category === 'masters') {
+    badge = msg.trainer_name + ' defeated!';
+    if (msg.all_masters_beaten) { title = 'WORLD CHAMPION!'; badge = 'You defeated all Masters Eight! You are the World Champion!'; }
+  }
+  document.getElementById('gym-result-title').textContent = title;
+  document.getElementById('gym-result-title').className = 'gameover-title win';
+  document.getElementById('gym-result-dialog').textContent = msg.dialog_win;
+  document.getElementById('gym-result-badge').textContent = badge;
+  document.getElementById('gym-result-currency').textContent = '+$' + msg.currency_gained;
+  o.classList.add('active');
+  playSound('win');
+  // Refresh milestones for hub buttons
+  send({type:'get_progression'});
+}
+
+function showTrainerDefeat(msg) {
+  S.journeyMode = false;
+  S.pendingXpResults = [];
+  var o = document.getElementById('gym-result-overlay');
+  document.getElementById('gym-result-title').textContent = 'DEFEAT';
+  document.getElementById('gym-result-title').className = 'gameover-title lose';
+  document.getElementById('gym-result-dialog').textContent = msg.dialog_lose || 'You were defeated...';
+  document.getElementById('gym-result-badge').textContent = '';
+  document.getElementById('gym-result-currency').textContent = '';
+  o.classList.add('active');
+  playSound('faint');
+}
 
 /* ─── Gym Result ───────────────────────────────── */
 function showGymVictory(msg) {

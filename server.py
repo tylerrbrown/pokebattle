@@ -275,6 +275,7 @@ async def handle_message(player, msg, room_mgr):
                 "type": "pokemon_list",
                 "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
                 "evolutions": pokemon_data.EVOLUTIONS,
+                "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
             })
         return
 
@@ -297,6 +298,7 @@ async def handle_message(player, msg, room_mgr):
                 "type": "pokemon_list",
                 "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
                 "evolutions": pokemon_data.EVOLUTIONS,
+                "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
             })
         else:
             await player.send({"type": "login_error", "message": "Account not found."})
@@ -329,6 +331,59 @@ async def handle_message(player, msg, room_mgr):
         team = account_mgr.get_team(player.account_id)
         all_pokemon = account_mgr.get_all_pokemon(player.account_id)
         await player.send({"type": "team_data", "team": team, "all_pokemon": all_pokemon})
+        return
+
+    # ─── Backpack / Storage ───────────────────────────
+    if msg_type == "get_storage":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        team = account_mgr.get_team(player.account_id)
+        storage = account_mgr.get_storage(player.account_id)
+        await player.send({"type": "storage_data", "team": team, "storage": storage})
+        return
+
+    if msg_type == "swap_to_team":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        team_id = data.get("team_pokemon_id")
+        storage_id = data.get("storage_pokemon_id")
+        ok = account_mgr.swap_team_member(player.account_id, team_id, storage_id)
+        if ok:
+            team = account_mgr.get_team(player.account_id)
+            storage = account_mgr.get_storage(player.account_id)
+            await player.send({"type": "storage_data", "team": team, "storage": storage})
+        else:
+            await player.send({"type": "error", "message": "Swap failed."})
+        return
+
+    if msg_type == "move_to_team":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        pokemon_id = data.get("pokemon_id")
+        ok = account_mgr.move_to_team(player.account_id, pokemon_id)
+        if ok:
+            team = account_mgr.get_team(player.account_id)
+            storage = account_mgr.get_storage(player.account_id)
+            await player.send({"type": "storage_data", "team": team, "storage": storage})
+        else:
+            await player.send({"type": "error", "message": "Team is full (6 max)."})
+        return
+
+    if msg_type == "move_to_storage":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        pokemon_id = data.get("pokemon_id")
+        ok = account_mgr.move_to_storage(player.account_id, pokemon_id)
+        if ok:
+            team = account_mgr.get_team(player.account_id)
+            storage = account_mgr.get_storage(player.account_id)
+            await player.send({"type": "storage_data", "team": team, "storage": storage})
+        else:
+            await player.send({"type": "error", "message": "Must keep at least 1 Pokemon on team."})
         return
 
     # ─── Game Messages ─────────────────────────────────
@@ -398,6 +453,17 @@ async def handle_message(player, msg, room_mgr):
             return
 
         player.name = name
+
+        # Pre-set journey team for PvP if logged in
+        if getattr(player, 'account_id', None):
+            team_data = account_mgr.get_team(player.account_id)
+            if team_data and len(team_data) >= 6:
+                journey_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+                player.team = journey_team
+                player.team_dex_ids = [p.dex_id for p in journey_team]
+                player.team_name = f"{player.name}'s Team"
+                player.ready = True
+
         code = await room_mgr.create_room(player)
         await player.send({"type": "room_created", "code": code})
 
@@ -416,6 +482,17 @@ async def handle_message(player, msg, room_mgr):
             return
 
         player.name = name
+
+        # Pre-set journey team for PvP if logged in
+        if getattr(player, 'account_id', None):
+            team_data = account_mgr.get_team(player.account_id)
+            if team_data and len(team_data) >= 6:
+                journey_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+                player.team = journey_team
+                player.team_dex_ids = [p.dex_id for p in journey_team]
+                player.team_name = f"{player.name}'s Team"
+                player.ready = True
+
         result = await room_mgr.join_room(player, code)
         if result:
             opponent = room_mgr.get_room(player).get_opponent(player)
@@ -556,6 +633,206 @@ async def handle_message(player, msg, room_mgr):
             **encounter.serialize_state(),
             "gym_name": gym["name"],
             "gym_team_size": len(gym_team),
+        })
+
+    # ─── Elite Four / Champion / Masters Eight ──────
+    elif msg_type == "get_elite_four":
+        if not getattr(player, 'account_id', None):
+            return
+        badges = account_mgr.get_badges(player.account_id)
+        milestones = account_mgr.get_milestones(player.account_id)
+        if len(badges) < 8:
+            await player.send({"type": "error", "message": "Beat all 8 gym leaders first!"})
+            return
+        e4_list = []
+        for i, e in enumerate(ELITE_FOUR):
+            e4_list.append({
+                "id": e["id"], "name": e["name"], "title": e["title"],
+                "type": e["type"], "completed": f"{e['id']}_defeated" in milestones,
+                "team_size": len(e["team"]),
+                "max_level": max(t["level"] for t in e["team"]),
+            })
+        await player.send({
+            "type": "e4_list",
+            "members": e4_list,
+            "milestones": milestones,
+        })
+
+    elif msg_type == "start_e4":
+        if not getattr(player, 'account_id', None):
+            return
+        e4_id = data.get("e4_id")
+        member = None
+        e4_index = -1
+        for i, e in enumerate(ELITE_FOUR):
+            if e["id"] == e4_id:
+                member = e
+                e4_index = i
+                break
+        if not member:
+            await player.send({"type": "error", "message": "Invalid E4 member."})
+            return
+        milestones = account_mgr.get_milestones(player.account_id)
+        # Must beat E4 in order
+        if e4_index > 0:
+            prev_id = ELITE_FOUR[e4_index - 1]["id"]
+            if f"{prev_id}_defeated" not in milestones:
+                await player.send({"type": "error", "message": f"Beat {ELITE_FOUR[e4_index-1]['name']} first!"})
+                return
+        await player.send({
+            "type": "trainer_intro",
+            "trainer": {
+                "id": member["id"], "name": member["name"], "title": member["title"],
+                "type": member["type"], "dialog_intro": member["dialog_intro"],
+                "team_size": len(member["team"]),
+                "max_level": max(t["level"] for t in member["team"]),
+                "category": "e4",
+            }
+        })
+
+    elif msg_type == "e4_battle_start":
+        if not getattr(player, 'account_id', None):
+            return
+        e4_id = data.get("e4_id")
+        member = None
+        for e in ELITE_FOUR:
+            if e["id"] == e4_id:
+                member = e
+                break
+        if not member:
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokémon in team."})
+            return
+        player_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        trainer_team = build_trainer_team(member["team"])
+        encounter = WildEncounter(player, player_team, None, None)
+        encounter.gym = member  # reuse gym pattern for all trainer battles
+        encounter.gym_team = trainer_team
+        encounter.gym_active = 0
+        encounter.wild = trainer_team[0]
+        encounter.is_gym = True
+        encounter.trainer_category = "e4"
+        active_encounters[player.id] = encounter
+        await player.send({
+            "type": "gym_battle_start",
+            **encounter.serialize_state(),
+            "gym_name": member["name"],
+            "gym_team_size": len(trainer_team),
+        })
+
+    elif msg_type == "get_champion":
+        if not getattr(player, 'account_id', None):
+            return
+        milestones = account_mgr.get_milestones(player.account_id)
+        # Must beat all E4
+        for e in ELITE_FOUR:
+            if f"{e['id']}_defeated" not in milestones:
+                await player.send({"type": "error", "message": "Beat the entire Elite Four first!"})
+                return
+        await player.send({
+            "type": "trainer_intro",
+            "trainer": {
+                "id": CHAMPION["id"], "name": CHAMPION["name"], "title": CHAMPION["title"],
+                "type": CHAMPION.get("type", "normal"),
+                "dialog_intro": CHAMPION["dialog_intro"],
+                "team_size": len(CHAMPION["team"]),
+                "max_level": max(t["level"] for t in CHAMPION["team"]),
+                "category": "champion",
+            }
+        })
+
+    elif msg_type == "champion_battle_start":
+        if not getattr(player, 'account_id', None):
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokémon in team."})
+            return
+        player_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        trainer_team = build_trainer_team(CHAMPION["team"])
+        encounter = WildEncounter(player, player_team, None, None)
+        encounter.gym = CHAMPION
+        encounter.gym_team = trainer_team
+        encounter.gym_active = 0
+        encounter.wild = trainer_team[0]
+        encounter.is_gym = True
+        encounter.trainer_category = "champion"
+        active_encounters[player.id] = encounter
+        await player.send({
+            "type": "gym_battle_start",
+            **encounter.serialize_state(),
+            "gym_name": CHAMPION["name"],
+            "gym_team_size": len(trainer_team),
+        })
+
+    elif msg_type == "get_masters":
+        if not getattr(player, 'account_id', None):
+            return
+        milestones = account_mgr.get_milestones(player.account_id)
+        if "champion_defeated" not in milestones:
+            await player.send({"type": "error", "message": "Beat the Champion first!"})
+            return
+        m8_list = []
+        for m in MASTERS_EIGHT:
+            m8_list.append({
+                "id": m["id"], "name": m["name"], "title": m["title"],
+                "type": m["type"], "completed": f"{m['id']}_defeated" in milestones,
+                "team_size": len(m["team"]),
+                "max_level": max(t["level"] for t in m["team"]),
+            })
+        await player.send({
+            "type": "masters_list",
+            "members": m8_list,
+            "milestones": milestones,
+        })
+
+    elif msg_type == "start_masters":
+        if not getattr(player, 'account_id', None):
+            return
+        m8_id = data.get("m8_id")
+        member = get_masters_opponent(m8_id)
+        if not member:
+            await player.send({"type": "error", "message": "Invalid Masters opponent."})
+            return
+        await player.send({
+            "type": "trainer_intro",
+            "trainer": {
+                "id": member["id"], "name": member["name"], "title": member["title"],
+                "type": member["type"], "dialog_intro": member["dialog_intro"],
+                "team_size": len(member["team"]),
+                "max_level": max(t["level"] for t in member["team"]),
+                "category": "masters",
+            }
+        })
+
+    elif msg_type == "masters_battle_start":
+        if not getattr(player, 'account_id', None):
+            return
+        m8_id = data.get("m8_id")
+        member = get_masters_opponent(m8_id)
+        if not member:
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokémon in team."})
+            return
+        player_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        trainer_team = build_trainer_team(member["team"])
+        encounter = WildEncounter(player, player_team, None, None)
+        encounter.gym = member
+        encounter.gym_team = trainer_team
+        encounter.gym_active = 0
+        encounter.wild = trainer_team[0]
+        encounter.is_gym = True
+        encounter.trainer_category = "masters"
+        active_encounters[player.id] = encounter
+        await player.send({
+            "type": "gym_battle_start",
+            **encounter.serialize_state(),
+            "gym_name": member["name"],
+            "gym_team_size": len(trainer_team),
         })
 
     elif msg_type == "get_shop":
@@ -1098,8 +1375,41 @@ async def _handle_wild_action(player, encounter, data):
             })
         return
 
+    if action == "mega_evolve":
+        my_poke = encounter.get_active()
+        if getattr(encounter, '_mega_used', False):
+            await player.send({"type": "error", "message": "Already used Mega Evolution this battle!"})
+            return
+        mega_stone_id = data.get("mega_stone")
+        inventory = account_mgr.get_inventory(player.account_id) if hasattr(account_mgr, 'get_inventory') else {}
+        if not inventory.get(mega_stone_id, 0):
+            await player.send({"type": "error", "message": "You don't have that Mega Stone!"})
+            return
+        mega_data_all = pokemon_data.MEGA_EVOLUTIONS.get(str(my_poke.dex_id))
+        if not mega_data_all:
+            await player.send({"type": "error", "message": "This Pokemon can't Mega Evolve!"})
+            return
+        # Find the right mega form for this stone
+        if isinstance(mega_data_all, list):
+            mega_data = next((m for m in mega_data_all if m["mega_stone"] == mega_stone_id), None)
+        else:
+            mega_data = mega_data_all if mega_data_all["mega_stone"] == mega_stone_id else None
+        if not mega_data:
+            await player.send({"type": "error", "message": "Wrong Mega Stone for this Pokemon!"})
+            return
+        my_poke.mega_evolve(mega_data)
+        encounter._mega_used = True
+        await player.send({
+            "type": "mega_evolved",
+            "pokemon_name": my_poke.name,
+            "new_types": my_poke.types,
+            **encounter.serialize_state(),
+        })
+        return
+
     if action == "move":
         move_index = data.get("move_index", 0)
+        use_zmove = data.get("z_move", False)
         my_poke = encounter.get_active()
         wild = encounter.wild
 
@@ -1111,6 +1421,22 @@ async def _handle_wild_action(player, encounter, data):
                 player_move = next((m for m in my_poke.moves if m["current_pp"] > 0), STRUGGLE)
         else:
             player_move = STRUGGLE
+
+        # Z-Move: boost power for this turn, mark used
+        z_move_name = None
+        if use_zmove and not getattr(encounter, '_zmove_used', False):
+            z_crystal_type = player_move.get("type")
+            z_data = pokemon_data.ZMOVES.get(z_crystal_type)
+            if z_data and player_move["power"] > 0:
+                # Check player has the right Z-Crystal
+                z_key = f"z-{z_crystal_type}"
+                inventory = account_mgr.get_inventory(player.account_id) if hasattr(account_mgr, 'get_inventory') else {}
+                if inventory.get(z_key, 0) > 0:
+                    player_move = dict(player_move)  # Copy to avoid mutating
+                    player_move["power"] = int(player_move["power"] * z_data["power_mult"])
+                    player_move["accuracy"] = 100  # Z-Moves never miss
+                    z_move_name = z_data["name"]
+                    encounter._zmove_used = True
 
         # Wild Pokemon picks a random move
         if wild.has_usable_moves():
@@ -1165,11 +1491,11 @@ async def _handle_wild_action(player, encounter, data):
             del active_encounters[player.id]
 
             if is_gym:
-                # Check if more gym Pokemon remain
+                # Check if more trainer Pokemon remain
                 gym_team = encounter.gym_team
                 encounter.gym_active += 1
                 if encounter.gym_active < len(gym_team):
-                    # Next gym Pokemon
+                    # Next trainer Pokemon
                     encounter.wild = gym_team[encounter.gym_active]
                     active_encounters[player.id] = encounter
                     events.append({"type": "gym_next_pokemon", "pokemon": encounter.wild.name,
@@ -1182,19 +1508,61 @@ async def _handle_wild_action(player, encounter, data):
                     })
                     return
                 else:
-                    # Gym victory!
-                    gym = encounter.gym
-                    account_mgr.add_currency(player.account_id, gym["reward_currency"] - CURRENCY_WILD_WIN)
-                    account_mgr.earn_badge(player.account_id, gym["id"])
-                    await player.send({
-                        "type": "gym_victory",
-                        "events": events,
-                        "gym_name": gym["name"],
-                        "badge": gym["badge"],
-                        "dialog_win": gym["dialog_win"],
-                        "currency_gained": gym["reward_currency"],
-                        "xp_results": xp_results,
-                    })
+                    # Trainer victory! Handle by category
+                    trainer = encounter.gym
+                    category = getattr(encounter, 'trainer_category', 'gym')
+                    reward = trainer.get("reward_currency", CURRENCY_GYM_WIN)
+                    account_mgr.add_currency(player.account_id, reward - CURRENCY_WILD_WIN)
+
+                    if category == "e4":
+                        account_mgr.record_milestone(player.account_id, f"{trainer['id']}_defeated")
+                        await player.send({
+                            "type": "trainer_victory",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_win": trainer["dialog_win"],
+                            "currency_gained": reward,
+                            "category": "e4",
+                            "xp_results": xp_results,
+                        })
+                    elif category == "champion":
+                        account_mgr.record_milestone(player.account_id, "champion_defeated")
+                        await player.send({
+                            "type": "trainer_victory",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_win": trainer["dialog_win"],
+                            "currency_gained": reward,
+                            "category": "champion",
+                            "xp_results": xp_results,
+                        })
+                    elif category == "masters":
+                        account_mgr.record_milestone(player.account_id, f"{trainer['id']}_defeated")
+                        # Check if all Masters beaten
+                        milestones = account_mgr.get_milestones(player.account_id)
+                        all_beaten = all(f"{m['id']}_defeated" in milestones for m in MASTERS_EIGHT)
+                        await player.send({
+                            "type": "trainer_victory",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_win": trainer["dialog_win"],
+                            "currency_gained": reward,
+                            "category": "masters",
+                            "all_masters_beaten": all_beaten,
+                            "xp_results": xp_results,
+                        })
+                    else:
+                        # Regular gym
+                        account_mgr.earn_badge(player.account_id, trainer["id"])
+                        await player.send({
+                            "type": "gym_victory",
+                            "events": events,
+                            "gym_name": trainer["name"],
+                            "badge": trainer.get("badge", ""),
+                            "dialog_win": trainer.get("dialog_win", ""),
+                            "currency_gained": reward,
+                            "xp_results": xp_results,
+                        })
                     return
 
             await player.send({
@@ -1210,13 +1578,23 @@ async def _handle_wild_action(player, encounter, data):
             if not alive:
                 del active_encounters[player.id]
                 if is_gym:
-                    gym = encounter.gym
-                    await player.send({
-                        "type": "gym_defeat",
-                        "events": events,
-                        "gym_name": gym["name"],
-                        "dialog_lose": gym["dialog_lose"],
-                    })
+                    trainer = encounter.gym
+                    category = getattr(encounter, 'trainer_category', 'gym')
+                    if category in ("e4", "champion", "masters"):
+                        await player.send({
+                            "type": "trainer_defeat",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_lose": trainer.get("dialog_lose", ""),
+                            "category": category,
+                        })
+                    else:
+                        await player.send({
+                            "type": "gym_defeat",
+                            "events": events,
+                            "gym_name": trainer["name"],
+                            "dialog_lose": trainer.get("dialog_lose", ""),
+                        })
                 else:
                     await player.send({"type": "wild_blackout", "events": events})
                 return
