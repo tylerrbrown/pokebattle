@@ -196,10 +196,13 @@ class WildEncounter:
                 "current_hp": self.wild.current_hp,
                 "status": self.wild.status,
                 "rarity": self.wild_rarity,
+                "is_mega": getattr(self.wild, 'is_mega', False),
             },
             "your_pokemon": active.serialize_full(),
             "your_team": [p.serialize_full() for p in self.team],
             "active_index": self.active_idx,
+            "zmove_used": getattr(self, '_zmove_used', False),
+            "mega_used": getattr(self, '_mega_used', False),
         }
 
 

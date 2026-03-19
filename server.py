@@ -1488,7 +1488,6 @@ async def _handle_wild_action(player, encounter, data):
 
             xp_results = _award_encounter_xp(encounter, wild)
             account_mgr.add_currency(player.account_id, CURRENCY_WILD_WIN)
-            del active_encounters[player.id]
 
             if is_gym:
                 # Check if more trainer Pokemon remain
@@ -1497,7 +1496,6 @@ async def _handle_wild_action(player, encounter, data):
                 if encounter.gym_active < len(gym_team):
                     # Next trainer Pokemon
                     encounter.wild = gym_team[encounter.gym_active]
-                    active_encounters[player.id] = encounter
                     events.append({"type": "gym_next_pokemon", "pokemon": encounter.wild.name,
                                    "remaining": len(gym_team) - encounter.gym_active})
                     await player.send({
@@ -1563,8 +1561,10 @@ async def _handle_wild_action(player, encounter, data):
                             "currency_gained": reward,
                             "xp_results": xp_results,
                         })
+                    del active_encounters[player.id]
                     return
 
+            del active_encounters[player.id]
             await player.send({
                 "type": "wild_fainted",
                 "events": events,

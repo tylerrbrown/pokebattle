@@ -672,8 +672,8 @@ input.invalid { border-color: var(--red); }
 .bp-card img { width:48px; height:48px; image-rendering:pixelated; }
 .bp-card .bp-name { font-size:var(--fs-2xs); text-align:center; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
 .bp-card .bp-level { font-size:var(--fs-2xs); color:var(--yellow); }
-.bp-card .bp-types { font-size:9px; margin-top:2px; display:flex; gap:2px; justify-content:center; }
-.bp-card .bp-action { font-size:9px; color:var(--text-dim); margin-top:3px; }
+.bp-card .bp-types { font-size:var(--fs-2xs); margin-top:2px; display:flex; gap:2px; justify-content:center; }
+.bp-card .bp-action { font-size:var(--fs-2xs); color:var(--text-dim); margin-top:3px; }
 
 /* ─── Shop ─────────────────────────────────────── */
 .shop-screen { padding:16px; gap:12px; }
@@ -946,7 +946,7 @@ input.invalid { border-color: var(--red); }
   <!-- TITLE SCREEN (Quick Battle menu) -->
   <div id="screen-title" class="screen title-screen">
     <div class="title-logo" style="font-size:var(--fs-3xl)">QUICK<br>BATTLE</div>
-    <div class="title-subtitle" id="title-greeting">Pick 6 from all 251 and battle!</div>
+    <div class="title-subtitle" id="title-greeting">Pick 6 and battle!</div>
     <div class="title-instructions">
       <p>1. CREATE a room and share the 4-letter code</p>
       <p>2. Or JOIN with a friend's code</p>
@@ -1191,6 +1191,7 @@ const S = {
   _pendingLearnInfo: null,
   _moveLookup: {},  // move_id -> {name, type, power, accuracy, pp, ...}
   _evoData: {},     // dex_id -> evolution data (object or array)
+  _megaData: {},    // dex_id -> mega evolution data
 };
 
 /* ─── Toast Notifications ──────────────────────── */
@@ -1244,6 +1245,7 @@ function handleMessage(msg) {
       } else {
         showScreen('hub');
         updateHubProfile();
+        send({ type: 'get_progression' });
       }
       break;
     case 'register_error':
@@ -2302,7 +2304,7 @@ function _bpCard(p, isTeam) {
   html += '<div class="bp-level">Lv.' + p.level + '</div>';
   html += '<div class="bp-types">';
   types.forEach(function(t) {
-    html += '<span class="move-type-badge" style="background:var(--type-' + t + ');font-size:9px;padding:1px 4px">' + t + '</span>';
+    html += '<span class="move-type-badge" style="background:var(--type-' + t + ');font-size:var(--fs-2xs);padding:1px 4px">' + t + '</span>';
   });
   html += '</div>';
   if (isTeam) {
@@ -2822,6 +2824,8 @@ function updateJourneyState(msg) {
   if (msg.your_pokemon) S.myTeam[S.myActive] = msg.your_pokemon;
   if (msg.xp_results && msg.xp_results.length) S.pendingXpResults = msg.xp_results;
   if (msg.inventory && S.account) S.account.inventory = msg.inventory;
+  if (msg.zmove_used) S._zMoveUsed = true;
+  if (msg.mega_used) S._megaUsed = true;
 }
 
 function renderJourneyBattle() {
