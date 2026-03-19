@@ -628,6 +628,95 @@ class AccountManager:
         conn.close()
         return [r["milestone"] for r in rows]
 
+    # ─── Trading ─────────────────────────────────────
+
+    def trade_pokemon(self, from_player_id, from_pokemon_id, to_player_id, to_pokemon_id):
+        """Swap ownership of two Pokemon between two players.
+        Both Pokemon move to storage after trade to avoid team slot issues.
+        Returns True on success."""
+        conn = self._conn()
+        try:
+            # Verify ownership
+            row_a = conn.execute(
+                "SELECT id, player_id FROM player_pokemon WHERE id = ? AND player_id = ?",
+                (from_pokemon_id, from_player_id)
+            ).fetchone()
+            row_b = conn.execute(
+                "SELECT id, player_id FROM player_pokemon WHERE id = ? AND player_id = ?",
+                (to_pokemon_id, to_player_id)
+            ).fetchone()
+            if not row_a or not row_b:
+                conn.close()
+                return False
+
+            # Ensure neither player would be left with 0 team Pokemon
+            for pid, traded_id in [(from_player_id, from_pokemon_id), (to_player_id, to_pokemon_id)]:
+                team_count = conn.execute(
+                    "SELECT COUNT(*) as cnt FROM player_pokemon WHERE player_id = ? AND is_in_team = 1",
+                    (pid,)
+                ).fetchone()["cnt"]
+                in_team = conn.execute(
+                    "SELECT is_in_team FROM player_pokemon WHERE id = ?",
+                    (traded_id,)
+                ).fetchone()["is_in_team"]
+                if in_team and team_count <= 1:
+                    # This is their only team Pokemon; the incoming one will go to storage
+                    # so we can't remove their last team member.
+                    # Instead, put the incoming Pokemon into team slot 0.
+                    pass  # handled below
+
+            # Swap ownership — both go to storage first
+            conn.execute(
+                "UPDATE player_pokemon SET player_id = ?, is_in_team = 0, team_slot = NULL WHERE id = ?",
+                (to_player_id, from_pokemon_id)
+            )
+            conn.execute(
+                "UPDATE player_pokemon SET player_id = ?, is_in_team = 0, team_slot = NULL WHERE id = ?",
+                (from_player_id, to_pokemon_id)
+            )
+
+            # Compact team slots for both players
+            for pid in (from_player_id, to_player_id):
+                team_rows = conn.execute(
+                    "SELECT id FROM player_pokemon WHERE player_id = ? AND is_in_team = 1 ORDER BY team_slot",
+                    (pid,)
+                ).fetchall()
+                for slot, r in enumerate(team_rows):
+                    conn.execute("UPDATE player_pokemon SET team_slot = ? WHERE id = ?", (slot, r["id"]))
+
+                # If player has no team Pokemon left, move the received one to team
+                remaining = conn.execute(
+                    "SELECT COUNT(*) as cnt FROM player_pokemon WHERE player_id = ? AND is_in_team = 1",
+                    (pid,)
+                ).fetchone()["cnt"]
+                if remaining == 0:
+                    # Find the Pokemon they just received (which is in storage)
+                    received_id = to_pokemon_id if pid == from_player_id else from_pokemon_id
+                    conn.execute(
+                        "UPDATE player_pokemon SET is_in_team = 1, team_slot = 0 WHERE id = ?",
+                        (received_id,)
+                    )
+
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Trade error: {e}")
+            conn.close()
+            return False
+
+    def get_pokemon_by_id(self, pokemon_row_id, player_id):
+        """Get a specific Pokemon row, verified against player_id."""
+        conn = self._conn()
+        row = conn.execute(
+            "SELECT * FROM player_pokemon WHERE id = ? AND player_id = ?",
+            (pokemon_row_id, player_id)
+        ).fetchone()
+        conn.close()
+        if not row:
+            return None
+        return self._enrich_pokemon_xp(dict(row))
+
     def _row_to_dict(self, row):
         return {
             "id": row["id"],

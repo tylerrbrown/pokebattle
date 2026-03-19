@@ -179,6 +179,21 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
   - Frontend: purple "RARE CANDY (N)" button on My Team cards, count shown in hub + stats line + shop summary
   - Victory messages include `rare_candy_gained` field; UI shows "+X Rare Candy" alongside currency
 
+## Pokemon Trading
+
+- **Trade button** on hub screen opens trade menu (create or join with 4-letter code)
+- **TradeRoom** class in `server.py` — lightweight 2-player room separate from battle rooms
+- **Flow**: Create/join trade room -> both see their Pokemon -> tap to offer -> both confirm -> swap executed
+- **WebSocket Messages**:
+  - `create_trade` -> `trade_room_created` (code)
+  - `join_trade` -> `trade_room_joined` / `trade_partner_joined`
+  - `trade_offer` -> `trade_offer_set` / `trade_partner_offer`
+  - `trade_confirm` -> `trade_partner_confirmed` / `trade_complete`
+  - `trade_cancel` -> `trade_cancelled` / `trade_left`
+- **Database**: `trade_pokemon()` in `player_accounts.py` swaps `player_id` on both rows; both go to storage after trade; handles edge case where traded Pokemon was the last team member
+- **Cleanup**: trade rooms auto-cleaned on disconnect; separate from battle room namespace
+- **Frontend screens**: `screen-trademenu` (create/join), `screen-tradewait` (waiting for partner), `screen-trade` (active trade with offer/confirm)
+
 ## Tests
 
 ```bash
@@ -226,3 +241,4 @@ python tests/test_battle_engine.py
 3. **Gigantamax/Dynamax** — DYNAMAX button in battle, 3-turn HP doubling, Max Move names/powers, G-Max moves for eligible Pokemon, sprite scale+glow effect, mutually exclusive with Mega/Z-Move
 4. **Faster XP progression** — 1.5x base XP boost to `calc_xp_yield()`, Lucky Egg shop item ($1500) doubles all XP gains passively, "Lucky Egg: 2x XP!" shown in victory text
 5. **Rare Candy** — Battle reward item (+1 level); 10% wild drop, 100% gym/E4/Champion/Masters; usable from My Team; handles move learning + evolution on level-up
+6. **Pokemon Trading** — TRADE button on hub, 4-letter room codes, select Pokemon to offer, both confirm, swap ownership in DB; traded Pokemon go to storage
