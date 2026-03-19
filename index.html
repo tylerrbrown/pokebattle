@@ -1487,14 +1487,14 @@ function handleMessage(msg) {
       }
       break;
     case 'wild_force_switch':
-      if (msg.inventory && S.account) S.account.inventory = msg.inventory;
+      updateJourneyState(msg);
       if (msg.events && msg.events.length) {
         playJourneyEvents(msg.events).then(() => {
-          if (msg.your_team) S.myTeam = msg.your_team;
+          renderJourneyBattle();
           showJourneySwitchPanel(msg.available);
         });
       } else {
-        if (msg.your_team) S.myTeam = msg.your_team;
+        renderJourneyBattle();
         showJourneySwitchPanel(msg.available);
       }
       break;
@@ -3292,6 +3292,22 @@ async function playJourneyEvents(events) {
 }
 
 /* ─── Journey Victory/Defeat ───────────────────── */
+function processAllXpResults(xpResults, finalCallback) {
+  var levelUps = xpResults.filter(function(r) { return r.leveled_up; });
+  if (levelUps.length === 0) { finalCallback(); return; }
+  // Chain level-up overlays: last one calls finalCallback, each prior calls the next
+  var chain = finalCallback;
+  for (var i = levelUps.length - 1; i >= 0; i--) {
+    (function(result, nextCb) {
+      chain = function() {
+        var postChain = buildPostLevelUpChain(result, nextCb);
+        showLevelUpOverlay(result, postChain);
+      };
+    })(levelUps[i], chain);
+  }
+  chain();
+}
+
 function buildPostLevelUpChain(xpResult, finalCallback) {
   // Build a callback chain: level-up -> learn moves -> evolution -> final
   return function() {
@@ -3335,10 +3351,7 @@ function showJourneyVictory(msg) {
   setBattleText('You won! +$' + currency);
   playSound('win');
   setTimeout(() => {
-    if (xp.length && xp[0].leveled_up) {
-      var chain = buildPostLevelUpChain(xp[0], function() { goHome(true); });
-      showLevelUpOverlay(xp[0], chain);
-    } else goHome(true);
+    processAllXpResults(xp, function() { goHome(true); });
   }, 2000);
 }
 
@@ -3396,10 +3409,7 @@ function showCaughtResult(msg) {
   }
   setTimeout(() => {
     const xp = msg.xp_results || [];
-    if (xp.length && xp[0].leveled_up) {
-      var chain = buildPostLevelUpChain(xp[0], function() { goHome(true); });
-      showLevelUpOverlay(xp[0], chain);
-    } else goHome(true);
+    processAllXpResults(xp, function() { goHome(true); });
   }, 2500);
 }
 
@@ -3790,10 +3800,7 @@ function dismissGymResult() {
   document.getElementById('gym-result-overlay').classList.remove('active');
   const xp = S.pendingXpResults;
   S.pendingXpResults = [];
-  if (xp.length && xp[0].leveled_up) {
-    var chain = buildPostLevelUpChain(xp[0], function() { goHome(true); });
-    showLevelUpOverlay(xp[0], chain);
-  } else goHome(true);
+  processAllXpResults(xp, function() { goHome(true); });
 }
 
 function startWildEncounter() { send({type:'wild_encounter'}); }
