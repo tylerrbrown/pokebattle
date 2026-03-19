@@ -74,6 +74,11 @@
     "level": 22,
     "method": "level"
   },
+  "172": {
+    "evolves_to": 25,
+    "method": "level-up",
+    "level": null
+  },
   "25": {
     "evolves_to": 26,
     "method": "stone",
@@ -104,6 +109,11 @@
     "method": "stone",
     "item": "moon-stone"
   },
+  "173": {
+    "evolves_to": 35,
+    "method": "level-up",
+    "level": null
+  },
   "35": {
     "evolves_to": 36,
     "method": "stone",
@@ -113,6 +123,11 @@
     "evolves_to": 38,
     "method": "stone",
     "item": "fire-stone"
+  },
+  "174": {
+    "evolves_to": 39,
+    "method": "level-up",
+    "level": null
   },
   "39": {
     "evolves_to": 40,
@@ -124,15 +139,21 @@
     "level": 22,
     "method": "level"
   },
+  "42": {
+    "evolves_to": 169,
+    "method": "level-up",
+    "level": null
+  },
   "43": {
     "evolves_to": 44,
     "level": 21,
     "method": "level"
   },
-  "44": [
-    {"evolves_to": 45, "method": "stone", "item": "leaf-stone"},
-    {"evolves_to": 182, "method": "stone", "item": "sun-stone"}
-  ],
+  "44": {
+    "evolves_to": 182,
+    "method": "stone",
+    "item": "sun-stone"
+  },
   "46": {
     "evolves_to": 47,
     "level": 24,
@@ -149,7 +170,7 @@
     "method": "level"
   },
   "52": {
-    "evolves_to": 53,
+    "evolves_to": 863,
     "level": 28,
     "method": "level"
   },
@@ -163,6 +184,11 @@
     "level": 28,
     "method": "level"
   },
+  "57": {
+    "evolves_to": 979,
+    "method": "use-move",
+    "level": null
+  },
   "58": {
     "evolves_to": 59,
     "method": "stone",
@@ -173,10 +199,10 @@
     "level": 25,
     "method": "level"
   },
-  "61": [
-    {"evolves_to": 62, "method": "stone", "item": "water-stone"},
-    {"evolves_to": 186, "method": "item", "item": "link-cable"}
-  ],
+  "61": {
+    "evolves_to": 186,
+    "method": "trade"
+  },
   "63": {
     "evolves_to": 64,
     "level": 16,
@@ -184,8 +210,7 @@
   },
   "64": {
     "evolves_to": 65,
-    "method": "item",
-    "item": "link-cable"
+    "method": "trade"
   },
   "66": {
     "evolves_to": 67,
@@ -194,8 +219,7 @@
   },
   "67": {
     "evolves_to": 68,
-    "method": "item",
-    "item": "link-cable"
+    "method": "trade"
   },
   "69": {
     "evolves_to": 70,
@@ -219,22 +243,31 @@
   },
   "75": {
     "evolves_to": 76,
-    "method": "item",
-    "item": "link-cable"
+    "method": "trade"
   },
   "77": {
     "evolves_to": 78,
     "level": 40,
     "method": "level"
   },
-  "79": [
-    {"evolves_to": 80, "level": 37, "method": "level"},
-    {"evolves_to": 199, "method": "item", "item": "link-cable"}
-  ],
+  "79": {
+    "evolves_to": 199,
+    "method": "trade"
+  },
   "81": {
     "evolves_to": 82,
     "level": 30,
     "method": "level"
+  },
+  "82": {
+    "evolves_to": 462,
+    "method": "level-up",
+    "level": null
+  },
+  "83": {
+    "evolves_to": 865,
+    "method": "three-critical-hits",
+    "level": null
   },
   "84": {
     "evolves_to": 85,
@@ -263,8 +296,11 @@
   },
   "93": {
     "evolves_to": 94,
-    "method": "item",
-    "item": "link-cable"
+    "method": "trade"
+  },
+  "95": {
+    "evolves_to": 208,
+    "method": "trade"
   },
   "96": {
     "evolves_to": 97,
@@ -291,6 +327,16 @@
     "level": 28,
     "method": "level"
   },
+  "236": {
+    "evolves_to": 237,
+    "level": 20,
+    "method": "level"
+  },
+  "108": {
+    "evolves_to": 463,
+    "method": "level-up",
+    "level": null
+  },
   "109": {
     "evolves_to": 110,
     "level": 35,
@@ -301,10 +347,33 @@
     "level": 42,
     "method": "level"
   },
+  "112": {
+    "evolves_to": 464,
+    "method": "trade"
+  },
+  "440": {
+    "evolves_to": 113,
+    "method": "level-up",
+    "level": null
+  },
+  "113": {
+    "evolves_to": 242,
+    "method": "level-up",
+    "level": null
+  },
+  "114": {
+    "evolves_to": 465,
+    "method": "level-up",
+    "level": null
+  },
   "116": {
     "evolves_to": 117,
     "level": 32,
     "method": "level"
+  },
+  "117": {
+    "evolves_to": 230,
+    "method": "trade"
   },
   "118": {
     "evolves_to": 119,
@@ -316,18 +385,62 @@
     "method": "stone",
     "item": "water-stone"
   },
+  "439": {
+    "evolves_to": 122,
+    "method": "level-up",
+    "level": null
+  },
+  "122": {
+    "evolves_to": 866,
+    "level": 42,
+    "method": "level"
+  },
+  "123": {
+    "evolves_to": 900,
+    "method": "stone",
+    "item": "black-augurite"
+  },
+  "238": {
+    "evolves_to": 124,
+    "level": 30,
+    "method": "level"
+  },
+  "239": {
+    "evolves_to": 125,
+    "level": 30,
+    "method": "level"
+  },
+  "125": {
+    "evolves_to": 466,
+    "method": "trade"
+  },
+  "240": {
+    "evolves_to": 126,
+    "level": 30,
+    "method": "level"
+  },
+  "126": {
+    "evolves_to": 467,
+    "method": "trade"
+  },
   "129": {
     "evolves_to": 130,
     "level": 20,
     "method": "level"
   },
-  "133": [
-    {"evolves_to": 134, "method": "stone", "item": "water-stone"},
-    {"evolves_to": 135, "method": "stone", "item": "thunder-stone"},
-    {"evolves_to": 136, "method": "stone", "item": "fire-stone"},
-    {"evolves_to": 196, "method": "level", "level": 30},
-    {"evolves_to": 197, "method": "level", "level": 30}
-  ],
+  "133": {
+    "evolves_to": 700,
+    "method": "level-up",
+    "level": null
+  },
+  "137": {
+    "evolves_to": 233,
+    "method": "trade"
+  },
+  "233": {
+    "evolves_to": 474,
+    "method": "trade"
+  },
   "138": {
     "evolves_to": 139,
     "level": 40,
@@ -338,6 +451,11 @@
     "level": 40,
     "method": "level"
   },
+  "446": {
+    "evolves_to": 143,
+    "method": "level-up",
+    "level": null
+  },
   "147": {
     "evolves_to": 148,
     "level": 30,
@@ -346,31 +464,6 @@
   "148": {
     "evolves_to": 149,
     "level": 55,
-    "method": "level"
-  },
-  "95": {
-    "evolves_to": 208,
-    "level": 36,
-    "method": "level"
-  },
-  "113": {
-    "evolves_to": 242,
-    "level": 38,
-    "method": "level"
-  },
-  "117": {
-    "evolves_to": 230,
-    "level": 42,
-    "method": "level"
-  },
-  "123": {
-    "evolves_to": 212,
-    "level": 36,
-    "method": "level"
-  },
-  "137": {
-    "evolves_to": 233,
-    "level": 36,
     "method": "level"
   },
   "152": {
@@ -430,8 +523,13 @@
   },
   "175": {
     "evolves_to": 176,
-    "level": 25,
-    "method": "level"
+    "method": "level-up",
+    "level": null
+  },
+  "176": {
+    "evolves_to": 468,
+    "method": "stone",
+    "item": "shiny-stone"
   },
   "177": {
     "evolves_to": 178,
@@ -448,10 +546,20 @@
     "level": 30,
     "method": "level"
   },
+  "298": {
+    "evolves_to": 183,
+    "method": "level-up",
+    "level": null
+  },
   "183": {
     "evolves_to": 184,
     "level": 18,
     "method": "level"
+  },
+  "438": {
+    "evolves_to": 185,
+    "method": "level-up",
+    "level": null
   },
   "187": {
     "evolves_to": 188,
@@ -463,30 +571,85 @@
     "level": 27,
     "method": "level"
   },
+  "190": {
+    "evolves_to": 424,
+    "method": "level-up",
+    "level": null
+  },
   "191": {
     "evolves_to": 192,
     "method": "stone",
     "item": "sun-stone"
   },
+  "193": {
+    "evolves_to": 469,
+    "method": "level-up",
+    "level": null
+  },
   "194": {
-    "evolves_to": 195,
+    "evolves_to": 980,
     "level": 20,
     "method": "level"
+  },
+  "198": {
+    "evolves_to": 430,
+    "method": "stone",
+    "item": "dusk-stone"
+  },
+  "200": {
+    "evolves_to": 429,
+    "method": "stone",
+    "item": "dusk-stone"
+  },
+  "360": {
+    "evolves_to": 202,
+    "level": 15,
+    "method": "level"
+  },
+  "203": {
+    "evolves_to": 981,
+    "method": "level-up",
+    "level": null
   },
   "204": {
     "evolves_to": 205,
     "level": 31,
     "method": "level"
   },
+  "206": {
+    "evolves_to": 982,
+    "method": "level-up",
+    "level": null
+  },
+  "207": {
+    "evolves_to": 472,
+    "method": "level-up",
+    "level": null
+  },
   "209": {
     "evolves_to": 210,
     "level": 23,
     "method": "level"
   },
+  "211": {
+    "evolves_to": 904,
+    "method": "strong-style-move",
+    "level": null
+  },
+  "215": {
+    "evolves_to": 903,
+    "method": "level-up",
+    "level": null
+  },
   "216": {
     "evolves_to": 217,
     "level": 30,
     "method": "level"
+  },
+  "217": {
+    "evolves_to": 901,
+    "method": "stone",
+    "item": "peat-block"
   },
   "218": {
     "evolves_to": 219,
@@ -498,10 +661,25 @@
     "level": 33,
     "method": "level"
   },
+  "221": {
+    "evolves_to": 473,
+    "method": "level-up",
+    "level": null
+  },
+  "222": {
+    "evolves_to": 864,
+    "level": 38,
+    "method": "level"
+  },
   "223": {
     "evolves_to": 224,
     "level": 25,
     "method": "level"
+  },
+  "458": {
+    "evolves_to": 226,
+    "method": "level-up",
+    "level": null
   },
   "228": {
     "evolves_to": 229,
@@ -513,10 +691,10 @@
     "level": 25,
     "method": "level"
   },
-  "236": {
-    "evolves_to": 237,
-    "level": 20,
-    "method": "level"
+  "234": {
+    "evolves_to": 899,
+    "method": "agile-style-move",
+    "level": null
   },
   "246": {
     "evolves_to": 247,
@@ -527,5 +705,1560 @@
     "evolves_to": 248,
     "level": 55,
     "method": "level"
+  },
+  "252": {
+    "evolves_to": 253,
+    "level": 16,
+    "method": "level"
+  },
+  "253": {
+    "evolves_to": 254,
+    "level": 36,
+    "method": "level"
+  },
+  "255": {
+    "evolves_to": 256,
+    "level": 16,
+    "method": "level"
+  },
+  "256": {
+    "evolves_to": 257,
+    "level": 36,
+    "method": "level"
+  },
+  "258": {
+    "evolves_to": 259,
+    "level": 16,
+    "method": "level"
+  },
+  "259": {
+    "evolves_to": 260,
+    "level": 36,
+    "method": "level"
+  },
+  "261": {
+    "evolves_to": 262,
+    "level": 18,
+    "method": "level"
+  },
+  "263": {
+    "evolves_to": 264,
+    "level": 20,
+    "method": "level"
+  },
+  "264": {
+    "evolves_to": 862,
+    "level": 35,
+    "method": "level"
+  },
+  "265": {
+    "evolves_to": 268,
+    "level": 7,
+    "method": "level"
+  },
+  "266": {
+    "evolves_to": 267,
+    "level": 10,
+    "method": "level"
+  },
+  "268": {
+    "evolves_to": 269,
+    "level": 10,
+    "method": "level"
+  },
+  "270": {
+    "evolves_to": 271,
+    "level": 14,
+    "method": "level"
+  },
+  "271": {
+    "evolves_to": 272,
+    "method": "stone",
+    "item": "water-stone"
+  },
+  "273": {
+    "evolves_to": 274,
+    "level": 14,
+    "method": "level"
+  },
+  "274": {
+    "evolves_to": 275,
+    "method": "stone",
+    "item": "leaf-stone"
+  },
+  "276": {
+    "evolves_to": 277,
+    "level": 22,
+    "method": "level"
+  },
+  "278": {
+    "evolves_to": 279,
+    "level": 25,
+    "method": "level"
+  },
+  "280": {
+    "evolves_to": 281,
+    "level": 20,
+    "method": "level"
+  },
+  "281": {
+    "evolves_to": 475,
+    "method": "stone",
+    "item": "dawn-stone"
+  },
+  "283": {
+    "evolves_to": 284,
+    "level": 22,
+    "method": "level"
+  },
+  "285": {
+    "evolves_to": 286,
+    "level": 23,
+    "method": "level"
+  },
+  "287": {
+    "evolves_to": 288,
+    "level": 18,
+    "method": "level"
+  },
+  "288": {
+    "evolves_to": 289,
+    "level": 36,
+    "method": "level"
+  },
+  "290": {
+    "evolves_to": 292,
+    "method": "shed",
+    "level": null
+  },
+  "293": {
+    "evolves_to": 294,
+    "level": 20,
+    "method": "level"
+  },
+  "294": {
+    "evolves_to": 295,
+    "level": 40,
+    "method": "level"
+  },
+  "296": {
+    "evolves_to": 297,
+    "level": 24,
+    "method": "level"
+  },
+  "299": {
+    "evolves_to": 476,
+    "method": "level-up",
+    "level": null
+  },
+  "300": {
+    "evolves_to": 301,
+    "method": "stone",
+    "item": "moon-stone"
+  },
+  "304": {
+    "evolves_to": 305,
+    "level": 32,
+    "method": "level"
+  },
+  "305": {
+    "evolves_to": 306,
+    "level": 42,
+    "method": "level"
+  },
+  "307": {
+    "evolves_to": 308,
+    "level": 37,
+    "method": "level"
+  },
+  "309": {
+    "evolves_to": 310,
+    "level": 26,
+    "method": "level"
+  },
+  "406": {
+    "evolves_to": 315,
+    "method": "level-up",
+    "level": null
+  },
+  "315": {
+    "evolves_to": 407,
+    "method": "stone",
+    "item": "shiny-stone"
+  },
+  "316": {
+    "evolves_to": 317,
+    "level": 26,
+    "method": "level"
+  },
+  "318": {
+    "evolves_to": 319,
+    "level": 30,
+    "method": "level"
+  },
+  "320": {
+    "evolves_to": 321,
+    "level": 40,
+    "method": "level"
+  },
+  "322": {
+    "evolves_to": 323,
+    "level": 33,
+    "method": "level"
+  },
+  "325": {
+    "evolves_to": 326,
+    "level": 32,
+    "method": "level"
+  },
+  "328": {
+    "evolves_to": 329,
+    "level": 35,
+    "method": "level"
+  },
+  "329": {
+    "evolves_to": 330,
+    "level": 45,
+    "method": "level"
+  },
+  "331": {
+    "evolves_to": 332,
+    "level": 32,
+    "method": "level"
+  },
+  "333": {
+    "evolves_to": 334,
+    "level": 35,
+    "method": "level"
+  },
+  "339": {
+    "evolves_to": 340,
+    "level": 30,
+    "method": "level"
+  },
+  "341": {
+    "evolves_to": 342,
+    "level": 30,
+    "method": "level"
+  },
+  "343": {
+    "evolves_to": 344,
+    "level": 36,
+    "method": "level"
+  },
+  "345": {
+    "evolves_to": 346,
+    "level": 40,
+    "method": "level"
+  },
+  "347": {
+    "evolves_to": 348,
+    "level": 40,
+    "method": "level"
+  },
+  "349": {
+    "evolves_to": 350,
+    "method": "level-up",
+    "level": null
+  },
+  "353": {
+    "evolves_to": 354,
+    "level": 37,
+    "method": "level"
+  },
+  "355": {
+    "evolves_to": 356,
+    "level": 37,
+    "method": "level"
+  },
+  "356": {
+    "evolves_to": 477,
+    "method": "trade"
+  },
+  "433": {
+    "evolves_to": 358,
+    "method": "level-up",
+    "level": null
+  },
+  "361": {
+    "evolves_to": 478,
+    "method": "stone",
+    "item": "dawn-stone"
+  },
+  "363": {
+    "evolves_to": 364,
+    "level": 32,
+    "method": "level"
+  },
+  "364": {
+    "evolves_to": 365,
+    "level": 44,
+    "method": "level"
+  },
+  "366": {
+    "evolves_to": 368,
+    "method": "trade"
+  },
+  "371": {
+    "evolves_to": 372,
+    "level": 30,
+    "method": "level"
+  },
+  "372": {
+    "evolves_to": 373,
+    "level": 50,
+    "method": "level"
+  },
+  "374": {
+    "evolves_to": 375,
+    "level": 20,
+    "method": "level"
+  },
+  "375": {
+    "evolves_to": 376,
+    "level": 45,
+    "method": "level"
+  },
+  "387": {
+    "evolves_to": 388,
+    "level": 18,
+    "method": "level"
+  },
+  "388": {
+    "evolves_to": 389,
+    "level": 32,
+    "method": "level"
+  },
+  "390": {
+    "evolves_to": 391,
+    "level": 14,
+    "method": "level"
+  },
+  "391": {
+    "evolves_to": 392,
+    "level": 36,
+    "method": "level"
+  },
+  "393": {
+    "evolves_to": 394,
+    "level": 16,
+    "method": "level"
+  },
+  "394": {
+    "evolves_to": 395,
+    "level": 36,
+    "method": "level"
+  },
+  "396": {
+    "evolves_to": 397,
+    "level": 14,
+    "method": "level"
+  },
+  "397": {
+    "evolves_to": 398,
+    "level": 34,
+    "method": "level"
+  },
+  "399": {
+    "evolves_to": 400,
+    "level": 15,
+    "method": "level"
+  },
+  "401": {
+    "evolves_to": 402,
+    "level": 10,
+    "method": "level"
+  },
+  "403": {
+    "evolves_to": 404,
+    "level": 15,
+    "method": "level"
+  },
+  "404": {
+    "evolves_to": 405,
+    "level": 30,
+    "method": "level"
+  },
+  "408": {
+    "evolves_to": 409,
+    "level": 30,
+    "method": "level"
+  },
+  "410": {
+    "evolves_to": 411,
+    "level": 30,
+    "method": "level"
+  },
+  "412": {
+    "evolves_to": 414,
+    "level": 20,
+    "method": "level"
+  },
+  "415": {
+    "evolves_to": 416,
+    "level": 21,
+    "method": "level"
+  },
+  "418": {
+    "evolves_to": 419,
+    "level": 26,
+    "method": "level"
+  },
+  "420": {
+    "evolves_to": 421,
+    "level": 25,
+    "method": "level"
+  },
+  "422": {
+    "evolves_to": 423,
+    "level": 30,
+    "method": "level"
+  },
+  "425": {
+    "evolves_to": 426,
+    "level": 28,
+    "method": "level"
+  },
+  "427": {
+    "evolves_to": 428,
+    "method": "level-up",
+    "level": null
+  },
+  "431": {
+    "evolves_to": 432,
+    "level": 38,
+    "method": "level"
+  },
+  "434": {
+    "evolves_to": 435,
+    "level": 34,
+    "method": "level"
+  },
+  "436": {
+    "evolves_to": 437,
+    "level": 33,
+    "method": "level"
+  },
+  "443": {
+    "evolves_to": 444,
+    "level": 24,
+    "method": "level"
+  },
+  "444": {
+    "evolves_to": 445,
+    "level": 48,
+    "method": "level"
+  },
+  "447": {
+    "evolves_to": 448,
+    "method": "level-up",
+    "level": null
+  },
+  "449": {
+    "evolves_to": 450,
+    "level": 34,
+    "method": "level"
+  },
+  "451": {
+    "evolves_to": 452,
+    "level": 40,
+    "method": "level"
+  },
+  "453": {
+    "evolves_to": 454,
+    "level": 37,
+    "method": "level"
+  },
+  "456": {
+    "evolves_to": 457,
+    "level": 31,
+    "method": "level"
+  },
+  "459": {
+    "evolves_to": 460,
+    "level": 40,
+    "method": "level"
+  },
+  "489": {
+    "evolves_to": 490,
+    "method": "unknown",
+    "level": null
+  },
+  "495": {
+    "evolves_to": 496,
+    "level": 17,
+    "method": "level"
+  },
+  "496": {
+    "evolves_to": 497,
+    "level": 36,
+    "method": "level"
+  },
+  "498": {
+    "evolves_to": 499,
+    "level": 17,
+    "method": "level"
+  },
+  "499": {
+    "evolves_to": 500,
+    "level": 36,
+    "method": "level"
+  },
+  "501": {
+    "evolves_to": 502,
+    "level": 17,
+    "method": "level"
+  },
+  "502": {
+    "evolves_to": 503,
+    "level": 36,
+    "method": "level"
+  },
+  "504": {
+    "evolves_to": 505,
+    "level": 20,
+    "method": "level"
+  },
+  "506": {
+    "evolves_to": 507,
+    "level": 16,
+    "method": "level"
+  },
+  "507": {
+    "evolves_to": 508,
+    "level": 32,
+    "method": "level"
+  },
+  "509": {
+    "evolves_to": 510,
+    "level": 20,
+    "method": "level"
+  },
+  "511": {
+    "evolves_to": 512,
+    "method": "stone",
+    "item": "leaf-stone"
+  },
+  "513": {
+    "evolves_to": 514,
+    "method": "stone",
+    "item": "fire-stone"
+  },
+  "515": {
+    "evolves_to": 516,
+    "method": "stone",
+    "item": "water-stone"
+  },
+  "517": {
+    "evolves_to": 518,
+    "method": "stone",
+    "item": "moon-stone"
+  },
+  "519": {
+    "evolves_to": 520,
+    "level": 21,
+    "method": "level"
+  },
+  "520": {
+    "evolves_to": 521,
+    "level": 32,
+    "method": "level"
+  },
+  "522": {
+    "evolves_to": 523,
+    "level": 27,
+    "method": "level"
+  },
+  "524": {
+    "evolves_to": 525,
+    "level": 25,
+    "method": "level"
+  },
+  "525": {
+    "evolves_to": 526,
+    "method": "trade"
+  },
+  "527": {
+    "evolves_to": 528,
+    "method": "level-up",
+    "level": null
+  },
+  "529": {
+    "evolves_to": 530,
+    "level": 31,
+    "method": "level"
+  },
+  "532": {
+    "evolves_to": 533,
+    "level": 25,
+    "method": "level"
+  },
+  "533": {
+    "evolves_to": 534,
+    "method": "trade"
+  },
+  "535": {
+    "evolves_to": 536,
+    "level": 25,
+    "method": "level"
+  },
+  "536": {
+    "evolves_to": 537,
+    "level": 36,
+    "method": "level"
+  },
+  "540": {
+    "evolves_to": 541,
+    "level": 20,
+    "method": "level"
+  },
+  "541": {
+    "evolves_to": 542,
+    "method": "level-up",
+    "level": null
+  },
+  "543": {
+    "evolves_to": 544,
+    "level": 22,
+    "method": "level"
+  },
+  "544": {
+    "evolves_to": 545,
+    "level": 30,
+    "method": "level"
+  },
+  "546": {
+    "evolves_to": 547,
+    "method": "stone",
+    "item": "sun-stone"
+  },
+  "548": {
+    "evolves_to": 549,
+    "method": "stone",
+    "item": "sun-stone"
+  },
+  "550": {
+    "evolves_to": 902,
+    "method": "recoil-damage",
+    "level": null
+  },
+  "551": {
+    "evolves_to": 552,
+    "level": 29,
+    "method": "level"
+  },
+  "552": {
+    "evolves_to": 553,
+    "level": 40,
+    "method": "level"
+  },
+  "554": {
+    "evolves_to": 555,
+    "level": 35,
+    "method": "level"
+  },
+  "557": {
+    "evolves_to": 558,
+    "level": 34,
+    "method": "level"
+  },
+  "559": {
+    "evolves_to": 560,
+    "level": 39,
+    "method": "level"
+  },
+  "562": {
+    "evolves_to": 867,
+    "method": "take-damage",
+    "level": null
+  },
+  "564": {
+    "evolves_to": 565,
+    "level": 37,
+    "method": "level"
+  },
+  "566": {
+    "evolves_to": 567,
+    "level": 37,
+    "method": "level"
+  },
+  "568": {
+    "evolves_to": 569,
+    "level": 36,
+    "method": "level"
+  },
+  "570": {
+    "evolves_to": 571,
+    "level": 30,
+    "method": "level"
+  },
+  "572": {
+    "evolves_to": 573,
+    "method": "stone",
+    "item": "shiny-stone"
+  },
+  "574": {
+    "evolves_to": 575,
+    "level": 32,
+    "method": "level"
+  },
+  "575": {
+    "evolves_to": 576,
+    "level": 41,
+    "method": "level"
+  },
+  "577": {
+    "evolves_to": 578,
+    "level": 32,
+    "method": "level"
+  },
+  "578": {
+    "evolves_to": 579,
+    "level": 41,
+    "method": "level"
+  },
+  "580": {
+    "evolves_to": 581,
+    "level": 35,
+    "method": "level"
+  },
+  "582": {
+    "evolves_to": 583,
+    "level": 35,
+    "method": "level"
+  },
+  "583": {
+    "evolves_to": 584,
+    "level": 47,
+    "method": "level"
+  },
+  "585": {
+    "evolves_to": 586,
+    "level": 34,
+    "method": "level"
+  },
+  "588": {
+    "evolves_to": 589,
+    "method": "trade"
+  },
+  "590": {
+    "evolves_to": 591,
+    "level": 39,
+    "method": "level"
+  },
+  "592": {
+    "evolves_to": 593,
+    "level": 40,
+    "method": "level"
+  },
+  "595": {
+    "evolves_to": 596,
+    "level": 36,
+    "method": "level"
+  },
+  "597": {
+    "evolves_to": 598,
+    "level": 40,
+    "method": "level"
+  },
+  "599": {
+    "evolves_to": 600,
+    "level": 38,
+    "method": "level"
+  },
+  "600": {
+    "evolves_to": 601,
+    "level": 49,
+    "method": "level"
+  },
+  "602": {
+    "evolves_to": 603,
+    "level": 39,
+    "method": "level"
+  },
+  "603": {
+    "evolves_to": 604,
+    "method": "stone",
+    "item": "thunder-stone"
+  },
+  "605": {
+    "evolves_to": 606,
+    "level": 42,
+    "method": "level"
+  },
+  "607": {
+    "evolves_to": 608,
+    "level": 41,
+    "method": "level"
+  },
+  "608": {
+    "evolves_to": 609,
+    "method": "stone",
+    "item": "dusk-stone"
+  },
+  "610": {
+    "evolves_to": 611,
+    "level": 38,
+    "method": "level"
+  },
+  "611": {
+    "evolves_to": 612,
+    "level": 48,
+    "method": "level"
+  },
+  "613": {
+    "evolves_to": 614,
+    "level": 37,
+    "method": "level"
+  },
+  "616": {
+    "evolves_to": 617,
+    "method": "trade"
+  },
+  "619": {
+    "evolves_to": 620,
+    "level": 50,
+    "method": "level"
+  },
+  "622": {
+    "evolves_to": 623,
+    "level": 43,
+    "method": "level"
+  },
+  "624": {
+    "evolves_to": 625,
+    "level": 52,
+    "method": "level"
+  },
+  "625": {
+    "evolves_to": 983,
+    "method": "three-defeated-bisharp",
+    "level": null
+  },
+  "627": {
+    "evolves_to": 628,
+    "level": 54,
+    "method": "level"
+  },
+  "629": {
+    "evolves_to": 630,
+    "level": 54,
+    "method": "level"
+  },
+  "633": {
+    "evolves_to": 634,
+    "level": 50,
+    "method": "level"
+  },
+  "634": {
+    "evolves_to": 635,
+    "level": 64,
+    "method": "level"
+  },
+  "636": {
+    "evolves_to": 637,
+    "level": 59,
+    "method": "level"
+  },
+  "650": {
+    "evolves_to": 651,
+    "level": 16,
+    "method": "level"
+  },
+  "651": {
+    "evolves_to": 652,
+    "level": 36,
+    "method": "level"
+  },
+  "653": {
+    "evolves_to": 654,
+    "level": 16,
+    "method": "level"
+  },
+  "654": {
+    "evolves_to": 655,
+    "level": 36,
+    "method": "level"
+  },
+  "656": {
+    "evolves_to": 657,
+    "level": 16,
+    "method": "level"
+  },
+  "657": {
+    "evolves_to": 658,
+    "level": 36,
+    "method": "level"
+  },
+  "659": {
+    "evolves_to": 660,
+    "level": 20,
+    "method": "level"
+  },
+  "661": {
+    "evolves_to": 662,
+    "level": 17,
+    "method": "level"
+  },
+  "662": {
+    "evolves_to": 663,
+    "level": 35,
+    "method": "level"
+  },
+  "664": {
+    "evolves_to": 665,
+    "level": 9,
+    "method": "level"
+  },
+  "665": {
+    "evolves_to": 666,
+    "level": 12,
+    "method": "level"
+  },
+  "667": {
+    "evolves_to": 668,
+    "level": 35,
+    "method": "level"
+  },
+  "669": {
+    "evolves_to": 670,
+    "level": 19,
+    "method": "level"
+  },
+  "670": {
+    "evolves_to": 671,
+    "method": "stone",
+    "item": "shiny-stone"
+  },
+  "672": {
+    "evolves_to": 673,
+    "level": 32,
+    "method": "level"
+  },
+  "674": {
+    "evolves_to": 675,
+    "level": 32,
+    "method": "level"
+  },
+  "677": {
+    "evolves_to": 678,
+    "level": 25,
+    "method": "level"
+  },
+  "679": {
+    "evolves_to": 680,
+    "level": 35,
+    "method": "level"
+  },
+  "680": {
+    "evolves_to": 681,
+    "method": "stone",
+    "item": "dusk-stone"
+  },
+  "682": {
+    "evolves_to": 683,
+    "method": "trade"
+  },
+  "684": {
+    "evolves_to": 685,
+    "method": "trade"
+  },
+  "686": {
+    "evolves_to": 687,
+    "level": 30,
+    "method": "level"
+  },
+  "688": {
+    "evolves_to": 689,
+    "level": 39,
+    "method": "level"
+  },
+  "690": {
+    "evolves_to": 691,
+    "level": 48,
+    "method": "level"
+  },
+  "692": {
+    "evolves_to": 693,
+    "level": 37,
+    "method": "level"
+  },
+  "694": {
+    "evolves_to": 695,
+    "method": "stone",
+    "item": "sun-stone"
+  },
+  "696": {
+    "evolves_to": 697,
+    "level": 39,
+    "method": "level"
+  },
+  "698": {
+    "evolves_to": 699,
+    "level": 39,
+    "method": "level"
+  },
+  "704": {
+    "evolves_to": 705,
+    "level": 40,
+    "method": "level"
+  },
+  "705": {
+    "evolves_to": 706,
+    "level": 50,
+    "method": "level"
+  },
+  "708": {
+    "evolves_to": 709,
+    "method": "trade"
+  },
+  "710": {
+    "evolves_to": 711,
+    "method": "trade"
+  },
+  "712": {
+    "evolves_to": 713,
+    "level": 37,
+    "method": "level"
+  },
+  "714": {
+    "evolves_to": 715,
+    "level": 48,
+    "method": "level"
+  },
+  "722": {
+    "evolves_to": 723,
+    "level": 17,
+    "method": "level"
+  },
+  "723": {
+    "evolves_to": 724,
+    "level": 34,
+    "method": "level"
+  },
+  "725": {
+    "evolves_to": 726,
+    "level": 17,
+    "method": "level"
+  },
+  "726": {
+    "evolves_to": 727,
+    "level": 34,
+    "method": "level"
+  },
+  "728": {
+    "evolves_to": 729,
+    "level": 17,
+    "method": "level"
+  },
+  "729": {
+    "evolves_to": 730,
+    "level": 34,
+    "method": "level"
+  },
+  "731": {
+    "evolves_to": 732,
+    "level": 14,
+    "method": "level"
+  },
+  "732": {
+    "evolves_to": 733,
+    "level": 28,
+    "method": "level"
+  },
+  "734": {
+    "evolves_to": 735,
+    "level": 20,
+    "method": "level"
+  },
+  "736": {
+    "evolves_to": 737,
+    "level": 20,
+    "method": "level"
+  },
+  "737": {
+    "evolves_to": 738,
+    "method": "level-up",
+    "level": null
+  },
+  "739": {
+    "evolves_to": 740,
+    "method": "level-up",
+    "level": null
+  },
+  "742": {
+    "evolves_to": 743,
+    "level": 25,
+    "method": "level"
+  },
+  "744": {
+    "evolves_to": 745,
+    "level": 25,
+    "method": "level"
+  },
+  "747": {
+    "evolves_to": 748,
+    "level": 38,
+    "method": "level"
+  },
+  "749": {
+    "evolves_to": 750,
+    "level": 30,
+    "method": "level"
+  },
+  "751": {
+    "evolves_to": 752,
+    "level": 22,
+    "method": "level"
+  },
+  "753": {
+    "evolves_to": 754,
+    "level": 34,
+    "method": "level"
+  },
+  "755": {
+    "evolves_to": 756,
+    "level": 24,
+    "method": "level"
+  },
+  "757": {
+    "evolves_to": 758,
+    "level": 33,
+    "method": "level"
+  },
+  "759": {
+    "evolves_to": 760,
+    "level": 27,
+    "method": "level"
+  },
+  "761": {
+    "evolves_to": 762,
+    "level": 18,
+    "method": "level"
+  },
+  "762": {
+    "evolves_to": 763,
+    "method": "level-up",
+    "level": null
+  },
+  "767": {
+    "evolves_to": 768,
+    "level": 30,
+    "method": "level"
+  },
+  "769": {
+    "evolves_to": 770,
+    "level": 42,
+    "method": "level"
+  },
+  "772": {
+    "evolves_to": 773,
+    "method": "level-up",
+    "level": null
+  },
+  "782": {
+    "evolves_to": 783,
+    "level": 35,
+    "method": "level"
+  },
+  "783": {
+    "evolves_to": 784,
+    "level": 45,
+    "method": "level"
+  },
+  "789": {
+    "evolves_to": 790,
+    "level": 43,
+    "method": "level"
+  },
+  "790": {
+    "evolves_to": 792,
+    "level": 53,
+    "method": "level"
+  },
+  "803": {
+    "evolves_to": 804,
+    "method": "level-up",
+    "level": null
+  },
+  "810": {
+    "evolves_to": 811,
+    "level": 16,
+    "method": "level"
+  },
+  "811": {
+    "evolves_to": 812,
+    "level": 35,
+    "method": "level"
+  },
+  "813": {
+    "evolves_to": 814,
+    "level": 16,
+    "method": "level"
+  },
+  "814": {
+    "evolves_to": 815,
+    "level": 35,
+    "method": "level"
+  },
+  "816": {
+    "evolves_to": 817,
+    "level": 16,
+    "method": "level"
+  },
+  "817": {
+    "evolves_to": 818,
+    "level": 35,
+    "method": "level"
+  },
+  "819": {
+    "evolves_to": 820,
+    "level": 24,
+    "method": "level"
+  },
+  "821": {
+    "evolves_to": 822,
+    "level": 18,
+    "method": "level"
+  },
+  "822": {
+    "evolves_to": 823,
+    "level": 38,
+    "method": "level"
+  },
+  "824": {
+    "evolves_to": 825,
+    "level": 10,
+    "method": "level"
+  },
+  "825": {
+    "evolves_to": 826,
+    "level": 30,
+    "method": "level"
+  },
+  "827": {
+    "evolves_to": 828,
+    "level": 18,
+    "method": "level"
+  },
+  "829": {
+    "evolves_to": 830,
+    "level": 20,
+    "method": "level"
+  },
+  "831": {
+    "evolves_to": 832,
+    "level": 24,
+    "method": "level"
+  },
+  "833": {
+    "evolves_to": 834,
+    "level": 22,
+    "method": "level"
+  },
+  "835": {
+    "evolves_to": 836,
+    "level": 25,
+    "method": "level"
+  },
+  "837": {
+    "evolves_to": 838,
+    "level": 18,
+    "method": "level"
+  },
+  "838": {
+    "evolves_to": 839,
+    "level": 34,
+    "method": "level"
+  },
+  "840": {
+    "evolves_to": 1011,
+    "method": "unknown",
+    "level": null
+  },
+  "1011": {
+    "evolves_to": 1019,
+    "method": "unknown",
+    "level": null
+  },
+  "843": {
+    "evolves_to": 844,
+    "level": 36,
+    "method": "level"
+  },
+  "846": {
+    "evolves_to": 847,
+    "level": 26,
+    "method": "level"
+  },
+  "848": {
+    "evolves_to": 849,
+    "level": 30,
+    "method": "level"
+  },
+  "850": {
+    "evolves_to": 851,
+    "level": 28,
+    "method": "level"
+  },
+  "852": {
+    "evolves_to": 853,
+    "method": "level-up",
+    "level": null
+  },
+  "854": {
+    "evolves_to": 855,
+    "method": "stone",
+    "item": "cracked-pot"
+  },
+  "856": {
+    "evolves_to": 857,
+    "level": 32,
+    "method": "level"
+  },
+  "857": {
+    "evolves_to": 858,
+    "level": 42,
+    "method": "level"
+  },
+  "859": {
+    "evolves_to": 860,
+    "level": 32,
+    "method": "level"
+  },
+  "860": {
+    "evolves_to": 861,
+    "level": 42,
+    "method": "level"
+  },
+  "868": {
+    "evolves_to": 869,
+    "method": "spin",
+    "level": null
+  },
+  "872": {
+    "evolves_to": 873,
+    "method": "level-up",
+    "level": null
+  },
+  "878": {
+    "evolves_to": 879,
+    "level": 34,
+    "method": "level"
+  },
+  "884": {
+    "evolves_to": 1018,
+    "method": "unknown",
+    "level": null
+  },
+  "885": {
+    "evolves_to": 886,
+    "level": 50,
+    "method": "level"
+  },
+  "886": {
+    "evolves_to": 887,
+    "level": 60,
+    "method": "level"
+  },
+  "891": {
+    "evolves_to": 892,
+    "method": "tower-of-darkness",
+    "level": null
+  },
+  "906": {
+    "evolves_to": 907,
+    "level": 16,
+    "method": "level"
+  },
+  "907": {
+    "evolves_to": 908,
+    "level": 36,
+    "method": "level"
+  },
+  "909": {
+    "evolves_to": 910,
+    "level": 16,
+    "method": "level"
+  },
+  "910": {
+    "evolves_to": 911,
+    "level": 36,
+    "method": "level"
+  },
+  "912": {
+    "evolves_to": 913,
+    "level": 16,
+    "method": "level"
+  },
+  "913": {
+    "evolves_to": 914,
+    "level": 36,
+    "method": "level"
+  },
+  "915": {
+    "evolves_to": 916,
+    "level": 18,
+    "method": "level"
+  },
+  "917": {
+    "evolves_to": 918,
+    "level": 15,
+    "method": "level"
+  },
+  "919": {
+    "evolves_to": 920,
+    "level": 24,
+    "method": "level"
+  },
+  "921": {
+    "evolves_to": 922,
+    "level": 18,
+    "method": "level"
+  },
+  "922": {
+    "evolves_to": 923,
+    "method": "level-up",
+    "level": null
+  },
+  "924": {
+    "evolves_to": 925,
+    "method": "other",
+    "level": 25
+  },
+  "926": {
+    "evolves_to": 927,
+    "level": 26,
+    "method": "level"
+  },
+  "928": {
+    "evolves_to": 929,
+    "level": 25,
+    "method": "level"
+  },
+  "929": {
+    "evolves_to": 930,
+    "level": 35,
+    "method": "level"
+  },
+  "932": {
+    "evolves_to": 933,
+    "level": 24,
+    "method": "level"
+  },
+  "933": {
+    "evolves_to": 934,
+    "level": 38,
+    "method": "level"
+  },
+  "935": {
+    "evolves_to": 937,
+    "method": "stone",
+    "item": "malicious-armor"
+  },
+  "938": {
+    "evolves_to": 939,
+    "method": "stone",
+    "item": "thunder-stone"
+  },
+  "940": {
+    "evolves_to": 941,
+    "level": 25,
+    "method": "level"
+  },
+  "942": {
+    "evolves_to": 943,
+    "level": 30,
+    "method": "level"
+  },
+  "944": {
+    "evolves_to": 945,
+    "level": 28,
+    "method": "level"
+  },
+  "946": {
+    "evolves_to": 947,
+    "method": "level-up",
+    "level": null
+  },
+  "948": {
+    "evolves_to": 949,
+    "level": 30,
+    "method": "level"
+  },
+  "951": {
+    "evolves_to": 952,
+    "method": "stone",
+    "item": "fire-stone"
+  },
+  "953": {
+    "evolves_to": 954,
+    "method": "level-up",
+    "level": null
+  },
+  "955": {
+    "evolves_to": 956,
+    "level": 35,
+    "method": "level"
+  },
+  "957": {
+    "evolves_to": 958,
+    "level": 24,
+    "method": "level"
+  },
+  "958": {
+    "evolves_to": 959,
+    "level": 38,
+    "method": "level"
+  },
+  "960": {
+    "evolves_to": 961,
+    "level": 26,
+    "method": "level"
+  },
+  "963": {
+    "evolves_to": 964,
+    "level": 38,
+    "method": "level"
+  },
+  "965": {
+    "evolves_to": 966,
+    "level": 40,
+    "method": "level"
+  },
+  "969": {
+    "evolves_to": 970,
+    "level": 35,
+    "method": "level"
+  },
+  "971": {
+    "evolves_to": 972,
+    "level": 30,
+    "method": "level"
+  },
+  "974": {
+    "evolves_to": 975,
+    "method": "stone",
+    "item": "ice-stone"
+  },
+  "996": {
+    "evolves_to": 997,
+    "level": 35,
+    "method": "level"
+  },
+  "997": {
+    "evolves_to": 998,
+    "level": 54,
+    "method": "level"
+  },
+  "999": {
+    "evolves_to": 1000,
+    "method": "gimmmighoul-coins",
+    "level": null
+  },
+  "1012": {
+    "evolves_to": 1013,
+    "method": "unknown",
+    "level": null
   }
 }
