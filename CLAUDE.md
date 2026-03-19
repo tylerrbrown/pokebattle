@@ -239,6 +239,9 @@ python tests/test_battle_engine.py
 1. **XP bar UI** — Thin blue XP bar on My Team cards and battle HUD; shows "X XP to next" text; XP scaling via medium-fast growth formula
 2. **Move learning UX fix** — Prominent hint box at top, client-side selection (no server round-trip), inline confirmation "Replace X with Y? [YES] [NO]" for 4-move swaps, green LEARN button for <4 moves
 3. **Gigantamax/Dynamax** — DYNAMAX button in battle, 3-turn HP doubling, Max Move names/powers, G-Max moves for eligible Pokemon, sprite scale+glow effect, mutually exclusive with Mega/Z-Move
-4. **Faster XP progression** — 1.5x base XP boost to `calc_xp_yield()`, Lucky Egg shop item ($1500) doubles all XP gains passively, "Lucky Egg: 2x XP!" shown in victory text
-5. **Rare Candy** — Battle reward item (+1 level); 10% wild drop, 100% gym/E4/Champion/Masters; usable from My Team; handles move learning + evolution on level-up
-6. **Pokemon Trading** — TRADE button on hub, 4-letter room codes, select Pokemon to offer, both confirm, swap ownership in DB; traded Pokemon go to storage
+4. **Bug fixes** — Faint/switch freeze (wild_force_switch missing encounter state), EXP Share (all alive team Pokemon earn XP: 100% active, 50% bench)
+5. **Faster XP progression** — 1.5x base XP boost to `calc_xp_yield()`, Lucky Egg shop item ($1500) doubles all XP gains passively, "Lucky Egg: 2x XP!" shown in victory text
+6. **Tiered Rare Candy shop** — Rare Candy ($500, +1 lv), XL ($2000, +5), XXL ($5000, +10), Ultra ($20000, +50); chain evolution support
+7. **Rare Candy battle drops** — 10% wild, 100% gym x1, 100% E4 x2, 100% Champion/Masters x3; usable from My Team
+8. **PvP currency rewards** — $500 for beating a human, $300 for beating AI bot
+9. **Pokemon Trading** — TRADE button on hub, 4-letter room codes, select Pokemon to offer, both confirm, swap ownership in DB; traded Pokemon go to storage
