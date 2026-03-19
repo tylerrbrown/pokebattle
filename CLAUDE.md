@@ -149,7 +149,7 @@ python tests/test_battle_engine.py
 
 - **iCloud email**: liam4now@icloud.com (this is how his messages appear in iMessage DB)
 - **Phone**: (785) 761-6790 — but messages come through iCloud, not phone number
-- **To pull his messages**: Use `mcp__imessage__tool_fuzzy_search_messages` with search_term "pokemon" or "battle", hours=336, threshold=0.5. Filter results for `liam4now@icloud.com`. Do NOT use `get_recent_messages` with contact name/number — his replies don't show up that way due to iCloud routing.
+- **To pull his messages**: Use `mcp__imessage__tool_get_recent_messages` with NO contact filter (omit the contact param), then visually scan for `liam4now@icloud.com` entries. Do NOT filter by contact name or phone number — his messages route through iCloud, not his phone number, so contact-filtered queries miss them. Do NOT rely on `fuzzy_search_messages` alone — it only finds messages matching a keyword and will miss messages on other topics.
 
 ## Feature Request Tracker (from Liam, 3/17–3/18/2026)
 
@@ -169,9 +169,15 @@ python tests/test_battle_engine.py
 - ~~**Gym leader no-AI bug**: fixed 3/18/2026~~
 - **PvP forces team pick**: "When I battle somebody I expect to use my Pokémon, not click on Pokémon" — PvP should use saved journey team, not re-pick (OPEN)
 
+### Implemented in "Liam's Feature Pack" (3/19/2026)
+- Backpack/PC Storage UI (swap Pokemon between team and storage)
+- Elite Four → Champion → Masters Eight progression path
+- All 1,025 Pokemon (Gen 1-9) with sprites, learnsets, evolutions
+- Z-Moves & Mega Evolution battle mechanics
+- Font size bump (+2px via CSS variables)
+- PvP uses saved journey team
+
 ### New Feature Requests (not yet built)
-1. **Backpack/PC Storage UI** — browse all caught Pokemon, swap between team and storage (DB stores them, but no UI to manage beyond team of 6)
-2. **Elite Four → Masters Eight → Champion path** — data structures exist in `journey.py` (ELITE_FOUR, CHAMPION, MASTERS_EIGHT) but no server routes or UI; need to wire up post-gym progression
-3. **All Pokemon beyond Gen 1+2** — Liam wants every Pokemon ever created; currently 251 (Gen 1+2 only)
-4. **Z-Moves & Mega Evolution** — no code exists; would need new battle mechanics, shop items, data structures
-5. **Bigger font / font size setting** — all CSS font sizes hardcoded; no settings UI
+1. **XP bar UI** — "Show the XP bar when you earn XP and when you start off at low levels, you get more XP but when you get higher levels, it gets harder to earn XP" (3/18)
+2. **Move learning bug** — "your team has problems learning moves. There should be a button that says click on the button and it'll put the move up there" (3/19) — move management screen exists but may have UX issues
+3. **Gigantamax** — mentioned alongside Z-Moves/Mega (3/18) — not yet implemented
