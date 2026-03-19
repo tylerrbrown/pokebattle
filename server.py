@@ -13,6 +13,7 @@ import pathlib
 import random
 import re
 import sqlite3
+import string
 import time
 
 import websockets
@@ -97,6 +98,214 @@ def record_game(room, winner_idx, summary):
 room_manager = RoomManager(on_game_end=record_game)
 account_mgr = None  # Initialized in main()
 active_encounters = {}  # player.id -> WildEncounter
+trade_rooms = {}  # code -> TradeRoom
+player_trade_rooms = {}  # player.id -> code
+
+
+# ─── Trade Room ────────────────────────────────────────
+
+class TradeRoom:
+    """A lightweight trade room for two players to swap Pokemon."""
+
+    def __init__(self, code, player):
+        self.code = code
+        self.players = [player, None]
+        self.offers = [None, None]       # pokemon_row_id each player offers
+        self.confirmed = [False, False]  # both must confirm
+        self.created_at = time.time()
+
+    def get_player_index(self, player):
+        for i in range(2):
+            if self.players[i] and self.players[i].id == player.id:
+                return i
+        return -1
+
+    def get_opponent(self, player):
+        idx = self.get_player_index(player)
+        if idx == -1:
+            return None
+        return self.players[1 - idx]
+
+    def is_full(self):
+        return self.players[0] is not None and self.players[1] is not None
+
+
+def generate_trade_code():
+    """Generate a unique 4-letter trade room code."""
+    for _ in range(100):
+        code = ''.join(random.choices(string.ascii_uppercase, k=4))
+        if code not in trade_rooms and code not in room_manager.rooms:
+            return code
+    raise RuntimeError("Could not generate unique trade code")
+
+
+async def _handle_trade_message(player, msg_type, data):
+    """Handle all trade-related WebSocket messages. Returns True if handled."""
+
+    if msg_type == "create_trade":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return True
+        code = generate_trade_code()
+        room = TradeRoom(code, player)
+        trade_rooms[code] = room
+        player_trade_rooms[player.id] = code
+        await player.send({"type": "trade_room_created", "code": code})
+        return True
+
+    if msg_type == "join_trade":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return True
+        code = str(data.get("code", "")).strip().upper()
+        if not re.match(r'^[A-Z]{4}$', code):
+            await player.send({"type": "error", "message": "Trade code must be 4 letters."})
+            return True
+        room = trade_rooms.get(code)
+        if not room:
+            await player.send({"type": "error", "message": f"Trade room {code} not found."})
+            return True
+        if room.is_full():
+            await player.send({"type": "error", "message": "Trade room is full."})
+            return True
+        if room.get_player_index(player) != -1:
+            await player.send({"type": "error", "message": "Already in this trade room."})
+            return True
+        room.players[1] = player
+        player_trade_rooms[player.id] = code
+        # Notify both players
+        p0 = room.players[0]
+        await p0.send({
+            "type": "trade_partner_joined",
+            "partner_name": player.name,
+        })
+        await player.send({
+            "type": "trade_room_joined",
+            "code": code,
+            "partner_name": p0.name,
+        })
+        # Send both players their Pokemon list for selection
+        for p in room.players:
+            if p and getattr(p, 'account_id', None):
+                team = account_mgr.get_team(p.account_id)
+                storage = account_mgr.get_storage(p.account_id)
+                await p.send({
+                    "type": "trade_pokemon_list",
+                    "team": team,
+                    "storage": storage,
+                })
+        return True
+
+    if msg_type == "trade_offer":
+        code = player_trade_rooms.get(player.id)
+        if not code:
+            await player.send({"type": "error", "message": "Not in a trade room."})
+            return True
+        room = trade_rooms.get(code)
+        if not room:
+            await player.send({"type": "error", "message": "Trade room not found."})
+            return True
+        idx = room.get_player_index(player)
+        if idx == -1:
+            return True
+        pokemon_id = data.get("pokemon_id")
+        if not pokemon_id:
+            await player.send({"type": "error", "message": "No Pokemon selected."})
+            return True
+        # Verify ownership
+        poke = account_mgr.get_pokemon_by_id(pokemon_id, player.account_id)
+        if not poke:
+            await player.send({"type": "error", "message": "Pokemon not found."})
+            return True
+        room.offers[idx] = pokemon_id
+        room.confirmed[idx] = False  # Reset confirmation when offer changes
+        room.confirmed[1 - idx] = False
+        # Look up Pokemon data for display
+        poke_data = pokemon_data.get_pokemon(poke["dex_id"])
+        offer_info = {
+            "pokemon_id": poke["id"],
+            "dex_id": poke["dex_id"],
+            "name": poke.get("nickname") or (poke_data["name"] if poke_data else "???"),
+            "level": poke["level"],
+            "types": poke_data.get("types", []) if poke_data else [],
+        }
+        # Tell the player their offer is set
+        await player.send({"type": "trade_offer_set", "offer": offer_info})
+        # Tell the opponent what's being offered
+        opp = room.get_opponent(player)
+        if opp:
+            await opp.send({"type": "trade_partner_offer", "offer": offer_info})
+        return True
+
+    if msg_type == "trade_confirm":
+        code = player_trade_rooms.get(player.id)
+        if not code:
+            return True
+        room = trade_rooms.get(code)
+        if not room:
+            return True
+        idx = room.get_player_index(player)
+        if idx == -1:
+            return True
+        # Both must have offered
+        if room.offers[0] is None or room.offers[1] is None:
+            await player.send({"type": "error", "message": "Both players must offer a Pokemon first."})
+            return True
+        room.confirmed[idx] = True
+        opp = room.get_opponent(player)
+        if opp:
+            await opp.send({"type": "trade_partner_confirmed"})
+
+        # Check if both confirmed
+        if room.confirmed[0] and room.confirmed[1]:
+            # Execute trade
+            p0 = room.players[0]
+            p1 = room.players[1]
+            success = account_mgr.trade_pokemon(
+                p0.account_id, room.offers[0],
+                p1.account_id, room.offers[1],
+            )
+            if success:
+                for p in room.players:
+                    if p:
+                        await p.send({"type": "trade_complete"})
+                # Clean up trade room
+                _cleanup_trade_room(code)
+            else:
+                for p in room.players:
+                    if p:
+                        await p.send({"type": "error", "message": "Trade failed. Please try again."})
+                room.confirmed = [False, False]
+        return True
+
+    if msg_type == "trade_cancel":
+        code = player_trade_rooms.get(player.id)
+        if not code:
+            return True
+        room = trade_rooms.get(code)
+        if room:
+            opp = room.get_opponent(player)
+            if opp:
+                await opp.send({"type": "trade_cancelled", "message": f"{player.name} left the trade."})
+                if opp.id in player_trade_rooms:
+                    del player_trade_rooms[opp.id]
+        _cleanup_trade_room(code)
+        if player.id in player_trade_rooms:
+            del player_trade_rooms[player.id]
+        await player.send({"type": "trade_left"})
+        return True
+
+    return False  # Not a trade message
+
+
+def _cleanup_trade_room(code):
+    """Remove a trade room and clean up player references."""
+    room = trade_rooms.get(code)
+    if room:
+        for p in room.players:
+            if p and p.id in player_trade_rooms:
+                del player_trade_rooms[p.id]
+        del trade_rooms[code]
 
 
 # ─── HTTP Static File Server ───────────────────────────
@@ -1105,6 +1314,10 @@ async def handle_message(player, msg, room_mgr):
             "total_pokemon": profile.get("total_pokemon", 0),
         })
 
+    # ─── Trade Messages ─────────────────────────────
+    elif msg_type in ("create_trade", "join_trade", "trade_offer", "trade_confirm", "trade_cancel"):
+        await _handle_trade_message(player, msg_type, data)
+
     else:
         await player.send({"type": "error", "message": f"Unknown message type: {msg_type}"})
 
@@ -1835,6 +2048,15 @@ async def handler(websocket):
     finally:
         print(f"[-] Player disconnected: {player.id}")
         await room_manager.remove_player(player)
+        # Clean up trade room if player was in one
+        trade_code = player_trade_rooms.get(player.id)
+        if trade_code:
+            room = trade_rooms.get(trade_code)
+            if room:
+                opp = room.get_opponent(player)
+                if opp:
+                    await opp.send({"type": "trade_cancelled", "message": f"{player.name} disconnected."})
+            _cleanup_trade_room(trade_code)
 
 
 # ─── Background Tasks ──────────────────────────────────
