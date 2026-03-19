@@ -676,6 +676,14 @@ class GameRoom:
         ) if winner.team else 0
         winner_alive = len(winner.alive_pokemon_indices()) if winner.team else 0
 
+        # Determine currency award for the winner
+        # Bot battles pay less to prevent farming; human PvP pays more
+        opponent_is_bot = loser.is_bot if loser else False
+        currency_gained = 0
+        if winner and getattr(winner, 'account_id', None):
+            from journey import CURRENCY_PVP_WIN, CURRENCY_PVP_BOT_WIN
+            currency_gained = CURRENCY_PVP_BOT_WIN if opponent_is_bot else CURRENCY_PVP_WIN
+
         summary = {
             "winner_name": winner.name if winner else "Unknown",
             "winner_team_name": winner.team_name if winner else "",
@@ -685,19 +693,23 @@ class GameRoom:
             "duration": duration,
             "winner_remaining_pokemon": winner_alive,
             "winner_remaining_hp": winner_remaining,
+            "currency_gained": currency_gained,
+            "winner_account_id": getattr(winner, 'account_id', None),
         }
 
         for i, p in enumerate(self.players):
             if p:
+                is_winner = winner_idx == i
                 await p.send({
                     "type": "game_over",
-                    "winner": winner_idx == i,
+                    "winner": is_winner,
+                    "currency_gained": currency_gained if is_winner else 0,
                     "summary": summary,
                     "your_team_status": p.team_status(full=True),
                     "opponent_team_status": self.players[1 - i].team_status(full=True),
                 })
 
-        # Persist game to database
+        # Persist game to database and award currency
         if self.on_game_end:
             try:
                 self.on_game_end(self, winner_idx, summary)
