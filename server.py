@@ -27,6 +27,7 @@ from journey import (
     build_trainer_team, GYM_LEADERS, ELITE_FOUR, CHAMPION, MASTERS_EIGHT,
     SHOP_ITEMS, CURRENCY_WILD_WIN, CURRENCY_WILD_CATCH, CURRENCY_GYM_WIN,
     CURRENCY_ELITE_FOUR_WIN, CURRENCY_CHAMPION_WIN, CURRENCY_MASTERS_WIN,
+    CURRENCY_PVP_WIN, CURRENCY_PVP_BOT_WIN,
     get_gym, get_next_gym, get_elite_four_member, get_masters_opponent,
 )
 from battle_engine import build_journey_team, resolve_turn, calculate_damage, STRUGGLE
@@ -63,7 +64,7 @@ def init_db():
 
 
 def record_game(room, winner_idx, summary):
-    """Record a completed game to the database."""
+    """Record a completed game to the database and award PvP currency."""
     try:
         conn = sqlite3.connect(str(DB_PATH))
         p1 = room.players[0]
@@ -91,6 +92,16 @@ def record_game(room, winner_idx, summary):
         conn.close()
     except Exception as e:
         print(f"Error recording game: {e}")
+
+    # Award currency to the PvP winner
+    currency = summary.get("currency_gained", 0)
+    winner_account = summary.get("winner_account_id")
+    if currency > 0 and winner_account and account_mgr:
+        try:
+            account_mgr.add_currency(winner_account, currency)
+            print(f"[pvp] Awarded ${currency} to account {winner_account}")
+        except Exception as e:
+            print(f"Error awarding PvP currency: {e}")
 
 
 # Global state

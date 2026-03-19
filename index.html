@@ -1410,7 +1410,7 @@ function handleMessage(msg) {
       clearTimer();
       S.myTeam = msg.your_team_status;
       S.oppTeam = msg.opponent_team_status;
-      setTimeout(() => showGameOver(msg.winner, msg.summary), 1500);
+      setTimeout(() => showGameOver(msg.winner, msg.summary, msg.currency_gained || 0), 1500);
       break;
     case 'opponent_disconnected':
       setBattleText(msg.text || 'Opponent disconnected.');
@@ -2171,18 +2171,22 @@ function startTapPhase(durationMs, moveName) {
 }
 
 /* ─── Game Over ─────────────────────────────────── */
-function showGameOver(isWinner, summary) {
+function showGameOver(isWinner, summary, currencyGained) {
   showScreen('gameover');
   const title = document.getElementById('gameover-title');
   title.textContent = isWinner ? 'YOU WIN!' : 'YOU LOSE';
   title.className = 'gameover-title ' + (isWinner ? 'win' : 'lose');
 
-  document.getElementById('gameover-summary').innerHTML = `
+  let html = `
     ${summary.winner_name}'s "${summary.winner_team_name}" defeated
     ${summary.loser_name}'s "${summary.loser_team_name}"<br>
     Turns: ${summary.turns} • Time: ${formatDuration(summary.duration)}<br>
     Remaining Pokemon: ${summary.winner_remaining_pokemon}/6
   `;
+  if (isWinner && currencyGained > 0) {
+    html += `<br><span style="color: var(--yellow); font-weight: bold;">+$${currencyGained} PokeDollars!</span>`;
+  }
+  document.getElementById('gameover-summary').innerHTML = html;
   playSound(isWinner ? 'win' : 'faint');
 }
 
