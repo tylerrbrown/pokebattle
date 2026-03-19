@@ -26,6 +26,23 @@ def xp_to_next_level(level, current_xp):
     return max(0, xp_for_level(level + 1) - current_xp)
 
 
+def xp_progress_info(level, current_xp):
+    """Compute XP progress data for UI display."""
+    if level >= 100:
+        return {"xp_progress": 1.0, "xp_to_next": 0,
+                "xp_for_current_level": current_xp, "xp_for_next_level": current_xp}
+    cur_level_xp = xp_for_level(level)
+    next_level_xp = xp_for_level(level + 1)
+    span = next_level_xp - cur_level_xp
+    progress_in_level = current_xp - cur_level_xp
+    return {
+        "xp_progress": max(0.0, min(1.0, progress_in_level / span)) if span > 0 else 1.0,
+        "xp_to_next": max(0, next_level_xp - current_xp),
+        "xp_for_current_level": cur_level_xp,
+        "xp_for_next_level": next_level_xp,
+    }
+
+
 def calc_xp_yield(opponent_level, base_exp, is_wild=True):
     """Calculate XP earned from defeating an opponent.
     Simplified Gen 1: (base_exp * opponent_level) / 7
@@ -201,6 +218,13 @@ class AccountManager:
         conn.close()
         return True
 
+    @staticmethod
+    def _enrich_pokemon_xp(pokemon_dict):
+        """Add XP progress fields to a pokemon dict."""
+        info = xp_progress_info(pokemon_dict.get("level", 1), pokemon_dict.get("xp", 0))
+        pokemon_dict.update(info)
+        return pokemon_dict
+
     def get_team(self, player_id):
         """Get player's active team (up to 6 Pokemon in team slots)."""
         conn = self._conn()
@@ -211,7 +235,7 @@ class AccountManager:
             (player_id,)
         ).fetchall()
         conn.close()
-        return [dict(r) for r in rows]
+        return [self._enrich_pokemon_xp(dict(r)) for r in rows]
 
     def get_all_pokemon(self, player_id):
         """Get all Pokemon owned by player."""
@@ -221,7 +245,7 @@ class AccountManager:
             (player_id,)
         ).fetchall()
         conn.close()
-        return [dict(r) for r in rows]
+        return [self._enrich_pokemon_xp(dict(r)) for r in rows]
 
     def get_storage(self, player_id):
         """Get Pokemon NOT in the active team (storage/backpack)."""
@@ -233,7 +257,7 @@ class AccountManager:
             (player_id,)
         ).fetchall()
         conn.close()
-        return [dict(r) for r in rows]
+        return [self._enrich_pokemon_xp(dict(r)) for r in rows]
 
     def swap_team_member(self, player_id, team_pokemon_id, storage_pokemon_id):
         """Swap a team member with a storage Pokemon."""
@@ -368,7 +392,7 @@ class AccountManager:
             "starter_dex_id": row["starter_dex_id"],
             "pokeballs": row["pokeballs"],
             "currency": dict(row).get("currency", 500),
-            "team": [dict(r) for r in team],
+            "team": [self._enrich_pokemon_xp(dict(r)) for r in team],
             "total_pokemon": total_pokemon,
             "badges": [r["gym_id"] for r in badges],
             "milestones": [r["milestone"] for r in milestones],
@@ -452,6 +476,7 @@ class AccountManager:
         conn.commit()
         conn.close()
 
+        xp_info = xp_progress_info(new_level, total_xp)
         return {
             "pokemon_id": pokemon_row_id,
             "dex_id": row["dex_id"],
@@ -461,6 +486,9 @@ class AccountManager:
             "xp_gained": xp_gained,
             "total_xp": total_xp,
             "xp_to_next": xp_to_next_level(new_level, total_xp),
+            "xp_progress": xp_info["xp_progress"],
+            "xp_for_current_level": xp_info["xp_for_current_level"],
+            "xp_for_next_level": xp_info["xp_for_next_level"],
         }
 
     def update_pokemon_moves(self, pokemon_row_id, moves_list):

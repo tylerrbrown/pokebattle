@@ -13,12 +13,13 @@ LEARNSETS = {}    # str(dex_id) -> [{level, move}]
 EVOLUTIONS = {}   # str(dex_id) -> {evolves_to, level, method}
 ZMOVES = {}       # type (str) -> {name, power_mult}
 MEGA_EVOLUTIONS = {}  # str(dex_id) -> mega form data (or list for dual megas)
+DYNAMAX = {}      # dynamax data: max_move_powers, max_move_names, gigantamax
 POKEMON_LIST = [] # ordered list for client
 
 
 def load_data():
     """Load all JSON data files. Call once at startup."""
-    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, ZMOVES, MEGA_EVOLUTIONS, POKEMON_LIST
+    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, ZMOVES, MEGA_EVOLUTIONS, DYNAMAX, POKEMON_LIST
 
     with open(os.path.join(DATA_DIR, "pokemon.json")) as f:
         pokemon_list = json.load(f)
@@ -48,6 +49,11 @@ def load_data():
     if os.path.exists(mega_path):
         with open(mega_path) as f:
             MEGA_EVOLUTIONS = json.load(f)
+
+    dynamax_path = os.path.join(DATA_DIR, "dynamax.json")
+    if os.path.exists(dynamax_path):
+        with open(dynamax_path) as f:
+            DYNAMAX = json.load(f)
 
     # Index by dex ID
     POKEMON = {p["id"]: p for p in pokemon_list}
@@ -156,6 +162,27 @@ def get_new_moves_for_level(dex_id, old_level, new_level):
     """Get moves learned between old_level (exclusive) and new_level (inclusive)."""
     learnset = get_learnset(dex_id)
     return [m for m in learnset if old_level < m["level"] <= new_level]
+
+
+def get_max_move_power(base_power):
+    """Get Max Move power from base move power."""
+    powers = DYNAMAX.get("max_move_powers", {})
+    # Find the closest key <= base_power
+    best = 90
+    for k, v in powers.items():
+        if int(k) <= base_power:
+            best = v
+    return best
+
+
+def get_max_move_name(move_type):
+    """Get Max Move name for a given type."""
+    return DYNAMAX.get("max_move_names", {}).get(move_type, "Max Strike")
+
+
+def get_gmax_data(dex_id):
+    """Get Gigantamax data for a Pokemon. Returns dict or None."""
+    return DYNAMAX.get("gigantamax", {}).get(str(dex_id))
 
 
 def get_starter_moves(dex_id):

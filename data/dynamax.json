@@ -1,0 +1,46 @@
+{
+  "max_move_powers": {
+    "10": 90, "15": 90, "20": 90, "25": 90, "30": 90, "35": 90, "40": 90,
+    "45": 90, "50": 100, "55": 100, "60": 110, "65": 120, "70": 120,
+    "75": 130, "80": 130, "85": 130, "90": 130, "95": 140, "100": 140,
+    "110": 140, "120": 150, "130": 150, "140": 150, "150": 150, "160": 150,
+    "170": 150, "180": 150, "190": 150, "200": 150, "250": 150
+  },
+  "max_move_names": {
+    "normal": "Max Strike",
+    "fire": "Max Flare",
+    "water": "Max Geyser",
+    "electric": "Max Lightning",
+    "grass": "Max Overgrowth",
+    "ice": "Max Hailstorm",
+    "fighting": "Max Knuckle",
+    "poison": "Max Ooze",
+    "ground": "Max Quake",
+    "flying": "Max Airstream",
+    "psychic": "Max Mindstorm",
+    "bug": "Max Flutterby",
+    "rock": "Max Rockfall",
+    "ghost": "Max Phantasm",
+    "dragon": "Max Wyrmwind",
+    "dark": "Max Darkness",
+    "steel": "Max Steelspike",
+    "fairy": "Max Starfall"
+  },
+  "max_move_status": "Max Guard",
+  "gigantamax": {
+    "6": {"name": "Gigantamax Charizard", "gmax_move": "G-Max Wildfire", "gmax_type": "fire"},
+    "9": {"name": "Gigantamax Blastoise", "gmax_move": "G-Max Cannonade", "gmax_type": "water"},
+    "12": {"name": "Gigantamax Butterfree", "gmax_move": "G-Max Befuddle", "gmax_type": "bug"},
+    "25": {"name": "Gigantamax Pikachu", "gmax_move": "G-Max Volt Crash", "gmax_type": "electric"},
+    "52": {"name": "Gigantamax Meowth", "gmax_move": "G-Max Gold Rush", "gmax_type": "normal"},
+    "68": {"name": "Gigantamax Machamp", "gmax_move": "G-Max Chi Strike", "gmax_type": "fighting"},
+    "94": {"name": "Gigantamax Gengar", "gmax_move": "G-Max Terror", "gmax_type": "ghost"},
+    "99": {"name": "Gigantamax Kingler", "gmax_move": "G-Max Foam Burst", "gmax_type": "water"},
+    "131": {"name": "Gigantamax Lapras", "gmax_move": "G-Max Resonance", "gmax_type": "ice"},
+    "133": {"name": "Gigantamax Eevee", "gmax_move": "G-Max Cuddle", "gmax_type": "normal"},
+    "143": {"name": "Gigantamax Snorlax", "gmax_move": "G-Max Replenish", "gmax_type": "normal"},
+    "3": {"name": "Gigantamax Venusaur", "gmax_move": "G-Max Vine Lash", "gmax_type": "grass"},
+    "130": {"name": "Gigantamax Gyarados", "gmax_move": "G-Max Malodor", "gmax_type": "water"},
+    "149": {"name": "Gigantamax Dragonite", "gmax_move": "G-Max Depletion", "gmax_type": "dragon"}
+  }
+}

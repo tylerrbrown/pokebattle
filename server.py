@@ -276,6 +276,7 @@ async def handle_message(player, msg, room_mgr):
                 "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
                 "evolutions": pokemon_data.EVOLUTIONS,
                 "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
+                "dynamax": pokemon_data.DYNAMAX,
             })
         return
 
@@ -299,6 +300,7 @@ async def handle_message(player, msg, room_mgr):
                 "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
                 "evolutions": pokemon_data.EVOLUTIONS,
                 "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
+                "dynamax": pokemon_data.DYNAMAX,
             })
         else:
             await player.send({"type": "login_error", "message": "Account not found."})
@@ -1380,6 +1382,9 @@ async def _handle_wild_action(player, encounter, data):
         if getattr(encounter, '_mega_used', False):
             await player.send({"type": "error", "message": "Already used Mega Evolution this battle!"})
             return
+        if getattr(encounter, '_dynamax_used', False):
+            await player.send({"type": "error", "message": "Can't Mega Evolve after Dynamaxing!"})
+            return
         mega_stone_id = data.get("mega_stone")
         inventory = account_mgr.get_inventory(player.account_id) if hasattr(account_mgr, 'get_inventory') else {}
         if not inventory.get(mega_stone_id, 0):
@@ -1407,6 +1412,32 @@ async def _handle_wild_action(player, encounter, data):
         })
         return
 
+    if action == "dynamax":
+        my_poke = encounter.get_active()
+        if getattr(encounter, '_dynamax_used', False):
+            await player.send({"type": "error", "message": "Already used Dynamax this battle!"})
+            return
+        if getattr(encounter, '_mega_used', False) or my_poke.is_mega:
+            await player.send({"type": "error", "message": "Can't Dynamax after Mega Evolution!"})
+            return
+        if getattr(encounter, '_zmove_used', False):
+            await player.send({"type": "error", "message": "Can't Dynamax after using a Z-Move!"})
+            return
+        if my_poke.is_fainted:
+            await player.send({"type": "error", "message": "Can't Dynamax a fainted Pokemon!"})
+            return
+        my_poke.dynamax()
+        encounter._dynamax_used = True
+        gmax = pokemon_data.get_gmax_data(my_poke.dex_id)
+        await player.send({
+            "type": "dynamaxed",
+            "pokemon_name": (gmax["name"] if gmax else my_poke.name) + " Dynamaxed!",
+            "is_gigantamax": gmax is not None,
+            "gmax_data": gmax,
+            **encounter.serialize_state(),
+        })
+        return
+
     if action == "move":
         move_index = data.get("move_index", 0)
         use_zmove = data.get("z_move", False)
@@ -1421,6 +1452,20 @@ async def _handle_wild_action(player, encounter, data):
                 player_move = next((m for m in my_poke.moves if m["current_pp"] > 0), STRUGGLE)
         else:
             player_move = STRUGGLE
+
+        # Dynamax: convert to Max Moves
+        if my_poke.is_dynamaxed and player_move.get("id") != "struggle":
+            player_move = dict(player_move)  # Copy to avoid mutating
+            if player_move["power"] > 0:
+                gmax = pokemon_data.get_gmax_data(my_poke.dex_id)
+                if gmax and player_move["type"] == gmax["gmax_type"]:
+                    player_move["name"] = gmax["gmax_move"]
+                else:
+                    player_move["name"] = pokemon_data.get_max_move_name(player_move["type"])
+                player_move["power"] = pokemon_data.get_max_move_power(player_move["power"])
+                player_move["accuracy"] = 100  # Max Moves never miss
+            else:
+                player_move["name"] = "Max Guard"
 
         # Z-Move: boost power for this turn, mark used
         z_move_name = None
@@ -1466,6 +1511,11 @@ async def _handle_wild_action(player, encounter, data):
                 events += _resolve_single_move(my_poke, wild, player_move, tap_score, "player")
 
         encounter.turn_count += 1
+
+        # Tick Dynamax for player's active Pokemon
+        if my_poke.is_dynamaxed and not my_poke.is_fainted:
+            if my_poke.tick_dynamax():
+                events.append({"type": "dynamax_end", "pokemon": my_poke.name, "side": "player"})
 
         # Check outcomes
         if wild.is_fainted:

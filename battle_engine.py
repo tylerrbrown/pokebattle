@@ -73,6 +73,12 @@ class PokemonInstance:
         self.mega_name = None
         self._original_stats = None  # Saved for revert
 
+        # Dynamax (per-battle)
+        self.is_dynamaxed = False
+        self.dynamax_turns_left = 0
+        self.pre_dynamax_hp = 0
+        self.pre_dynamax_max_hp = 0
+
         # Stat modifiers (Gen 1 stages: -6 to +6)
         self.attack_stage = 0
         self.defense_stage = 0
@@ -103,6 +109,40 @@ class PokemonInstance:
         """Check if any move has PP remaining."""
         return any(m["current_pp"] > 0 for m in self.moves)
 
+    def dynamax(self):
+        """Activate Dynamax: double HP for 3 turns."""
+        if self.is_dynamaxed or self.is_fainted:
+            return
+        self.is_dynamaxed = True
+        self.dynamax_turns_left = 3
+        self.pre_dynamax_hp = self.current_hp
+        self.pre_dynamax_max_hp = self.max_hp
+        self.max_hp *= 2
+        self.current_hp *= 2
+
+    def revert_dynamax(self):
+        """Revert Dynamax: restore original HP proportionally."""
+        if not self.is_dynamaxed:
+            return
+        self.is_dynamaxed = False
+        self.dynamax_turns_left = 0
+        # Proportional HP: (current / doubled_max) * original_max
+        ratio = self.current_hp / self.max_hp if self.max_hp > 0 else 0
+        self.max_hp = self.pre_dynamax_max_hp
+        self.current_hp = max(1, int(ratio * self.max_hp))
+        if self.current_hp > self.max_hp:
+            self.current_hp = self.max_hp
+
+    def tick_dynamax(self):
+        """Decrement Dynamax turns. Returns True if Dynamax ended this tick."""
+        if not self.is_dynamaxed or self.is_fainted:
+            return False
+        self.dynamax_turns_left -= 1
+        if self.dynamax_turns_left <= 0:
+            self.revert_dynamax()
+            return True
+        return False
+
     def mega_evolve(self, mega_data):
         """Apply Mega Evolution stat changes (temporary, battle-only)."""
         if self.is_mega:
@@ -126,7 +166,7 @@ class PokemonInstance:
 
     def serialize_full(self):
         """Full serialization for the owning player."""
-        return {
+        data = {
             "dex_id": self.dex_id,
             "name": self.name,
             "types": self.types,
@@ -140,6 +180,8 @@ class PokemonInstance:
             "status": self.status,
             "is_fainted": self.is_fainted,
             "is_mega": self.is_mega,
+            "is_dynamaxed": self.is_dynamaxed,
+            "dynamax_turns_left": self.dynamax_turns_left,
             "moves": [
                 {
                     "id": m["id"],
@@ -155,6 +197,10 @@ class PokemonInstance:
                 for m in self.moves
             ],
         }
+        # XP progress (set by build_journey_team)
+        if hasattr(self, 'xp_progress'):
+            data["xp_progress"] = self.xp_progress
+        return data
 
     def serialize_public(self):
         """Public serialization for the opponent (no PP info)."""
@@ -168,6 +214,8 @@ class PokemonInstance:
             "status": self.status,
             "is_fainted": self.is_fainted,
             "is_mega": self.is_mega,
+            "is_dynamaxed": self.is_dynamaxed,
+            "dynamax_turns_left": self.dynamax_turns_left,
             "moves": [
                 {"id": m["id"], "name": m["name"], "type": m["type"]}
                 for m in self.moves
@@ -194,6 +242,13 @@ def build_journey_team(owned_pokemon_list, pokemon_db, moves_db):
             custom_moves = json.loads(p["moves"]) if p.get("moves") else None
             inst = PokemonInstance(species, moves_db, level=p.get("level", 5), custom_moves=custom_moves)
             inst.db_id = p.get("id")  # Track DB row ID for XP awards
+            # Compute XP progress inline (avoids circular import with player_accounts)
+            level = p.get("level", 5)
+            xp = p.get("xp", 0)
+            cur_xp = int((4 / 5) * level ** 3) if level > 1 else 0
+            nxt_xp = int((4 / 5) * (level + 1) ** 3) if level < 100 else cur_xp
+            span = nxt_xp - cur_xp
+            inst.xp_progress = max(0.0, min(1.0, (xp - cur_xp) / span)) if span > 0 else 1.0
             team.append(inst)
     return team
 
