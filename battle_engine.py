@@ -167,6 +167,7 @@ class PokemonInstance:
             "current_hp": self.current_hp,
             "status": self.status,
             "is_fainted": self.is_fainted,
+            "is_mega": self.is_mega,
             "moves": [
                 {"id": m["id"], "name": m["name"], "type": m["type"]}
                 for m in self.moves
