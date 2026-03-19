@@ -45,10 +45,12 @@ def xp_progress_info(level, current_xp):
 
 def calc_xp_yield(opponent_level, base_exp, is_wild=True):
     """Calculate XP earned from defeating an opponent.
-    Simplified Gen 1: (base_exp * opponent_level) / 7
-    Trainer battles yield 1.5x, gym leaders yield 2x.
+    Simplified Gen 1: (base_exp * opponent_level) / 7, boosted 1.5x for faster progression.
+    Trainer battles yield an additional 1.5x, gym leaders yield 2x.
     """
     xp = int((base_exp * opponent_level) / 7)
+    # 1.5x base XP boost for faster, more fun progression
+    xp = int(xp * 1.5)
     if not is_wild:
         xp = int(xp * 1.5)
     return max(1, xp)
