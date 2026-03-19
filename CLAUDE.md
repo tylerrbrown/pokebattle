@@ -161,6 +161,13 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **Item use from My Team**: consumes item from inventory (HP doesn't persist between battles, so mainly cosmetic outside battle)
 - **NOT usable in PvP**: items only work in wild encounters and gym battles
 - Items are categorized: `"category": "ball"` (Poke Balls use `pokeballs` column) vs `"category": "healing"` (use `player_inventory` table)
+- **Rare Candy**: Battle reward (not purchasable), stored as `rare_candy` in `player_inventory`
+  - Drop rates: wild encounter 10%, gym 100% x1, Elite Four 100% x2, Champion/Masters 100% x3
+  - Also awarded on wild catch (same 10% rate)
+  - `_award_rare_candy(player, battle_type)` in `server.py` handles drops
+  - Usage: `use_rare_candy` message → `_handle_use_rare_candy()` → awards exact XP for +1 level, handles move learning + evolution
+  - Frontend: purple "RARE CANDY (N)" button on My Team cards, count shown in hub + stats line + shop summary
+  - Victory messages include `rare_candy_gained` field; UI shows "+X Rare Candy" alongside currency
 
 ## Tests
 
@@ -207,3 +214,4 @@ python tests/test_battle_engine.py
 1. **XP bar UI** — Thin blue XP bar on My Team cards and battle HUD; shows "X XP to next" text; XP scaling via medium-fast growth formula
 2. **Move learning UX fix** — Prominent hint box at top, client-side selection (no server round-trip), inline confirmation "Replace X with Y? [YES] [NO]" for 4-move swaps, green LEARN button for <4 moves
 3. **Gigantamax/Dynamax** — DYNAMAX button in battle, 3-turn HP doubling, Max Move names/powers, G-Max moves for eligible Pokemon, sprite scale+glow effect, mutually exclusive with Mega/Z-Move
+4. **Rare Candy** — Battle reward item (+1 level); 10% wild drop, 100% gym/E4/Champion/Masters; usable from My Team; handles move learning + evolution on level-up
