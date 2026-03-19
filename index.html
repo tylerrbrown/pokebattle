@@ -675,6 +675,33 @@ input.invalid { border-color: var(--red); }
 .bp-card .bp-types { font-size:var(--fs-2xs); margin-top:2px; display:flex; gap:2px; justify-content:center; }
 .bp-card .bp-action { font-size:var(--fs-2xs); color:var(--text-dim); margin-top:3px; }
 
+/* ─── Trade ────────────────────────────────────── */
+.trade-screen { padding:16px; gap:12px; align-items:stretch; }
+.trade-header { display:flex; justify-content:space-between; align-items:center; }
+.trade-title { font-size:var(--fs-xl); color:#38bdf8; }
+.trade-lobby { display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px; }
+.trade-lobby .room-code { font-size:var(--fs-3xl); letter-spacing:8px; color:var(--accent); text-shadow:0 0 20px rgba(233,69,96,0.4); cursor:pointer; }
+.trade-lobby .trade-status { font-size:var(--fs-xs); color:var(--text-dim); }
+.trade-area { display:flex; gap:12px; flex:1; overflow:hidden; }
+.trade-side { flex:1; display:flex; flex-direction:column; gap:6px; min-width:0; }
+.trade-side-label { font-size:var(--fs-xs); color:var(--text-dim); text-align:center; border-bottom:1px solid var(--border); padding-bottom:4px; }
+.trade-offer-box { display:flex; flex-direction:column; align-items:center; padding:10px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; min-height:90px; justify-content:center; }
+.trade-offer-box.has-offer { border-color:var(--yellow); }
+.trade-offer-box img { width:56px; height:56px; image-rendering:pixelated; }
+.trade-offer-name { font-size:var(--fs-xs); margin-top:2px; }
+.trade-offer-level { font-size:var(--fs-2xs); color:var(--yellow); }
+.trade-offer-types { font-size:var(--fs-2xs); margin-top:2px; display:flex; gap:2px; justify-content:center; }
+.trade-offer-placeholder { font-size:var(--fs-xs); color:var(--text-dim); }
+.trade-pokemon-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; overflow-y:auto; flex:1; }
+.trade-arrow { display:flex; align-items:center; justify-content:center; font-size:var(--fs-2xl); color:var(--accent); padding:0 4px; }
+.trade-confirm-bar { display:flex; gap:10px; justify-content:center; padding:8px 0; }
+.btn-trade { background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:#1a1a2e; font-weight:bold; }
+.btn-trade:hover { filter:brightness(1.1); }
+.btn-trade-confirm { background:linear-gradient(135deg,var(--green),#22c55e); color:#1a1a2e; font-weight:bold; }
+.btn-trade-confirm:hover { filter:brightness(1.1); }
+.btn-trade-confirm:disabled { opacity:0.4; cursor:not-allowed; }
+.trade-confirmed-badge { font-size:var(--fs-2xs); color:var(--green); margin-top:4px; }
+
 /* ─── Shop ─────────────────────────────────────── */
 .shop-screen { padding:16px; gap:12px; }
 .shop-header { display:flex; justify-content:space-between; align-items:center; }
@@ -921,6 +948,7 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-shop" onclick="showShop()">SHOP</button>
       <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
       <button class="btn btn-backpack" onclick="showBackpack()">BACKPACK</button>
+      <button class="btn btn-trade" onclick="showTradeMenu()">TRADE</button>
       <button class="btn btn-ai" onclick="createJourneyBattle()">BATTLE AI</button>
       <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:var(--fs-xs)">QUICK BATTLE</button>
       <button class="btn btn-secondary" style="font-size:var(--fs-xs)" onclick="logout()">LOG OUT</button>
@@ -947,6 +975,66 @@ input.invalid { border-color: var(--red); }
     <div class="backpack-team" id="backpack-team"></div>
     <div class="backpack-section-label">Storage <span id="backpack-storage-count"></span></div>
     <div class="backpack-storage" id="backpack-storage"></div>
+  </div>
+
+  <!-- TRADE MENU SCREEN -->
+  <div id="screen-trademenu" class="screen trade-screen">
+    <div class="trade-header">
+      <span class="trade-title">TRADE</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div class="trade-lobby">
+      <p style="font-size:var(--fs-sm);color:var(--text);text-align:center">Trade Pokemon with a friend!<br>Create a room and share the code, or join with a code.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-trade" onclick="createTradeRoom()">CREATE</button>
+        <button class="btn btn-secondary" onclick="showTradeJoinInput()">JOIN</button>
+      </div>
+      <input id="trade-join-code" type="text" placeholder="Room Code (4 letters)" maxlength="4" style="display:none" autocomplete="off">
+      <button id="trade-join-btn" class="btn btn-trade" style="display:none" onclick="joinTradeRoom()">JOIN ROOM</button>
+      <div id="trade-menu-error" class="error-text"></div>
+    </div>
+  </div>
+
+  <!-- TRADE WAITING SCREEN -->
+  <div id="screen-tradewait" class="screen trade-screen">
+    <div class="trade-header">
+      <span class="trade-title">TRADE ROOM</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="cancelTrade()">LEAVE</button>
+    </div>
+    <div class="trade-lobby">
+      <div class="room-code" id="trade-lobby-code" onclick="copyTradeCode()" title="Click to copy"></div>
+      <div class="trade-status">Share this code with your trade partner</div>
+      <div class="trade-status dots-anim">Waiting for partner</div>
+    </div>
+  </div>
+
+  <!-- TRADE SCREEN (active trade) -->
+  <div id="screen-trade" class="screen trade-screen">
+    <div class="trade-header">
+      <span class="trade-title">TRADE</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="cancelTrade()">CANCEL</button>
+    </div>
+    <div class="trade-area">
+      <div class="trade-side">
+        <div class="trade-side-label">YOUR OFFER</div>
+        <div class="trade-offer-box" id="trade-my-offer">
+          <div class="trade-offer-placeholder">Tap a Pokemon below</div>
+        </div>
+        <div class="trade-side-label">Your Pokemon</div>
+        <div class="trade-pokemon-grid" id="trade-my-pokemon"></div>
+      </div>
+      <div class="trade-arrow">&#8644;</div>
+      <div class="trade-side">
+        <div class="trade-side-label" id="trade-partner-label">PARTNER'S OFFER</div>
+        <div class="trade-offer-box" id="trade-partner-offer">
+          <div class="trade-offer-placeholder">Waiting...</div>
+        </div>
+        <div id="trade-partner-confirmed" class="trade-confirmed-badge" style="display:none;text-align:center">CONFIRMED!</div>
+      </div>
+    </div>
+    <div class="trade-confirm-bar">
+      <button class="btn btn-trade-confirm" id="trade-confirm-btn" onclick="confirmTrade()" disabled>CONFIRM TRADE</button>
+    </div>
   </div>
 
   <!-- MOVE MANAGEMENT SCREEN -->
@@ -1615,6 +1703,53 @@ function handleMessage(msg) {
         showToast(msg.message || 'Evolution failed');
       }
       break;
+    // ─── Trade Messages ─────────────────────────────
+    case 'trade_room_created':
+      S.tradeCode = msg.code;
+      showScreen('tradewait');
+      document.getElementById('trade-lobby-code').textContent = msg.code;
+      break;
+    case 'trade_room_joined':
+      S.tradeCode = msg.code;
+      S.tradePartner = msg.partner_name;
+      document.getElementById('trade-partner-label').textContent = msg.partner_name.toUpperCase() + "'S OFFER";
+      showScreen('trade');
+      break;
+    case 'trade_partner_joined':
+      S.tradePartner = msg.partner_name;
+      document.getElementById('trade-partner-label').textContent = msg.partner_name.toUpperCase() + "'S OFFER";
+      showScreen('trade');
+      break;
+    case 'trade_pokemon_list':
+      S.tradePokemon = { team: msg.team, storage: msg.storage };
+      renderTradePokemonGrid();
+      break;
+    case 'trade_offer_set':
+      S.tradeMyOffer = msg.offer;
+      renderTradeMyOffer();
+      updateTradeConfirmBtn();
+      break;
+    case 'trade_partner_offer':
+      S.tradePartnerOffer = msg.offer;
+      renderTradePartnerOffer();
+      updateTradeConfirmBtn();
+      break;
+    case 'trade_partner_confirmed':
+      S.tradePartnerConfirmed = true;
+      document.getElementById('trade-partner-confirmed').style.display = '';
+      break;
+    case 'trade_complete':
+      showTradeCompleteOverlay();
+      break;
+    case 'trade_cancelled':
+      showToast(msg.message || 'Trade was cancelled.');
+      resetTradeState();
+      goHome();
+      break;
+    case 'trade_left':
+      resetTradeState();
+      goHome();
+      break;
     case 'error':
       showError(msg.message);
       break;
@@ -1633,6 +1768,10 @@ function showError(msg) {
     document.getElementById('title-error').textContent = msg;
   } else if (S.screen === 'team') {
     showTeamError(msg);
+  } else if (S.screen === 'trademenu') {
+    document.getElementById('trade-menu-error').textContent = msg;
+  } else if (S.screen === 'trade' || S.screen === 'tradewait') {
+    showToast(msg);
   } else {
     setBattleText(msg);
   }
@@ -2386,6 +2525,179 @@ function bpTap(pokemonId, isTeam) {
       send({ type: 'move_to_team', pokemon_id: pokemonId });
     }
   }
+}
+
+/* ─── Trade ────────────────────────────────────── */
+function showTradeMenu() {
+  resetTradeState();
+  showScreen('trademenu');
+  document.getElementById('trade-join-code').style.display = 'none';
+  document.getElementById('trade-join-btn').style.display = 'none';
+  document.getElementById('trade-menu-error').textContent = '';
+}
+
+function resetTradeState() {
+  S.tradeCode = null;
+  S.tradePartner = null;
+  S.tradePokemon = null;
+  S.tradeMyOffer = null;
+  S.tradePartnerOffer = null;
+  S.tradePartnerConfirmed = false;
+}
+
+function createTradeRoom() {
+  if (!S.account) return;
+  send({ type: 'create_trade' });
+}
+
+function showTradeJoinInput() {
+  document.getElementById('trade-join-code').style.display = '';
+  document.getElementById('trade-join-btn').style.display = '';
+  document.getElementById('trade-join-code').focus();
+}
+
+function joinTradeRoom() {
+  if (!S.account) return;
+  var code = document.getElementById('trade-join-code').value.trim().toUpperCase();
+  if (!/^[A-Z]{4}$/.test(code)) {
+    document.getElementById('trade-menu-error').textContent = 'Code must be 4 letters';
+    return;
+  }
+  document.getElementById('trade-menu-error').textContent = '';
+  send({ type: 'join_trade', code: code });
+}
+
+document.getElementById('trade-join-code').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') joinTradeRoom();
+  setTimeout(function() {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+  }, 0);
+});
+
+function copyTradeCode() {
+  if (S.tradeCode) {
+    navigator.clipboard.writeText(S.tradeCode);
+    var el = document.getElementById('trade-lobby-code');
+    el.style.color = 'var(--green)';
+    setTimeout(function() { el.style.color = ''; }, 500);
+  }
+}
+
+function cancelTrade() {
+  send({ type: 'trade_cancel' });
+}
+
+function _tradeCard(p, isSelected) {
+  var pk = S.pokemonList.find(function(x) { return x.id === p.dex_id; });
+  var name = p.nickname || (pk ? pk.name : 'Unknown');
+  var types = pk ? pk.types : [];
+  var sel = isSelected ? ' selected' : '';
+  var html = '<div class="bp-card' + sel + '" onclick="tradeSelectPokemon(' + p.id + ')">';
+  html += '<img src="/sprites/front/' + p.dex_id + '.png">';
+  html += '<div class="bp-name">' + name + '</div>';
+  html += '<div class="bp-level">Lv.' + p.level + '</div>';
+  html += '<div class="bp-types">';
+  types.forEach(function(t) {
+    html += '<span class="move-type-badge" style="background:var(--type-' + t + ');font-size:var(--fs-2xs);padding:1px 4px">' + t + '</span>';
+  });
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
+function renderTradePokemonGrid() {
+  var el = document.getElementById('trade-my-pokemon');
+  if (!S.tradePokemon) { el.innerHTML = ''; return; }
+  var all = S.tradePokemon.team.concat(S.tradePokemon.storage);
+  var html = '';
+  all.forEach(function(p) {
+    var isSel = S.tradeMyOffer && S.tradeMyOffer.pokemon_id === p.id;
+    html += _tradeCard(p, isSel);
+  });
+  if (all.length === 0) {
+    html = '<div style="color:var(--text-dim);font-size:var(--fs-xs);text-align:center;padding:12px;grid-column:1/-1">No Pokemon to trade.</div>';
+  }
+  el.innerHTML = html;
+}
+
+function tradeSelectPokemon(pokemonId) {
+  send({ type: 'trade_offer', pokemon_id: pokemonId });
+}
+
+function renderTradeMyOffer() {
+  var el = document.getElementById('trade-my-offer');
+  if (!S.tradeMyOffer) {
+    el.innerHTML = '<div class="trade-offer-placeholder">Tap a Pokemon below</div>';
+    el.classList.remove('has-offer');
+    return;
+  }
+  var o = S.tradeMyOffer;
+  var html = '<img src="/sprites/front/' + o.dex_id + '.png">';
+  html += '<div class="trade-offer-name">' + o.name + '</div>';
+  html += '<div class="trade-offer-level">Lv.' + o.level + '</div>';
+  html += '<div class="trade-offer-types">';
+  (o.types || []).forEach(function(t) {
+    html += '<span class="move-type-badge" style="background:var(--type-' + t + ');font-size:var(--fs-2xs);padding:1px 4px">' + t + '</span>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+  el.classList.add('has-offer');
+  // Re-render grid to update selection highlight
+  renderTradePokemonGrid();
+  // Reset confirmations when offer changes
+  S.tradePartnerConfirmed = false;
+  document.getElementById('trade-partner-confirmed').style.display = 'none';
+}
+
+function renderTradePartnerOffer() {
+  var el = document.getElementById('trade-partner-offer');
+  if (!S.tradePartnerOffer) {
+    el.innerHTML = '<div class="trade-offer-placeholder">Waiting...</div>';
+    el.classList.remove('has-offer');
+    return;
+  }
+  var o = S.tradePartnerOffer;
+  var html = '<img src="/sprites/front/' + o.dex_id + '.png">';
+  html += '<div class="trade-offer-name">' + o.name + '</div>';
+  html += '<div class="trade-offer-level">Lv.' + o.level + '</div>';
+  html += '<div class="trade-offer-types">';
+  (o.types || []).forEach(function(t) {
+    html += '<span class="move-type-badge" style="background:var(--type-' + t + ');font-size:var(--fs-2xs);padding:1px 4px">' + t + '</span>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+  el.classList.add('has-offer');
+  // Reset partner confirmed when their offer changes
+  S.tradePartnerConfirmed = false;
+  document.getElementById('trade-partner-confirmed').style.display = 'none';
+}
+
+function updateTradeConfirmBtn() {
+  var btn = document.getElementById('trade-confirm-btn');
+  btn.disabled = !(S.tradeMyOffer && S.tradePartnerOffer);
+}
+
+function confirmTrade() {
+  send({ type: 'trade_confirm' });
+  var btn = document.getElementById('trade-confirm-btn');
+  btn.textContent = 'WAITING...';
+  btn.disabled = true;
+}
+
+function showTradeCompleteOverlay() {
+  // Build overlay
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;';
+  var partnerOffer = S.tradePartnerOffer || {};
+  var myOffer = S.tradeMyOffer || {};
+  overlay.innerHTML = '<div style="font-size:var(--fs-xl);color:var(--green);font-weight:bold">Trade Complete!</div>'
+    + '<div style="display:flex;align-items:center;gap:20px;margin:12px 0">'
+    + '<div style="text-align:center;opacity:0.5"><img src="/sprites/front/' + myOffer.dex_id + '.png" style="width:64px;height:64px;image-rendering:pixelated"><div style="font-size:var(--fs-xs);color:var(--text-dim)">' + myOffer.name + '</div><div style="font-size:var(--fs-2xs);color:var(--text-dim)">Sent</div></div>'
+    + '<div style="font-size:var(--fs-2xl);color:var(--accent)">&#8594;</div>'
+    + '<div style="text-align:center"><img src="/sprites/front/' + partnerOffer.dex_id + '.png" style="width:80px;height:80px;image-rendering:pixelated"><div style="font-size:var(--fs-sm);color:var(--yellow)">' + partnerOffer.name + '</div><div style="font-size:var(--fs-2xs);color:var(--green)">Received!</div></div>'
+    + '</div>'
+    + '<button class="btn btn-trade" onclick="this.parentElement.remove();resetTradeState();goHome()" style="margin-top:8px">DONE</button>';
+  document.body.appendChild(overlay);
 }
 
 function renderMyTeam(team, allPokemon) {

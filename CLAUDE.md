@@ -162,6 +162,21 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **NOT usable in PvP**: items only work in wild encounters and gym battles
 - Items are categorized: `"category": "ball"` (Poke Balls use `pokeballs` column) vs `"category": "healing"` (use `player_inventory` table)
 
+## Pokemon Trading
+
+- **Trade button** on hub screen opens trade menu (create or join with 4-letter code)
+- **TradeRoom** class in `server.py` — lightweight 2-player room separate from battle rooms
+- **Flow**: Create/join trade room -> both see their Pokemon -> tap to offer -> both confirm -> swap executed
+- **WebSocket Messages**:
+  - `create_trade` -> `trade_room_created` (code)
+  - `join_trade` -> `trade_room_joined` / `trade_partner_joined`
+  - `trade_offer` -> `trade_offer_set` / `trade_partner_offer`
+  - `trade_confirm` -> `trade_partner_confirmed` / `trade_complete`
+  - `trade_cancel` -> `trade_cancelled` / `trade_left`
+- **Database**: `trade_pokemon()` in `player_accounts.py` swaps `player_id` on both rows; both go to storage after trade; handles edge case where traded Pokemon was the last team member
+- **Cleanup**: trade rooms auto-cleaned on disconnect; separate from battle room namespace
+- **Frontend screens**: `screen-trademenu` (create/join), `screen-tradewait` (waiting for partner), `screen-trade` (active trade with offer/confirm)
+
 ## Tests
 
 ```bash
@@ -207,3 +222,4 @@ python tests/test_battle_engine.py
 1. **XP bar UI** — Thin blue XP bar on My Team cards and battle HUD; shows "X XP to next" text; XP scaling via medium-fast growth formula
 2. **Move learning UX fix** — Prominent hint box at top, client-side selection (no server round-trip), inline confirmation "Replace X with Y? [YES] [NO]" for 4-move swaps, green LEARN button for <4 moves
 3. **Gigantamax/Dynamax** — DYNAMAX button in battle, 3-turn HP doubling, Max Move names/powers, G-Max moves for eligible Pokemon, sprite scale+glow effect, mutually exclusive with Mega/Z-Move
+4. **Pokemon Trading** — TRADE button on hub, 4-letter room codes, select Pokemon to offer, both confirm, swap ownership in DB; traded Pokemon go to storage
