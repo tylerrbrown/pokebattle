@@ -251,6 +251,119 @@ input.invalid { border-color: var(--red); }
   background: linear-gradient(180deg, var(--bg2) 0%, var(--bg3) 50%, var(--bg) 100%);
 }
 
+/* ─── Battle Backgrounds ─────────────────────────── */
+.battle-arena[data-bg-theme]::before,
+.battle-arena[data-bg-theme]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.battle-arena[data-bg-theme] .opponent-side,
+.battle-arena[data-bg-theme] .player-side,
+.battle-arena[data-bg-theme] .flash-overlay {
+  position: relative;
+  z-index: 1;
+}
+/* Wild - Grassland */
+.battle-arena[data-bg-theme="grassland"] {
+  background: linear-gradient(180deg, #0d1b2a 0%, #1b2d1b 50%, #0f1f0f 100%);
+}
+.battle-arena[data-bg-theme="grassland"]::before {
+  background: linear-gradient(0deg, rgba(34,100,34,0.25) 0%, transparent 35%);
+}
+/* Gym 1 Brock - Rock Cave */
+.battle-arena[data-bg-theme="rock-cave"] {
+  background: linear-gradient(180deg, #1a1209 0%, #2d1f0e 50%, #1a150b 100%);
+}
+.battle-arena[data-bg-theme="rock-cave"]::before {
+  background: linear-gradient(0deg, rgba(139,90,43,0.2) 0%, transparent 35%);
+}
+/* Gym 2 Misty - Aquarium */
+.battle-arena[data-bg-theme="aquarium"] {
+  background: linear-gradient(180deg, #0a1628 0%, #0d2847 50%, #091a30 100%);
+}
+.battle-arena[data-bg-theme="aquarium"]::before {
+  background: linear-gradient(0deg, rgba(30,80,160,0.2) 0%, transparent 40%);
+}
+/* Gym 3 Lt. Surge - Power Plant */
+.battle-arena[data-bg-theme="power-plant"] {
+  background: linear-gradient(180deg, #1a1a0a 0%, #2a2a0d 50%, #1a1a08 100%);
+}
+.battle-arena[data-bg-theme="power-plant"]::before {
+  background: linear-gradient(0deg, rgba(200,180,30,0.15) 0%, transparent 35%);
+}
+/* Gym 4 Erika - Garden */
+.battle-arena[data-bg-theme="garden"] {
+  background: linear-gradient(180deg, #0a1a10 0%, #142a18 50%, #0a1a0e 100%);
+}
+.battle-arena[data-bg-theme="garden"]::before {
+  background: linear-gradient(0deg, rgba(80,160,60,0.2) 0%, transparent 40%);
+}
+/* Gym 5 Koga - Dojo Poison */
+.battle-arena[data-bg-theme="dojo-poison"] {
+  background: linear-gradient(180deg, #1a0d1e 0%, #2a1530 50%, #1a0d1e 100%);
+}
+.battle-arena[data-bg-theme="dojo-poison"]::before {
+  background: linear-gradient(0deg, rgba(120,50,140,0.2) 0%, transparent 35%);
+}
+/* Gym 6 Sabrina - Psychic Chamber */
+.battle-arena[data-bg-theme="psychic-chamber"] {
+  background: linear-gradient(180deg, #1e0d1a 0%, #30152a 50%, #1e0d1a 100%);
+}
+.battle-arena[data-bg-theme="psychic-chamber"]::before {
+  background: linear-gradient(0deg, rgba(200,60,140,0.15) 0%, transparent 35%);
+}
+/* Gym 7 Blaine - Volcano */
+.battle-arena[data-bg-theme="volcano"] {
+  background: linear-gradient(180deg, #1a0a0a 0%, #2d1008 50%, #1a0a06 100%);
+}
+.battle-arena[data-bg-theme="volcano"]::before {
+  background: linear-gradient(0deg, rgba(200,60,20,0.2) 0%, transparent 35%);
+}
+/* Gym 8 Giovanni - Earth Fortress */
+.battle-arena[data-bg-theme="earth-fortress"] {
+  background: linear-gradient(180deg, #12100a 0%, #221c10 50%, #12100a 100%);
+}
+.battle-arena[data-bg-theme="earth-fortress"]::before {
+  background: linear-gradient(0deg, rgba(160,120,60,0.2) 0%, transparent 35%);
+}
+/* Elite Four - Indigo Plateau */
+.battle-arena[data-bg-theme="indigo-plateau"] {
+  background: linear-gradient(180deg, #0a0a20 0%, #101040 50%, #0a0a20 100%);
+}
+.battle-arena[data-bg-theme="indigo-plateau"]::before {
+  background: linear-gradient(0deg, rgba(60,60,160,0.2) 0%, transparent 35%);
+}
+/* Champion - Hall of Fame */
+.battle-arena[data-bg-theme="hall-of-fame"] {
+  background: linear-gradient(180deg, #1a1508 0%, #2a220c 50%, #1a1508 100%);
+}
+.battle-arena[data-bg-theme="hall-of-fame"]::before {
+  background: linear-gradient(0deg, rgba(220,190,60,0.2) 0%, transparent 40%);
+}
+.battle-arena[data-bg-theme="hall-of-fame"]::after {
+  background: radial-gradient(ellipse at 50% 30%, rgba(255,240,180,0.08) 0%, transparent 60%);
+}
+/* Masters Eight - World Stage */
+.battle-arena[data-bg-theme="world-stage"] {
+  background: linear-gradient(180deg, #0a0a0a 0%, #1a1008 50%, #0a0a0a 100%);
+}
+.battle-arena[data-bg-theme="world-stage"]::before {
+  background: linear-gradient(0deg, rgba(180,140,30,0.15) 0%, transparent 35%);
+}
+.battle-arena[data-bg-theme="world-stage"]::after {
+  background: radial-gradient(ellipse at 50% 20%, rgba(200,50,30,0.08) 0%, transparent 50%);
+}
+/* PvP / Quick Battle - Stadium */
+.battle-arena[data-bg-theme="stadium"] {
+  background: linear-gradient(180deg, #121215 0%, #1a1a20 50%, #121215 100%);
+}
+.battle-arena[data-bg-theme="stadium"]::before {
+  background: linear-gradient(0deg, rgba(120,120,140,0.15) 0%, transparent 35%);
+}
+
 /* Opponent (top-right) */
 .opponent-side {
   position: absolute;
@@ -1444,6 +1557,7 @@ function handleMessage(msg) {
       S.oppTeamName = msg.opponent_team_name;
       clearTimer();
       showScreen('battle');
+      applyBattleBackground();
       renderBattle();
       setBattleText(`${S.opponentName}'s ${S.oppTeamName} wants to battle!`);
       break;
@@ -2348,6 +2462,7 @@ function backToTitle() {
   S.myTeam = [];
   S.oppTeam = [];
   clearTimer();
+  clearBattleBackground();
   if (S.account) {
     goHome();
   } else {
@@ -3196,6 +3311,7 @@ function goHome(showSave) {
   S.encounter = null;
   S.encounterType = null;
   S.gymData = null;
+  clearBattleBackground();
   send({ type: 'get_profile' });
   send({ type: 'get_progression' });
   showScreen('hub');
@@ -3250,6 +3366,7 @@ function setupJourneyBattle(msg) {
   S._megaUsed = false;
   S._dynamaxUsed = false;
   showScreen('battle');
+  applyBattleBackground();
   renderJourneyBattle();
   if (S.encounterType === 'wild') {
     const w = msg.wild_pokemon;
@@ -4037,6 +4154,43 @@ function beginGymBattle() { send({type:'gym_battle_start',gym_id:S.currentGymId}
 
 /* ─── Elite Four / Champion / Masters Eight ────── */
 var _currentTrainer = null;
+
+/* ─── Battle Background Themes ────────────────── */
+var BATTLE_THEMES = {
+  wild: 'grassland',
+  gym: {1:'rock-cave', 2:'aquarium', 3:'power-plant', 4:'garden', 5:'dojo-poison', 6:'psychic-chamber', 7:'volcano', 8:'earth-fortress'},
+  e4: 'indigo-plateau',
+  champion: 'hall-of-fame',
+  masters: 'world-stage',
+  pvp: 'stadium'
+};
+
+function applyBattleBackground() {
+  var arena = document.getElementById('battle-arena');
+  if (!arena) return;
+  var theme = 'grassland';
+  if (S.encounterType === 'wild') {
+    theme = BATTLE_THEMES.wild;
+  } else if (S.encounterType === 'gym') {
+    if (_currentTrainer && _currentTrainer.category === 'e4') {
+      theme = BATTLE_THEMES.e4;
+    } else if (_currentTrainer && _currentTrainer.category === 'champion') {
+      theme = BATTLE_THEMES.champion;
+    } else if (_currentTrainer && _currentTrainer.category === 'masters') {
+      theme = BATTLE_THEMES.masters;
+    } else if (S.currentGymId && BATTLE_THEMES.gym[S.currentGymId]) {
+      theme = BATTLE_THEMES.gym[S.currentGymId];
+    }
+  } else {
+    theme = BATTLE_THEMES.pvp;
+  }
+  arena.setAttribute('data-bg-theme', theme);
+}
+
+function clearBattleBackground() {
+  var arena = document.getElementById('battle-arena');
+  if (arena) arena.removeAttribute('data-bg-theme');
+}
 
 function updateHubProgression() {
   var badges = S.account ? (S.account.badges || []) : [];
