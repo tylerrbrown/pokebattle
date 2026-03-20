@@ -742,6 +742,143 @@ input.invalid { border-color: var(--red); }
   to { transform: translateX(0); opacity: 1; }
 }
 
+/* ─── Battle VFX ───────────────────────────────── */
+#battle-vfx-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  overflow: hidden;
+}
+.vfx-particle {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+/* Normal — circles radiating outward */
+.vfx-normal { width:8px; height:8px; border-radius:50%; background:#a8a878; opacity:0.9; }
+@keyframes vfx-normal {
+  0% { transform:translate(0,0) scale(1); opacity:0.9; }
+  100% { transform:translate(var(--vfx-dx), var(--vfx-dy)) scale(0.3); opacity:0; }
+}
+/* Fire — teardrops rising with wobble */
+.vfx-fire { width:8px; height:12px; border-radius:50% 50% 50% 0; background:var(--type-fire); box-shadow:0 0 6px var(--type-fire); transform:rotate(45deg); }
+@keyframes vfx-fire {
+  0% { transform:rotate(45deg) translate(0,0); opacity:1; }
+  50% { transform:rotate(45deg) translate(var(--vfx-dx),-30px); opacity:0.8; }
+  100% { transform:rotate(45deg) translate(calc(var(--vfx-dx) * -1),-60px); opacity:0; }
+}
+/* Water — droplets arcing out then falling */
+.vfx-water { width:7px; height:10px; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; background:var(--type-water); box-shadow:0 0 5px var(--type-water); }
+@keyframes vfx-water {
+  0% { transform:translate(0,0); opacity:1; }
+  40% { transform:translate(var(--vfx-dx),-25px); opacity:0.9; }
+  100% { transform:translate(calc(var(--vfx-dx) * 1.5),20px); opacity:0; }
+}
+/* Electric — thin rects flashing/jittering */
+.vfx-electric { width:3px; height:14px; background:var(--type-electric); box-shadow:0 0 8px var(--type-electric), 0 0 16px rgba(248,208,48,0.4); border-radius:1px; }
+@keyframes vfx-electric {
+  0% { transform:rotate(var(--vfx-rot)) translate(0,0); opacity:1; }
+  25% { transform:rotate(calc(var(--vfx-rot) + 90deg)) translate(var(--vfx-dx),var(--vfx-dy)); opacity:0.9; }
+  50% { transform:rotate(calc(var(--vfx-rot) - 45deg)) translate(calc(var(--vfx-dx) * -1),calc(var(--vfx-dy) * -1)); opacity:1; }
+  75% { transform:rotate(calc(var(--vfx-rot) + 60deg)) translate(var(--vfx-dy),var(--vfx-dx)); opacity:0.8; }
+  100% { transform:rotate(var(--vfx-rot)) translate(0,0); opacity:0; }
+}
+/* Grass — ellipses spiraling outward */
+.vfx-grass { width:10px; height:6px; border-radius:50%; background:var(--type-grass); box-shadow:0 0 4px var(--type-grass); }
+@keyframes vfx-grass {
+  0% { transform:rotate(0deg) translate(0,0); opacity:1; }
+  50% { transform:rotate(180deg) translate(var(--vfx-dx),var(--vfx-dy)); opacity:0.7; }
+  100% { transform:rotate(360deg) translate(calc(var(--vfx-dx) * 2),calc(var(--vfx-dy) * 2)); opacity:0; }
+}
+/* Ice — rotated squares (diamonds) converging inward */
+.vfx-ice { width:8px; height:8px; background:var(--type-ice); transform:rotate(45deg); box-shadow:0 0 6px rgba(152,216,216,0.6); }
+@keyframes vfx-ice {
+  0% { transform:rotate(45deg) translate(var(--vfx-dx),var(--vfx-dy)) scale(1); opacity:0.9; }
+  70% { transform:rotate(45deg) translate(0,0) scale(0.8); opacity:1; }
+  100% { transform:rotate(45deg) translate(0,0) scale(0); opacity:0; }
+}
+/* Fighting — cross/star shapes, rapid burst */
+.vfx-fighting { width:10px; height:10px; background:var(--type-fighting); clip-path:polygon(50% 0%,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0% 50%,40% 40%); }
+@keyframes vfx-fighting {
+  0% { transform:translate(0,0) scale(0); opacity:1; }
+  30% { transform:translate(calc(var(--vfx-dx) * 0.5),calc(var(--vfx-dy) * 0.5)) scale(1.5); opacity:1; }
+  100% { transform:translate(var(--vfx-dx),var(--vfx-dy)) scale(0.5); opacity:0; }
+}
+/* Poison — circles floating upward with pulse */
+.vfx-poison { width:9px; height:9px; border-radius:50%; background:var(--type-poison); box-shadow:0 0 6px var(--type-poison); }
+@keyframes vfx-poison {
+  0% { transform:translate(0,0) scale(1); opacity:0.9; }
+  33% { transform:translate(var(--vfx-dx),-15px) scale(1.3); opacity:0.7; }
+  66% { transform:translate(calc(var(--vfx-dx) * -0.5),-35px) scale(0.9); opacity:0.5; }
+  100% { transform:translate(var(--vfx-dx),-55px) scale(0.5); opacity:0; }
+}
+/* Ground — irregular rects rising from bottom, arcing */
+.vfx-ground { width:10px; height:7px; border-radius:2px; background:var(--type-ground); }
+@keyframes vfx-ground {
+  0% { transform:translate(0,30px) rotate(0deg); opacity:0; }
+  20% { opacity:1; }
+  100% { transform:translate(var(--vfx-dx),var(--vfx-dy)) rotate(var(--vfx-rot)); opacity:0; }
+}
+/* Flying — crescents sweeping horizontally */
+.vfx-flying { width:12px; height:12px; border-radius:50%; background:transparent; box-shadow:3px 3px 0 var(--type-flying); }
+@keyframes vfx-flying {
+  0% { transform:translate(-40px,0) rotate(0deg); opacity:0; }
+  30% { opacity:1; }
+  100% { transform:translate(var(--vfx-dx),var(--vfx-dy)) rotate(var(--vfx-rot)); opacity:0; }
+}
+/* Psychic — bordered circles (rings) expanding outward */
+.vfx-psychic { width:12px; height:12px; border-radius:50%; background:transparent; border:2px solid var(--type-psychic); box-shadow:0 0 6px var(--type-psychic); }
+@keyframes vfx-psychic {
+  0% { transform:scale(0.3) rotate(0deg); opacity:1; }
+  100% { transform:scale(2.5) rotate(var(--vfx-rot)); opacity:0; }
+}
+/* Bug — tiny circles swarming/converging */
+.vfx-bug { width:5px; height:5px; border-radius:50%; background:var(--type-bug); }
+@keyframes vfx-bug {
+  0% { transform:translate(var(--vfx-dx),var(--vfx-dy)); opacity:0; }
+  30% { opacity:1; }
+  70% { transform:translate(calc(var(--vfx-dx) * 0.2),calc(var(--vfx-dy) * 0.2)); opacity:0.8; }
+  100% { transform:translate(0,0); opacity:0; }
+}
+/* Rock — irregular rects falling from above */
+.vfx-rock { width:10px; height:8px; border-radius:2px; background:var(--type-rock); }
+@keyframes vfx-rock {
+  0% { transform:translate(var(--vfx-dx),-40px) rotate(0deg); opacity:0; }
+  20% { opacity:1; }
+  80% { opacity:0.8; }
+  100% { transform:translate(var(--vfx-dx),30px) rotate(var(--vfx-rot)); opacity:0; }
+}
+/* Ghost — circles with blur floating up sine-wave */
+.vfx-ghost { width:10px; height:10px; border-radius:50%; background:var(--type-ghost); filter:blur(2px); box-shadow:0 0 8px var(--type-ghost); }
+@keyframes vfx-ghost {
+  0% { transform:translate(0,0); opacity:0.8; }
+  25% { transform:translate(10px,-15px); opacity:0.6; }
+  50% { transform:translate(-10px,-30px); opacity:0.7; }
+  75% { transform:translate(10px,-45px); opacity:0.4; }
+  100% { transform:translate(var(--vfx-dx),-60px); opacity:0; }
+}
+/* Dragon — triangles spiraling inward */
+.vfx-dragon { width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:10px solid var(--type-dragon); filter:drop-shadow(0 0 4px var(--type-dragon)); }
+@keyframes vfx-dragon {
+  0% { transform:translate(var(--vfx-dx),var(--vfx-dy)) rotate(0deg) scale(1); opacity:1; }
+  100% { transform:translate(0,0) rotate(360deg) scale(0.3); opacity:0; }
+}
+/* Dark — circles with blur converging from edges */
+.vfx-dark { width:10px; height:10px; border-radius:50%; background:var(--type-dark); filter:blur(2px); box-shadow:0 0 6px rgba(112,88,72,0.6); }
+@keyframes vfx-dark {
+  0% { transform:translate(var(--vfx-dx),var(--vfx-dy)) scale(1.2); opacity:0; }
+  30% { opacity:0.8; }
+  100% { transform:translate(0,0) scale(0.4); opacity:0; }
+}
+/* Steel — small rects flying straight at target */
+.vfx-steel { width:8px; height:4px; border-radius:1px; background:var(--type-steel); box-shadow:0 0 4px rgba(184,184,208,0.5); }
+@keyframes vfx-steel {
+  0% { transform:translate(var(--vfx-dx),var(--vfx-dy)) rotate(var(--vfx-rot)); opacity:0; }
+  20% { opacity:1; }
+  100% { transform:translate(0,0) rotate(var(--vfx-rot)); opacity:0; }
+}
+
 /* ─── Scrollbar ─────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -1216,6 +1353,7 @@ input.invalid { border-color: var(--red); }
   <div id="screen-battle" class="screen battle-screen">
     <div class="battle-arena" id="battle-arena">
       <div class="flash-overlay" id="flash-overlay"></div>
+      <div id="battle-vfx-layer"></div>
       <!-- Opponent side -->
       <div class="opponent-side">
         <div class="opponent-info">
@@ -2264,6 +2402,9 @@ async function playTurnEvents(events) {
         break;
       case 'move_use':
         setBattleText(`${evt.pokemon} used ${evt.move}!`);
+        if (evt.move_type && evt.is_damage_move) {
+          playMoveEffect(evt.move_type, !isOpponentPokemon(evt.pokemon));
+        }
         await delay(800);
         break;
       case 'effectiveness':
@@ -2369,6 +2510,34 @@ function screenFlash() {
   const flash = document.getElementById('flash-overlay');
   flash.classList.add('active');
   setTimeout(() => flash.classList.remove('active'), 300);
+}
+
+function playMoveEffect(moveType, isAttackerPlayer) {
+  var layer = document.getElementById('battle-vfx-layer');
+  if (!layer) return;
+  var counts = {fire:8, water:8, electric:6, grass:7, ice:6, fighting:5, poison:6, ground:8, flying:6, psychic:6, bug:7, rock:5, ghost:5, dragon:6, dark:6, steel:6, normal:5};
+  var count = counts[moveType] || 5;
+  var spread = 40;
+  // Target is opponent sprite area if player attacks, player sprite area if opponent attacks
+  var targetX = isAttackerPlayer ? (layer.offsetWidth - 80) : 100;
+  var targetY = isAttackerPlayer ? 80 : (layer.offsetHeight - 80);
+  var particles = [];
+  for (var i = 0; i < count; i++) {
+    var p = document.createElement('div');
+    p.className = 'vfx-particle vfx-' + moveType;
+    var ox = (Math.random() - 0.5) * spread * 2;
+    var oy = (Math.random() - 0.5) * spread * 2;
+    p.style.left = (targetX + ox) + 'px';
+    p.style.top = (targetY + oy) + 'px';
+    p.style.setProperty('--vfx-delay', (Math.random() * 200) + 'ms');
+    p.style.setProperty('--vfx-dx', ((Math.random() - 0.5) * 60) + 'px');
+    p.style.setProperty('--vfx-dy', ((Math.random() - 0.5) * 60 - 30) + 'px');
+    p.style.setProperty('--vfx-rot', (Math.random() * 360) + 'deg');
+    p.style.animation = 'vfx-' + moveType + ' 600ms ease-out ' + p.style.getPropertyValue('--vfx-delay') + ' forwards';
+    layer.appendChild(p);
+    particles.push(p);
+  }
+  setTimeout(function() { particles.forEach(function(el) { el.remove(); }); }, 850);
 }
 
 function delay(ms) {
@@ -3692,6 +3861,9 @@ async function playJourneyEvents(events) {
       }
       case 'move_use':
         setBattleText(evt.pokemon + ' used ' + evt.move + '!');
+        if (evt.move_type && evt.is_damage_move) {
+          playMoveEffect(evt.move_type, evt.side === 'player');
+        }
         await delay(800);
         break;
       case 'critical_hit':

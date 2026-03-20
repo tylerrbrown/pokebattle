@@ -556,6 +556,7 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
         "pokemon": attacker_pokemon.name,
         "move": move["name"],
         "move_type": move["type"],
+        "is_damage_move": move["power"] > 0,
         "tap_multiplier": tap_score,
     })
 
