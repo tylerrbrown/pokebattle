@@ -2062,7 +2062,8 @@ async def _handle_wild_action(player, encounter, data):
 def _resolve_single_move(attacker, defender, move, tap_score, side):
     """Resolve one side's move in a wild battle. Returns events list."""
     events = []
-    events.append({"type": "move_use", "side": side, "pokemon": attacker.name, "move": move["name"]})
+    events.append({"type": "move_use", "side": side, "pokemon": attacker.name, "move": move["name"],
+                   "move_type": move.get("type", "normal"), "is_damage_move": move.get("power", 0) > 0})
 
     power = move.get("power", 0)
     if power == 0:
