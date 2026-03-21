@@ -363,6 +363,45 @@ input.invalid { border-color: var(--red); }
   background: linear-gradient(0deg, rgba(120,120,140,0.15) 0%, transparent 35%);
 }
 
+/* Legendary Encounter - Sacred Shrine */
+.battle-arena[data-bg-theme="legendary-shrine"] {
+  background: linear-gradient(180deg, #0a0020 0%, #1a0040 50%, #0a0020 100%);
+}
+.battle-arena[data-bg-theme="legendary-shrine"]::before {
+  background: linear-gradient(0deg, rgba(200,160,40,0.15) 0%, transparent 35%);
+}
+.battle-arena[data-bg-theme="legendary-shrine"]::after {
+  background: radial-gradient(ellipse at 50% 40%, rgba(180,120,255,0.12) 0%, transparent 55%);
+  animation: legendary-bg-pulse 3s ease-in-out infinite;
+}
+@keyframes legendary-bg-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+/* Legendary name shimmer */
+.legendary-name {
+  color: #ffd700 !important;
+  text-shadow: 0 0 6px rgba(255,215,0,0.6);
+  animation: legendary-text-shimmer 2s ease-in-out infinite;
+}
+@keyframes legendary-text-shimmer {
+  0%, 100% { text-shadow: 0 0 6px rgba(255,215,0,0.6); }
+  50% { text-shadow: 0 0 14px rgba(255,215,0,0.9), 0 0 24px rgba(255,180,0,0.4); }
+}
+/* Legendary screen shake */
+.legendary-shake { animation: screen-shake 0.8s ease-out; }
+@keyframes screen-shake {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-6px, 3px); }
+  20% { transform: translate(5px, -4px); }
+  30% { transform: translate(-4px, 2px); }
+  40% { transform: translate(3px, -2px); }
+  50% { transform: translate(-2px, 1px); }
+  60% { transform: translate(2px, -1px); }
+  70% { transform: translate(-1px, 1px); }
+  80% { transform: translate(1px, 0); }
+  100% { transform: translate(0, 0); }
+}
 /* Opponent (top-right) */
 .opponent-side {
   position: absolute;
@@ -3601,8 +3640,18 @@ function setupJourneyBattle(msg) {
   renderJourneyBattle();
   if (S.encounterType === 'wild') {
     const w = msg.wild_pokemon;
-    const rText = w.rarity && w.rarity !== 'common' ? ' (' + w.rarity + ')' : '';
-    setBattleText('A wild ' + w.name + ' Lv.' + w.level + rText + ' appeared!');
+    if (w.rarity === 'legendary') {
+      setBattleText('A legendary ' + w.name + ' appeared!');
+      // Screen shake for legendary encounter
+      var arena = document.getElementById('battle-arena');
+      if (arena) {
+        arena.classList.add('legendary-shake');
+        setTimeout(function() { arena.classList.remove('legendary-shake'); }, 900);
+      }
+    } else {
+      const rText = w.rarity && w.rarity !== 'common' ? ' (' + w.rarity + ')' : '';
+      setBattleText('A wild ' + w.name + ' Lv.' + w.level + rText + ' appeared!');
+    }
   }
   setTimeout(() => showJourneyMovePanel(), 1500);
 }
@@ -3659,7 +3708,8 @@ function renderJourneyBattle() {
     os.style.display = (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'none' : '';
     if (oppPoke.is_dynamaxed) os.classList.add('dynamaxed-sprite');
     const prefix = S.encounterType === 'gym' ? (S.gymData ? S.gymData.name + "'s " : '') : 'Wild ';
-    let nh = prefix + oppPoke.name + ' <span class="journey-level">Lv.' + (oppPoke.level || '?') + '</span>';
+    const isLegendary = S.encounterType === 'wild' && oppPoke.rarity === 'legendary';
+    let nh = prefix + (isLegendary ? '<span class="legendary-name">' + oppPoke.name + '</span>' : oppPoke.name) + ' <span class="journey-level">Lv.' + (oppPoke.level || '?') + '</span>';
     if (oppPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + oppPoke.dynamax_turns_left + ' turns]</span>';
     if (oppPoke.status) nh += ' <span class="poke-status-badge status-' + oppPoke.status + '">' + oppPoke.status.toUpperCase().slice(0,3) + '</span>';
     document.getElementById('opp-name').innerHTML = nh;
@@ -4392,6 +4442,7 @@ var _currentTrainer = null;
 /* ─── Battle Background Themes ────────────────── */
 var BATTLE_THEMES = {
   wild: 'grassland',
+  legendary: 'legendary-shrine',
   gym: {1:'rock-cave', 2:'aquarium', 3:'power-plant', 4:'garden', 5:'dojo-poison', 6:'psychic-chamber', 7:'volcano', 8:'earth-fortress'},
   e4: 'indigo-plateau',
   champion: 'hall-of-fame',
@@ -4404,7 +4455,12 @@ function applyBattleBackground() {
   if (!arena) return;
   var theme = 'grassland';
   if (S.encounterType === 'wild') {
-    theme = BATTLE_THEMES.wild;
+    // Use legendary shrine theme for legendary wild encounters
+    if (S.oppTeam && S.oppTeam[0] && S.oppTeam[0].rarity === 'legendary') {
+      theme = BATTLE_THEMES.legendary;
+    } else {
+      theme = BATTLE_THEMES.wild;
+    }
   } else if (S.encounterType === 'gym') {
     if (_currentTrainer && _currentTrainer.category === 'e4') {
       theme = BATTLE_THEMES.e4;
