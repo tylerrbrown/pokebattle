@@ -83,6 +83,7 @@ class GameRoom:
         self.turn_count = 0
         self.battle_log = []
         self.on_game_end = None  # callback(room, winner_idx, summary)
+        self.on_rematch = None   # callback(room) — reload journey teams before team select
 
         # Async event coordination
         self._action_events = [None, None]
@@ -745,6 +746,8 @@ class GameRoom:
             for p in self.players:
                 p.ready = False
                 await p.send({"type": "rematch_start"})
+            if self.on_rematch:
+                self.on_rematch(self)
             await self._start_team_select()
             return
 
@@ -760,16 +763,19 @@ class GameRoom:
             for p in self.players:
                 p.ready = False
                 await p.send({"type": "rematch_start"})
+            if self.on_rematch:
+                self.on_rematch(self)
             await self._start_team_select()
 
 
 class RoomManager:
     """Manages all active game rooms."""
 
-    def __init__(self, on_game_end=None):
+    def __init__(self, on_game_end=None, on_rematch=None):
         self.rooms = {}  # code -> GameRoom
         self.player_rooms = {}  # player.id -> room_code
         self.on_game_end = on_game_end  # callback for all rooms
+        self.on_rematch = on_rematch    # callback(room) — reload journey teams
 
     def generate_code(self):
         """Generate a unique 4-letter room code."""
@@ -784,6 +790,7 @@ class RoomManager:
         code = self.generate_code()
         room = GameRoom(code)
         room.on_game_end = self.on_game_end
+        room.on_rematch = self.on_rematch
         self.rooms[code] = room
         await room.add_player(player)
         self.player_rooms[player.id] = code
