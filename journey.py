@@ -135,11 +135,21 @@ def generate_wild_pokemon(player_team_avg_level):
 
 
 def calc_catch_rate(pokemon_catch_rate, current_hp, max_hp, ball_type="pokeball"):
-    """Calculate catch success probability (0.0-1.0)."""
+    """Calculate catch success probability (0.0-1.0).
+
+    Kid-friendly boost: legendaries get 10x, rare get 3x, common get 1.5x.
+    """
     ball_mod = BALL_MODIFIERS.get(ball_type, 1.0)
     hp_factor = (3 * max_hp - 2 * current_hp) / (3 * max_hp)
-    chance = (pokemon_catch_rate * hp_factor * ball_mod) / 255.0
-    return min(1.0, max(0.01, chance))  # Always at least 1% chance
+    # Kid-friendly catch boost
+    if pokemon_catch_rate <= 10:
+        effective_rate = pokemon_catch_rate * 10  # Legendaries: ~2% -> ~24% at 1HP/Ultra
+    elif pokemon_catch_rate <= 45:
+        effective_rate = pokemon_catch_rate * 3   # Rare: much easier when weakened
+    else:
+        effective_rate = pokemon_catch_rate * 1.5  # Common: slight boost
+    chance = (effective_rate * hp_factor * ball_mod) / 255.0
+    return min(1.0, max(0.05, chance))  # Floor raised to 5%
 
 
 def attempt_catch(pokemon_catch_rate, current_hp, max_hp, ball_type="pokeball"):
