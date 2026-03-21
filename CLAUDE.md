@@ -226,6 +226,14 @@ python tests/test_battle_engine.py
 - ~~**Faint/switch freeze**: `wild_force_switch` was missing encounter state; fixed 3/19/2026~~
 - ~~**Only active Pokemon earned XP**: added EXP Share (100% active, 50% bench); fixed 3/19/2026~~
 - **PvP forces team pick**: "When I battle somebody I expect to use my Pokémon, not click on Pokémon" — PvP should use saved journey team, not re-pick (OPEN)
+- **Learn Move doesn't apply**: Clicking to learn a move doesn't actually add it to the moveset (reported by Liam x2, Tyler x1 — 3/20-3/21/2026) (OPEN)
+- **Faint animation plays on wrong Pokemon**: When you defeat the opponent's Pokemon, it looks like YOUR Pokemon faints instead (reported by Makoo — 3/20/2026) (OPEN)
+- **Pokemon stuck with <4 moves ("move lock")**: Some Pokemon only have 2-3 moves and cannot learn any new moves from the learn screen (reported by Makoo 3/20, Liam 3/21 — Liam calls it "move lock") (OPEN)
+
+### Feature Requests (3/21/2026 — from Liam)
+- **Shiny Pokemon**: Sparkle effect at battle start, ~10% encounter rate
+- **Legendary pity system**: Guaranteed legendary encounter every 50 wild encounters
+- **Decrease legendary random rate**: Lower the base random chance of finding legendaries
 
 ### Implemented in "Liam's Feature Pack" (3/19/2026)
 - Backpack/PC Storage UI (swap Pokemon between team and storage)

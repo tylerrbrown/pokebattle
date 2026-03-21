@@ -158,6 +158,21 @@ def get_moves_at_level(dex_id, level):
     return available[-4:] if len(available) > 4 else available
 
 
+def get_initial_moves(dex_id, level):
+    """Get initial moves, guaranteeing up to 4 when possible.
+    Uses learnset first, then supplements from pokemon.json defaults."""
+    moves = get_moves_at_level(dex_id, level)
+    if len(moves) < 4:
+        species = POKEMON.get(dex_id)
+        if species:
+            for mid in species["moves"]:
+                if mid not in moves and mid in MOVES:
+                    moves.append(mid)
+                    if len(moves) >= 4:
+                        break
+    return moves
+
+
 def get_new_moves_for_level(dex_id, old_level, new_level):
     """Get moves learned between old_level (exclusive) and new_level (inclusive)."""
     learnset = get_learnset(dex_id)

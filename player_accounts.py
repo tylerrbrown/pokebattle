@@ -191,7 +191,7 @@ class AccountManager:
             return None
         return self._row_to_dict(row)
 
-    def choose_starter(self, player_id, dex_id):
+    def choose_starter(self, player_id, dex_id, default_moves=None):
         """Set starter Pokemon and add it to collection. Returns success bool."""
         if dex_id not in (1, 4, 7, 152, 155, 158):  # Gen 1 & 2 starters
             return False
@@ -209,12 +209,13 @@ class AccountManager:
             "UPDATE players SET starter_dex_id = ? WHERE id = ?",
             (dex_id, player_id)
         )
+        moves_json = json.dumps(default_moves) if default_moves else None
         # Add starter to collection as team slot 0
         conn.execute(
             """INSERT INTO player_pokemon
-               (player_id, dex_id, level, xp, is_in_team, team_slot, caught_at)
-               VALUES (?, ?, 5, 0, 1, 0, ?)""",
-            (player_id, dex_id, int(time.time()))
+               (player_id, dex_id, level, xp, moves, is_in_team, team_slot, caught_at)
+               VALUES (?, ?, 5, 0, ?, 1, 0, ?)""",
+            (player_id, dex_id, moves_json, int(time.time()))
         )
         conn.commit()
         conn.close()
@@ -465,7 +466,7 @@ class AccountManager:
         conn.close()
         return True
 
-    def catch_pokemon(self, player_id, dex_id, level):
+    def catch_pokemon(self, player_id, dex_id, level, default_moves=None):
         """Add a caught Pokemon to player's collection."""
         conn = self._conn()
         # Check how many are in team
@@ -476,12 +477,13 @@ class AccountManager:
 
         in_team = 1 if team_count < 6 else 0
         team_slot = team_count if team_count < 6 else None
+        moves_json = json.dumps(default_moves) if default_moves else None
 
         conn.execute(
             """INSERT INTO player_pokemon
-               (player_id, dex_id, level, xp, is_in_team, team_slot, caught_at)
-               VALUES (?, ?, ?, 0, ?, ?, ?)""",
-            (player_id, dex_id, level, in_team, team_slot, int(time.time()))
+               (player_id, dex_id, level, xp, moves, is_in_team, team_slot, caught_at)
+               VALUES (?, ?, ?, 0, ?, ?, ?, ?)""",
+            (player_id, dex_id, level, moves_json, in_team, team_slot, int(time.time()))
         )
         conn.commit()
         conn.close()
@@ -753,6 +755,54 @@ class AccountManager:
         if not row:
             return None
         return self._enrich_pokemon_xp(dict(row))
+
+    # ─── Move Migrations ─────────────────────────────────
+
+    def fix_null_moves(self, pokemon_data_module):
+        """Fix Pokemon with NULL moves column by initializing from learnset + defaults."""
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT id, dex_id, level FROM player_pokemon WHERE moves IS NULL"
+        ).fetchall()
+        count = 0
+        for row in rows:
+            moves = pokemon_data_module.get_initial_moves(row["dex_id"], row["level"])
+            if moves:
+                conn.execute(
+                    "UPDATE player_pokemon SET moves = ? WHERE id = ?",
+                    (json.dumps(moves), row["id"])
+                )
+                count += 1
+        conn.commit()
+        conn.close()
+        print(f"[migration] Fixed {count} Pokemon with NULL moves")
+
+    def fix_sparse_moves(self, pokemon_data_module):
+        """Supplement Pokemon with fewer than 4 moves from learnset + defaults."""
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT id, dex_id, level, moves FROM player_pokemon WHERE moves IS NOT NULL"
+        ).fetchall()
+        count = 0
+        for row in rows:
+            current = json.loads(row["moves"])
+            if len(current) >= 4:
+                continue
+            full = pokemon_data_module.get_initial_moves(row["dex_id"], row["level"])
+            for mid in full:
+                if mid not in current:
+                    current.append(mid)
+                    if len(current) >= 4:
+                        break
+            if len(current) > len(json.loads(row["moves"])):
+                conn.execute(
+                    "UPDATE player_pokemon SET moves = ? WHERE id = ?",
+                    (json.dumps(current), row["id"])
+                )
+                count += 1
+        conn.commit()
+        conn.close()
+        print(f"[migration] Supplemented {count} Pokemon with sparse moves")
 
     def _row_to_dict(self, row):
         return {
