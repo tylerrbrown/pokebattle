@@ -123,8 +123,21 @@ def record_game(room, winner_idx, summary):
             print(f"Error awarding PvP currency: {e}")
 
 
+def reload_journey_teams(room):
+    """Re-load journey teams for logged-in players on rematch."""
+    for p in room.players:
+        if p and not p.is_bot and not p.ready and getattr(p, 'account_id', None):
+            team_data = account_mgr.get_team(p.account_id)
+            if team_data:
+                journey_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+                p.team = journey_team
+                p.team_dex_ids = [pkmn.dex_id for pkmn in journey_team]
+                p.team_name = f"{p.name}'s Team"
+                p.ready = True
+
+
 # Global state
-room_manager = RoomManager(on_game_end=record_game)
+room_manager = RoomManager(on_game_end=record_game, on_rematch=reload_journey_teams)
 account_mgr = None  # Initialized in main()
 active_encounters = {}  # player.id -> WildEncounter
 trade_rooms = {}  # code -> TradeRoom
@@ -712,7 +725,7 @@ async def handle_message(player, msg, room_mgr):
         # Pre-set journey team for PvP if logged in
         if getattr(player, 'account_id', None):
             team_data = account_mgr.get_team(player.account_id)
-            if team_data and len(team_data) >= 6:
+            if team_data:
                 journey_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
                 player.team = journey_team
                 player.team_dex_ids = [p.dex_id for p in journey_team]
@@ -741,7 +754,7 @@ async def handle_message(player, msg, room_mgr):
         # Pre-set journey team for PvP if logged in
         if getattr(player, 'account_id', None):
             team_data = account_mgr.get_team(player.account_id)
-            if team_data and len(team_data) >= 6:
+            if team_data:
                 journey_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
                 player.team = journey_team
                 player.team_dex_ids = [p.dex_id for p in journey_team]
