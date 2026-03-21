@@ -960,6 +960,28 @@ input.invalid { border-color: var(--red); }
 .btn-trade-confirm:disabled { opacity:0.4; cursor:not-allowed; }
 .trade-confirmed-badge { font-size:var(--fs-2xs); color:var(--green); margin-top:4px; }
 
+/* ─── Training ─────────────────────────────────── */
+.btn-training { background:linear-gradient(135deg,#14b8a6,#0d9488); color:#fff; font-weight:bold; }
+.btn-training:hover { filter:brightness(1.1); }
+.training-screen { padding:16px; gap:12px; }
+.training-header { display:flex; justify-content:space-between; align-items:center; }
+.training-title { font-size:var(--fs-lg); color:#14b8a6; }
+.training-desc { font-size:var(--fs-sm); color:var(--text-dim); text-align:center; }
+.training-search { width:100%; padding:8px 12px; border-radius:8px; border:2px solid var(--border); background:var(--bg2); color:var(--text); font-size:var(--fs-sm); font-family:inherit; box-sizing:border-box; }
+.training-search:focus { outline:none; border-color:#14b8a6; }
+.training-grid { flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:6px; padding:4px 0; }
+.training-card { display:flex; flex-direction:column; align-items:center; padding:6px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s; }
+.training-card:hover { border-color:#14b8a6; background:var(--bg3); }
+.training-card.selected { border-color:#14b8a6; box-shadow:0 0 10px rgba(20,184,166,0.4); background:var(--bg3); }
+.training-card img { width:48px; height:48px; image-rendering:pixelated; }
+.training-card-name { font-size:var(--fs-2xs); color:var(--text); text-align:center; margin-top:2px; }
+.training-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; }
+.training-level-group { display:flex; align-items:center; gap:6px; }
+.training-level-group label { font-size:var(--fs-sm); color:var(--text-dim); }
+.training-level-input { width:60px; padding:6px 8px; border-radius:6px; border:2px solid var(--border); background:var(--bg2); color:var(--text); font-size:var(--fs-sm); font-family:inherit; text-align:center; }
+.training-level-input:focus { outline:none; border-color:#14b8a6; }
+.training-badge { display:inline-block; background:#14b8a6; color:#fff; font-size:var(--fs-2xs); padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:4px; }
+
 /* ─── Shop ─────────────────────────────────────── */
 .shop-screen { padding:16px; gap:12px; }
 .shop-header { display:flex; justify-content:space-between; align-items:center; }
@@ -1207,6 +1229,7 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
       <button class="btn btn-backpack" onclick="showBackpack()">BACKPACK</button>
       <button class="btn btn-trade" onclick="showTradeMenu()">TRADE</button>
+      <button class="btn btn-training" onclick="showTraining()">TRAINING</button>
       <button class="btn btn-ai" onclick="createJourneyBattle()">BATTLE AI</button>
       <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:var(--fs-xs)">QUICK BATTLE</button>
       <button class="btn btn-secondary" style="font-size:var(--fs-xs)" onclick="logout()">LOG OUT</button>
@@ -1293,6 +1316,24 @@ input.invalid { border-color: var(--red); }
     </div>
     <div class="trade-confirm-bar">
       <button class="btn btn-trade-confirm" id="trade-confirm-btn" onclick="confirmTrade()" disabled>CONFIRM TRADE</button>
+    </div>
+  </div>
+
+  <!-- TRAINING SCREEN -->
+  <div id="screen-training" class="screen training-screen">
+    <div class="training-header">
+      <span class="training-title">TRAINING</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div class="training-desc">Pick any Pokemon to battle against for practice. Earn 75% XP, no currency or Rare Candy.</div>
+    <input type="text" class="training-search" id="training-search" placeholder="Search Pokemon..." autocomplete="off">
+    <div class="training-grid" id="training-grid"></div>
+    <div class="training-controls">
+      <div class="training-level-group">
+        <label for="training-level">Level:</label>
+        <input type="number" class="training-level-input" id="training-level" min="1" max="100" value="50">
+      </div>
+      <button class="btn btn-training" id="training-start-btn" onclick="startTrainingBattle()" disabled>SELECT A POKEMON</button>
     </div>
   </div>
 
@@ -1798,6 +1839,13 @@ function handleMessage(msg) {
       S.encounter = msg;
       setupJourneyBattle(msg);
       break;
+    case 'training_battle_start':
+      S.journeyMode = true;
+      S.encounterType = 'training';
+      S.encounter = msg;
+      setupJourneyBattle(msg);
+      setBattleText('Training battle vs ' + msg.wild_pokemon.name + ' Lv.' + msg.wild_pokemon.level + '!');
+      break;
     case 'mega_evolved':
       updateJourneyState(msg);
       showToast(msg.pokemon_name + '!');
@@ -1861,9 +1909,10 @@ function handleMessage(msg) {
       }
       break;
     case 'wild_fled':
+      var wasTraining = S.encounterType === 'training';
       S.journeyMode = false;
       setBattleText('Got away safely!');
-      setTimeout(() => goHome(), 1500);
+      setTimeout(() => wasTraining ? showTraining() : goHome(), 1500);
       break;
     case 'wild_catch_attempt':
       showCatchAnimation(msg.shakes, msg.caught);
@@ -3646,8 +3695,9 @@ function renderJourneyBattle() {
     os.classList.remove('dynamaxed-sprite');
     os.style.display = (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'none' : '';
     if (oppPoke.is_dynamaxed) os.classList.add('dynamaxed-sprite');
-    const prefix = S.encounterType === 'gym' ? (S.gymData ? S.gymData.name + "'s " : '') : 'Wild ';
+    const prefix = S.encounterType === 'gym' ? (S.gymData ? S.gymData.name + "'s " : '') : (S.encounterType === 'training' ? '' : 'Wild ');
     let nh = prefix + oppPoke.name + ' <span class="journey-level">Lv.' + (oppPoke.level || '?') + '</span>';
+    if (S.encounterType === 'training') nh += ' <span class="training-badge">TRAINING</span>';
     if (oppPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + oppPoke.dynamax_turns_left + ' turns]</span>';
     if (oppPoke.status) nh += ' <span class="poke-status-badge status-' + oppPoke.status + '">' + oppPoke.status.toUpperCase().slice(0,3) + '</span>';
     document.getElementById('opp-name').innerHTML = nh;
@@ -3747,7 +3797,7 @@ function showJourneyMovePanel() {
   const totalItems = _countHealingItems();
   html += '<button class="btn btn-item" onclick="showJourneyItemPanel()"' + (totalItems <= 0 ? ' disabled' : '') + '>ITEMS' + (totalItems > 0 ? ' (' + totalItems + ')' : '') + '</button>';
   html += '<button class="btn btn-secondary" onclick="showJourneySwitchPanel()">SWITCH</button>';
-  if (S.encounterType === 'wild') {
+  if (S.encounterType === 'wild' || S.encounterType === 'training') {
     html += '<button class="btn btn-run" onclick="journeyRun()">RUN</button>';
   }
   html += '</div>';
@@ -4037,30 +4087,39 @@ function buildPostLevelUpChain(xpResult, finalCallback) {
 }
 
 function showJourneyVictory(msg) {
+  const isTraining = msg.is_training || S.encounterType === 'training';
   S.journeyMode = false;
   const currency = msg.currency_gained || 0;
   const rareCandy = msg.rare_candy_gained || 0;
   const xp = msg.xp_results || [];
   const luckyEgg = xp.length > 0 && xp[0].lucky_egg_active;
-  let text = 'You won! +$' + currency;
-  if (rareCandy > 0) text += ' | +' + rareCandy + ' Rare Candy';
-  if (luckyEgg) text += ' (Lucky Egg: 2x XP!)';
+  let text;
+  if (isTraining) {
+    text = 'Training complete!';
+    if (luckyEgg) text += ' (Lucky Egg: 2x XP!)';
+  } else {
+    text = 'You won! +$' + currency;
+    if (rareCandy > 0) text += ' | +' + rareCandy + ' Rare Candy';
+    if (luckyEgg) text += ' (Lucky Egg: 2x XP!)';
+  }
   setBattleText(text);
   playSound('win');
+  const returnTo = isTraining ? function() { showTraining(); } : function() { goHome(true); };
   setTimeout(() => {
-    processAllXpResults(xp, function() { goHome(true); });
+    processAllXpResults(xp, returnTo);
   }, 2000);
 }
 
 function showJourneyDefeat(msg) {
+  const isTraining = S.encounterType === 'training';
   S.journeyMode = false;
   const isGym = msg && msg.gym_name;
   if (isGym) {
     showGymDefeat(msg);
   } else {
-    setBattleText('All your Pokemon fainted...');
+    setBattleText(isTraining ? 'Training over! Your Pokemon fainted...' : 'All your Pokemon fainted...');
     playSound('faint');
-    setTimeout(() => goHome(), 2500);
+    setTimeout(() => isTraining ? showTraining() : goHome(), 2500);
   }
 }
 
@@ -4391,7 +4450,7 @@ function applyBattleBackground() {
   var arena = document.getElementById('battle-arena');
   if (!arena) return;
   var theme = 'grassland';
-  if (S.encounterType === 'wild') {
+  if (S.encounterType === 'wild' || S.encounterType === 'training') {
     theme = BATTLE_THEMES.wild;
   } else if (S.encounterType === 'gym') {
     if (_currentTrainer && _currentTrainer.category === 'e4') {
@@ -4592,6 +4651,66 @@ function dismissGymResult() {
 }
 
 function startWildEncounter() { send({type:'wild_encounter'}); }
+
+/* ─── Training ─────────────────────────────────── */
+var _trainingSelectedDexId = null;
+
+function showTraining() {
+  _trainingSelectedDexId = null;
+  showScreen('training');
+  // Set default level to team average
+  if (S.account && S.account.team && S.account.team.length) {
+    var avg = Math.round(S.account.team.reduce(function(s, p) { return s + (p.level || 5); }, 0) / S.account.team.length);
+    document.getElementById('training-level').value = Math.max(1, Math.min(100, avg));
+  }
+  var searchInput = document.getElementById('training-search');
+  searchInput.value = '';
+  searchInput.oninput = function() { renderTrainingGrid(this.value); };
+  renderTrainingGrid('');
+  updateTrainingStartBtn();
+}
+
+function renderTrainingGrid(filter) {
+  var grid = document.getElementById('training-grid');
+  var html = '';
+  var f = (filter || '').toLowerCase().trim();
+  (S.pokemonList || []).forEach(function(p) {
+    if (f && p.name.toLowerCase().indexOf(f) === -1 && String(p.id).indexOf(f) === -1) return;
+    var sel = p.id === _trainingSelectedDexId ? ' selected' : '';
+    html += '<div class="training-card' + sel + '" onclick="selectTrainingPokemon(' + p.id + ')">' +
+      '<img src="/sprites/front/' + String(p.id).padStart(3, '0') + '.png" alt="' + p.name + '">' +
+      '<div class="training-card-name">' + p.name + '</div></div>';
+  });
+  if (!html) html = '<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:20px">No Pokemon found</div>';
+  grid.innerHTML = html;
+}
+
+function selectTrainingPokemon(dexId) {
+  _trainingSelectedDexId = dexId;
+  // Re-render to update selection highlight
+  var filter = document.getElementById('training-search').value;
+  renderTrainingGrid(filter);
+  updateTrainingStartBtn();
+}
+
+function updateTrainingStartBtn() {
+  var btn = document.getElementById('training-start-btn');
+  if (_trainingSelectedDexId) {
+    var pk = (S.pokemonList || []).find(function(p) { return p.id === _trainingSelectedDexId; });
+    btn.textContent = 'TRAIN vs ' + (pk ? pk.name : '???');
+    btn.disabled = false;
+  } else {
+    btn.textContent = 'SELECT A POKEMON';
+    btn.disabled = true;
+  }
+}
+
+function startTrainingBattle() {
+  if (!_trainingSelectedDexId) return;
+  var level = parseInt(document.getElementById('training-level').value) || 50;
+  level = Math.max(1, Math.min(100, level));
+  send({ type: 'start_training', dex_id: _trainingSelectedDexId, level: level });
+}
 
 /* ─── Init ──────────────────────────────────────── */
 connect();
