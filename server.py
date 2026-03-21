@@ -1807,7 +1807,7 @@ async def _handle_wild_action(player, encounter, data):
         if caught:
             # Add to collection
             moves_for_db = pokemon_data.get_initial_moves(wild.dex_id, wild.level)
-            added = account_mgr.catch_pokemon(player.account_id, wild.dex_id, wild.level, default_moves=moves_for_db)
+            added = account_mgr.catch_pokemon(player.account_id, wild.dex_id, wild.level, default_moves=moves_for_db, is_shiny=getattr(wild, 'is_shiny', False))
             # Award currency
             account_mgr.add_currency(player.account_id, CURRENCY_WILD_CATCH)
             # Award XP to active Pokemon
@@ -1817,7 +1817,7 @@ async def _handle_wild_action(player, encounter, data):
             del active_encounters[player.id]
             await player.send({
                 "type": "wild_caught",
-                "pokemon": {"dex_id": wild.dex_id, "name": wild.name, "level": wild.level},
+                "pokemon": {"dex_id": wild.dex_id, "name": wild.name, "level": wild.level, "is_shiny": getattr(wild, 'is_shiny', False)},
                 "added_to_team": added,
                 "currency_gained": CURRENCY_WILD_CATCH,
                 "rare_candy_gained": rare_candy,

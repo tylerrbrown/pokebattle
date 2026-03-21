@@ -142,6 +142,8 @@ class AccountManager:
         cols = {row[1] for row in conn.execute("PRAGMA table_info(player_pokemon)").fetchall()}
         if "moves" not in cols:
             conn.execute("ALTER TABLE player_pokemon ADD COLUMN moves TEXT")
+        if "is_shiny" not in cols:
+            conn.execute("ALTER TABLE player_pokemon ADD COLUMN is_shiny INTEGER DEFAULT 0")
 
     def register(self, username):
         """Register a new player. Returns (player_dict, error_string)."""
@@ -466,7 +468,7 @@ class AccountManager:
         conn.close()
         return True
 
-    def catch_pokemon(self, player_id, dex_id, level, default_moves=None):
+    def catch_pokemon(self, player_id, dex_id, level, default_moves=None, is_shiny=False):
         """Add a caught Pokemon to player's collection."""
         conn = self._conn()
         # Check how many are in team
@@ -481,9 +483,9 @@ class AccountManager:
 
         conn.execute(
             """INSERT INTO player_pokemon
-               (player_id, dex_id, level, xp, moves, is_in_team, team_slot, caught_at)
-               VALUES (?, ?, ?, 0, ?, ?, ?, ?)""",
-            (player_id, dex_id, level, moves_json, in_team, team_slot, int(time.time()))
+               (player_id, dex_id, level, xp, moves, is_in_team, team_slot, caught_at, is_shiny)
+               VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?)""",
+            (player_id, dex_id, level, moves_json, in_team, team_slot, int(time.time()), int(is_shiny))
         )
         conn.commit()
         conn.close()
