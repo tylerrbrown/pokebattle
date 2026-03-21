@@ -802,7 +802,13 @@ async def handle_message(player, msg, room_mgr):
             await player.send({"type": "error", "message": "No Pokémon in team."})
             return
         avg_level = sum(p["level"] for p in team_data) / len(team_data)
-        wild, rarity = generate_wild_pokemon(avg_level)
+        pity_counter = account_mgr.get_encounter_counter(player.account_id)
+        wild, rarity = generate_wild_pokemon(avg_level, pity_counter=pity_counter)
+        # Update pity counter: reset on legendary, increment otherwise
+        if rarity == "legendary":
+            account_mgr.reset_encounter_counter(player.account_id)
+        else:
+            account_mgr.increment_encounter_counter(player.account_id)
         team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
         encounter = WildEncounter(player, team, wild, rarity)
         active_encounters[player.id] = encounter
