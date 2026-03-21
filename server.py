@@ -31,7 +31,7 @@ from journey import (
     CURRENCY_PVP_WIN, CURRENCY_PVP_BOT_WIN,
     get_gym, get_next_gym, get_elite_four_member, get_masters_opponent,
 )
-from battle_engine import build_journey_team, resolve_turn, calculate_damage, STRUGGLE
+from battle_engine import PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE
 
 APP_DIR = pathlib.Path(__file__).parent
 
@@ -887,6 +887,36 @@ async def handle_message(player, msg, room_mgr):
         encounter = WildEncounter(player, team, wild, rarity)
         active_encounters[player.id] = encounter
         await player.send({"type": "wild_encounter_start", **encounter.serialize_state()})
+
+    elif msg_type == "start_training":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokémon in team."})
+            return
+        dex_id = data.get("dex_id")
+        level = data.get("level", 50)
+        # Validate dex_id
+        species = pokemon_data.POKEMON.get(dex_id)
+        if not species:
+            await player.send({"type": "error", "message": "Invalid Pokémon."})
+            return
+        # Clamp level 1-100
+        level = max(1, min(100, int(level)))
+        # Build the training opponent
+        moves = pokemon_data.get_moves_at_level(dex_id, level)
+        if not moves:
+            moves = species["moves"][:4]
+        training_pokemon = PokemonInstance(species, pokemon_data.MOVES, level=level, custom_moves=moves)
+        team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        encounter = WildEncounter(player, team, training_pokemon, "training")
+        encounter.is_training = True
+        active_encounters[player.id] = encounter
+        state = encounter.serialize_state()
+        state["is_training"] = True
+        await player.send({"type": "training_battle_start", **state})
 
     elif msg_type == "wild_action":
         encounter = active_encounters.get(player.id)
@@ -1860,6 +1890,7 @@ async def _handle_wild_action(player, encounter, data):
     """Process a wild encounter action (move, catch, switch, run)."""
     action = data.get("action_type", "")
     is_gym = getattr(encounter, 'is_gym', False)
+    is_training = getattr(encounter, 'is_training', False)
 
     if action == "run":
         if is_gym:
@@ -1872,6 +1903,9 @@ async def _handle_wild_action(player, encounter, data):
     if action == "ball":
         if is_gym:
             await player.send({"type": "error", "message": "Can't catch a trainer's Pokémon!"})
+            return
+        if is_training:
+            await player.send({"type": "error", "message": "Can't catch Pokémon in training mode!"})
             return
         ball_type = data.get("ball_type", "pokeball")
         if not account_mgr.use_pokeball(player.account_id):
@@ -2081,7 +2115,7 @@ async def _handle_wild_action(player, encounter, data):
         if wild.is_fainted:
             # Catch window: first time wild would faint in a wild encounter,
             # hold it at 1 HP and prompt the player to throw a ball
-            if not is_gym and not encounter.catch_window:
+            if not is_gym and not is_training and not encounter.catch_window:
                 encounter.catch_window = True
                 wild.current_hp = 1
                 wild.is_fainted = False
@@ -2097,7 +2131,8 @@ async def _handle_wild_action(player, encounter, data):
                 return
 
             xp_results = _award_encounter_xp(encounter, wild)
-            account_mgr.add_currency(player.account_id, CURRENCY_WILD_WIN)
+            if not is_training:
+                account_mgr.add_currency(player.account_id, CURRENCY_WILD_WIN)
 
             if is_gym:
                 # Check if more trainer Pokemon remain
@@ -2181,6 +2216,19 @@ async def _handle_wild_action(player, encounter, data):
                         })
                     del active_encounters[player.id]
                     return
+
+            # Training battles: no currency, no rare candy
+            if is_training:
+                del active_encounters[player.id]
+                await player.send({
+                    "type": "wild_fainted",
+                    "events": events,
+                    "currency_gained": 0,
+                    "rare_candy_gained": 0,
+                    "is_training": True,
+                    "xp_results": xp_results,
+                })
+                return
 
             # Rare Candy drop for wild encounter win
             rare_candy = _award_rare_candy(player, "wild")
@@ -2361,6 +2409,10 @@ def _award_encounter_xp(encounter, defeated):
         has_lucky_egg = inv.get("lucky-egg", 0) > 0
     if has_lucky_egg:
         full_xp *= 2
+
+    # Training battles give 75% XP
+    if getattr(encounter, 'is_training', False):
+        full_xp = int(full_xp * 0.75)
 
     for poke in encounter.team:
         if poke.is_fainted:
