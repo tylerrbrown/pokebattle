@@ -138,12 +138,14 @@ class AccountManager:
         cols = {row[1] for row in conn.execute("PRAGMA table_info(players)").fetchall()}
         if "currency" not in cols:
             conn.execute("ALTER TABLE players ADD COLUMN currency INTEGER DEFAULT 500")
+        if "pin" not in cols:
+            conn.execute("ALTER TABLE players ADD COLUMN pin TEXT DEFAULT NULL")
         # Check existing columns in player_pokemon
         cols = {row[1] for row in conn.execute("PRAGMA table_info(player_pokemon)").fetchall()}
         if "moves" not in cols:
             conn.execute("ALTER TABLE player_pokemon ADD COLUMN moves TEXT")
 
-    def register(self, username):
+    def register(self, username, pin=None):
         """Register a new player. Returns (player_dict, error_string)."""
         username = username.strip()
         if not username or len(username) < 2 or len(username) > 16:
@@ -155,8 +157,8 @@ class AccountManager:
         conn = self._conn()
         try:
             conn.execute(
-                "INSERT INTO players (username, token, created_at) VALUES (?, ?, ?)",
-                (username, token, int(time.time()))
+                "INSERT INTO players (username, token, pin, created_at) VALUES (?, ?, ?, ?)",
+                (username, token, pin, int(time.time()))
             )
             conn.commit()
             player_id = conn.execute(
@@ -805,11 +807,21 @@ class AccountManager:
         print(f"[migration] Supplemented {count} Pokemon with sparse moves")
 
     def _row_to_dict(self, row):
+        d = dict(row)
         return {
-            "id": row["id"],
-            "username": row["username"],
-            "token": row["token"],
-            "starter_dex_id": row["starter_dex_id"],
-            "pokeballs": row["pokeballs"],
-            "currency": dict(row).get("currency", 500),
+            "id": d["id"],
+            "username": d["username"],
+            "token": d["token"],
+            "starter_dex_id": d["starter_dex_id"],
+            "pokeballs": d["pokeballs"],
+            "currency": d.get("currency", 500),
+            "pin": d.get("pin"),
+            "has_pin": d.get("pin") is not None,
         }
+
+    def set_pin(self, player_id, pin):
+        """Set the 4-digit PIN for a player account."""
+        conn = self._conn()
+        conn.execute("UPDATE players SET pin = ? WHERE id = ?", (pin, player_id))
+        conn.commit()
+        conn.close()
