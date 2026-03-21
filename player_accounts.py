@@ -401,6 +401,43 @@ class AccountManager:
             "inventory": {r["item_type"]: r["quantity"] for r in inventory},
         }
 
+    def get_bug_report_context(self, player_id):
+        """Gather player context for a bug report snapshot."""
+        conn = self._conn()
+        player = conn.execute(
+            "SELECT username, created_at, currency, pokeballs FROM players WHERE id = ?",
+            (player_id,)
+        ).fetchone()
+        if not player:
+            conn.close()
+            return None
+        team = conn.execute(
+            "SELECT dex_id, level FROM player_pokemon WHERE player_id = ? AND is_in_team = 1 ORDER BY team_slot",
+            (player_id,)
+        ).fetchall()
+        badges = conn.execute(
+            "SELECT gym_id FROM player_badges WHERE player_id = ? ORDER BY gym_id",
+            (player_id,)
+        ).fetchall()
+        milestones = conn.execute(
+            "SELECT milestone FROM player_progression WHERE player_id = ?",
+            (player_id,)
+        ).fetchall()
+        total_pokemon = conn.execute(
+            "SELECT COUNT(*) as cnt FROM player_pokemon WHERE player_id = ?",
+            (player_id,)
+        ).fetchone()["cnt"]
+        conn.close()
+        return {
+            "username": player["username"],
+            "account_created_at": player["created_at"],
+            "currency": dict(player).get("currency", 500),
+            "team": [{"dex_id": r["dex_id"], "level": r["level"]} for r in team],
+            "badges": [r["gym_id"] for r in badges],
+            "milestones": [r["milestone"] for r in milestones],
+            "total_pokemon": total_pokemon,
+        }
+
     def add_pokeballs(self, player_id, count):
         """Add Poke Balls to player inventory."""
         conn = self._conn()

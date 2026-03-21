@@ -90,6 +90,9 @@ th { color: #8888aa; }
 
   <h2>Top Pokemon</h2>
   <div class="card" id="top-pokemon"></div>
+
+  <h2>Bug Reports <button class="btn btn-blue" style="font-size:10px;padding:4px 8px" onclick="loadBugs()">REFRESH</button></h2>
+  <div class="card"><table id="bugs-table"><thead><tr><th>ID</th><th>Player</th><th>Description</th><th>Screen</th><th>Team</th><th>Date</th></tr></thead><tbody></tbody></table></div>
 </div>
 
 <script>
@@ -126,15 +129,17 @@ async function apiFetch(path) {
 
 async function loadAll() {
   try {
-    const [stats, rooms, history] = await Promise.all([
+    const [stats, rooms, history, bugs] = await Promise.all([
       apiFetch('/api/admin/stats'),
       apiFetch('/api/admin/rooms'),
       apiFetch('/api/admin/history'),
+      apiFetch('/api/admin/bugs'),
     ]);
     renderStats(stats);
     renderRooms(rooms);
     renderHistory(history);
     renderTopPokemon(stats.top_pokemon || []);
+    renderBugs(bugs);
   } catch (e) {
     console.error(e);
   }
@@ -202,6 +207,25 @@ function renderTopPokemon(list) {
       <span>${i+1}. ${p.name} (${p.count})</span>
     </div>`
   ).join('');
+}
+
+async function loadBugs(){
+  try{
+    var bugs=await apiFetch('/api/admin/bugs');
+    renderBugs(bugs);
+  }catch(e){console.error(e)}
+}
+function renderBugs(bugs){
+  var tbody=document.querySelector('#bugs-table tbody');
+  if(!bugs||!bugs.length){tbody.innerHTML='<tr><td colspan="6" style="color:#8888aa">No bug reports</td></tr>';return;}
+  tbody.innerHTML=bugs.map(function(b){
+    var d=new Date(b.submitted_at*1000);
+    var s={};try{s=JSON.parse(b.game_state||'{}')}catch(e){}
+    var team=(s.team||[]).map(function(p){return 'Lv'+p.level}).join(', ')||'—';
+    var screen=s.current_screen||'—';
+    var desc=b.description.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<tr><td>'+b.id+'</td><td>'+b.username+'</td><td style="max-width:300px;word-wrap:break-word">'+desc+'</td><td>'+screen+'</td><td style="font-size:10px">'+team+'</td><td>'+d.toLocaleDateString()+' '+d.toLocaleTimeString()+'</td></tr>';
+  }).join('');
 }
 
 async function closeRoom(code) {
