@@ -60,6 +60,16 @@ def init_db():
             finished_at INTEGER NOT NULL
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS bug_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            player_id INTEGER,
+            username TEXT NOT NULL,
+            description TEXT NOT NULL,
+            game_state TEXT,
+            submitted_at INTEGER NOT NULL
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -450,6 +460,21 @@ async def handle_admin_api(request):
                 "active_rooms": len(room_manager.rooms),
                 "top_pokemon": top_pokemon_named,
             }).encode()
+            return HttpResponse(200, "OK", resp_headers, body)
+        except Exception as e:
+            body = json.dumps({"error": str(e)}).encode()
+            return HttpResponse(500, "Error", resp_headers, body)
+
+    if path == "/api/admin/bugs":
+        try:
+            conn = sqlite3.connect(str(DB_PATH))
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                "SELECT * FROM bug_reports ORDER BY submitted_at DESC LIMIT 100"
+            ).fetchall()
+            conn.close()
+            reports = [dict(r) for r in rows]
+            body = json.dumps(reports).encode()
             return HttpResponse(200, "OK", resp_headers, body)
         except Exception as e:
             body = json.dumps({"error": str(e)}).encode()
@@ -1340,6 +1365,35 @@ async def handle_message(player, msg, room_mgr):
     # ─── Trade Messages ─────────────────────────────
     elif msg_type in ("create_trade", "join_trade", "trade_offer", "trade_confirm", "trade_cancel"):
         await _handle_trade_message(player, msg_type, data)
+
+    # ─── Bug Reports ─────────────────────────────
+    elif msg_type == "submit_bug_report":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        description = str(data.get("description", "")).strip()
+        if not description:
+            await player.send({"type": "error", "message": "Please describe the bug."})
+            return
+        if len(description) > 2000:
+            description = description[:2000]
+        context = account_mgr.get_bug_report_context(player.account_id)
+        if context:
+            context["current_screen"] = data.get("current_screen", "unknown")
+        try:
+            conn = sqlite3.connect(str(DB_PATH))
+            conn.execute(
+                "INSERT INTO bug_reports (player_id, username, description, game_state, submitted_at) VALUES (?, ?, ?, ?, ?)",
+                (player.account_id, player.name or "unknown", description,
+                 json.dumps(context) if context else None, int(time.time()))
+            )
+            conn.commit()
+            conn.close()
+            await player.send({"type": "bug_report_submitted", "message": "Bug report submitted! Thanks for helping improve the game."})
+            print(f"[bug] Report from {player.name}: {description[:80]}")
+        except Exception as e:
+            print(f"[bug] Error saving report: {e}")
+            await player.send({"type": "error", "message": "Failed to save bug report."})
 
     else:
         await player.send({"type": "error", "message": f"Unknown message type: {msg_type}"})

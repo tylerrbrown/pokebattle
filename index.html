@@ -907,6 +907,15 @@ input.invalid { border-color: var(--red); }
 .btn-champion:hover { filter:brightness(1.1); }
 .btn-masters { grid-column:1/-1; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a1a2e; font-weight:bold; }
 .btn-masters:hover { filter:brightness(1.1); }
+.btn-bug{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-weight:bold}
+.btn-bug:hover{filter:brightness(1.1)}
+.bug-report-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center}
+.bug-report-overlay.active{display:flex}
+.bug-report-box{background:var(--bg2);border:2px solid var(--accent);border-radius:12px;padding:20px;width:90%;max-width:400px;display:flex;flex-direction:column;gap:12px}
+.bug-report-box h3{color:var(--accent);font-size:var(--fs-md);text-align:center;margin:0}
+.bug-report-box textarea{font-family:inherit;font-size:var(--fs-sm);background:var(--bg);color:var(--text);border:2px solid var(--border);border-radius:8px;padding:10px;resize:vertical;min-height:120px}
+.bug-report-box textarea:focus{border-color:var(--accent);outline:none}
+.bug-report-btns{display:flex;gap:10px;justify-content:center}
 
 /* ─── Backpack / Storage ──────────────────────── */
 .backpack-screen { padding:16px; gap:10px; }
@@ -1201,6 +1210,7 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-ai" onclick="createJourneyBattle()">BATTLE AI</button>
       <button class="btn btn-secondary" onclick="showQuickBattle()" style="font-size:var(--fs-xs)">QUICK BATTLE</button>
       <button class="btn btn-secondary" style="font-size:var(--fs-xs)" onclick="logout()">LOG OUT</button>
+      <button class="btn btn-bug" style="grid-column:1/-1;font-size:var(--fs-xs)" onclick="showBugReport()">REPORT BUG</button>
     </div>
   </div>
 
@@ -1510,6 +1520,19 @@ input.invalid { border-color: var(--red); }
     <div class="learnmove-current-title">Replace which move?</div>
     <div class="learnmove-current-list" id="learnmove-current-list"></div>
     <div class="learnmove-skip" onclick="skipLearnMove()">Don't learn this move</div>
+  </div>
+</div>
+
+<div id="bug-report-overlay" class="bug-report-overlay">
+  <div class="bug-report-box">
+    <h3>REPORT A BUG</h3>
+    <p style="font-size:var(--fs-xs);color:var(--text-dim);margin:0;text-align:center">Describe what happened:</p>
+    <textarea id="bug-report-text" maxlength="2000" placeholder="e.g. When I used a potion in battle, the HP bar didn't update..."></textarea>
+    <div class="bug-report-btns">
+      <button class="btn btn-primary" onclick="submitBugReport()">SUBMIT</button>
+      <button class="btn btn-secondary" onclick="closeBugReport()">CANCEL</button>
+    </div>
+    <div id="bug-report-status" style="font-size:var(--fs-xs);text-align:center"></div>
   </div>
 </div>
 
@@ -2006,6 +2029,12 @@ function handleMessage(msg) {
     case 'trade_left':
       resetTradeState();
       goHome();
+      break;
+    case 'bug_report_submitted':
+      var brs=document.getElementById('bug-report-status');
+      brs.textContent=msg.message;
+      brs.style.color='var(--green,#22c55e)';
+      setTimeout(closeBugReport,2000);
       break;
     case 'error':
       showError(msg.message);
@@ -2818,6 +2847,26 @@ function bpTap(pokemonId, isTeam) {
       send({ type: 'move_to_team', pokemon_id: pokemonId });
     }
   }
+}
+
+/* ─── Bug Report ──────────────────────────────── */
+function showBugReport(){
+  document.getElementById('bug-report-text').value='';
+  document.getElementById('bug-report-status').textContent='';
+  document.getElementById('bug-report-overlay').classList.add('active');
+}
+function closeBugReport(){
+  document.getElementById('bug-report-overlay').classList.remove('active');
+}
+function submitBugReport(){
+  var desc=document.getElementById('bug-report-text').value.trim();
+  if(!desc){
+    var st=document.getElementById('bug-report-status');
+    st.textContent='Please describe the bug.';
+    st.style.color='var(--red,#ef4444)';
+    return;
+  }
+  send({type:'submit_bug_report',description:desc,current_screen:S.screen||'hub'});
 }
 
 /* ─── Trade ────────────────────────────────────── */
