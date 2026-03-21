@@ -475,14 +475,13 @@ async def handle_admin_api(request):
 
     if path == "/api/admin/bugs":
         try:
-            conn = sqlite3.connect(str(DB_PATH))
-            conn.row_factory = sqlite3.Row
-            rows = conn.execute(
-                "SELECT * FROM bug_reports ORDER BY submitted_at DESC LIMIT 100"
-            ).fetchall()
-            conn.close()
-            reports = [dict(r) for r in rows]
-            body = json.dumps(reports).encode()
+            bugs_dir = APP_DIR / "bugs"
+            reports = []
+            if bugs_dir.exists():
+                for f in sorted(bugs_dir.glob("*.md"), reverse=True):
+                    content = f.read_text(encoding="utf-8")
+                    reports.append({"filename": f.name, "content": content})
+            body = json.dumps(reports[:100]).encode()
             return HttpResponse(200, "OK", resp_headers, body)
         except Exception as e:
             body = json.dumps({"error": str(e)}).encode()
@@ -1412,16 +1411,36 @@ async def handle_message(player, msg, room_mgr):
         if context:
             context["current_screen"] = data.get("current_screen", "unknown")
         try:
-            conn = sqlite3.connect(str(DB_PATH))
-            conn.execute(
-                "INSERT INTO bug_reports (player_id, username, description, game_state, submitted_at) VALUES (?, ?, ?, ?, ?)",
-                (player.account_id, player.name or "unknown", description,
-                 json.dumps(context) if context else None, int(time.time()))
-            )
-            conn.commit()
-            conn.close()
+            bugs_dir = APP_DIR / "bugs"
+            bugs_dir.mkdir(exist_ok=True)
+            ts = int(time.time())
+            from datetime import datetime, timezone
+            dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+            date_str = dt.strftime("%Y-%m-%d_%H%M%S")
+            safe_name = "".join(c if c.isalnum() else "_" for c in (player.name or "unknown"))
+            filename = f"{date_str}_{safe_name}.md"
+            team_str = ""
+            if context and context.get("team"):
+                team_str = ", ".join(f"Lv{p['level']}" for p in context["team"])
+            lines = [
+                f"# Bug Report — {player.name or 'unknown'}",
+                f"",
+                f"- **Date**: {dt.strftime('%m/%d/%Y %I:%M:%S %p')} UTC",
+                f"- **Player**: {player.name or 'unknown'} (ID: {player.account_id})",
+                f"- **Screen**: {context.get('current_screen', 'unknown') if context else 'unknown'}",
+                f"- **Team**: {team_str or 'N/A'}",
+                f"- **Badges**: {len(context.get('badges', [])) if context else 0}",
+                f"- **Currency**: ${context.get('currency', 0) if context else 0}",
+                f"- **Total Pokemon**: {context.get('total_pokemon', 0) if context else 0}",
+                f"",
+                f"## Description",
+                f"",
+                description,
+                f"",
+            ]
+            (bugs_dir / filename).write_text("\n".join(lines), encoding="utf-8")
             await player.send({"type": "bug_report_submitted", "message": "Bug report submitted! Thanks for helping improve the game."})
-            print(f"[bug] Report from {player.name}: {description[:80]}")
+            print(f"[bug] Report from {player.name}: {description[:80]} -> bugs/{filename}")
         except Exception as e:
             print(f"[bug] Error saving report: {e}")
             await player.send({"type": "error", "message": "Failed to save bug report."})
