@@ -67,7 +67,7 @@ SHOP_ITEMS = {
     "rare_candy":      {"name": "Rare Candy",      "price": 500,   "category": "rare_candy", "levels": 1},
     "rare_candy_xl":   {"name": "Rare Candy XL",   "price": 2000,  "category": "rare_candy", "levels": 5},
     "rare_candy_xxl":  {"name": "Rare Candy XXL",  "price": 5000,  "category": "rare_candy", "levels": 10},
-    "rare_candy_ultra":{"name": "Rare Candy Ultra", "price": 20000, "category": "rare_candy", "levels": 50},
+
     # Mega Stones
     "venusaurite":     {"name": "Venusaurite",     "price": 10000, "category": "mega-stone", "mega_for": 3},
     "charizardite-x":  {"name": "Charizardite X",  "price": 10000, "category": "mega-stone", "mega_for": 6},
