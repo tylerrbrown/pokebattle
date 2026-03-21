@@ -546,10 +546,72 @@ def apply_status_effect(move, target, events):
         })
 
 
-def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
-    """Resolve a single move execution."""
+def _tag_move_events(events, start_idx, attacker, defender, attacker_idx, defender_idx):
+    """Tag events from start_idx onward with player_index based on which Pokemon they reference.
+
+    Uses object identity (id()) to reliably distinguish attacker vs defender,
+    even when both are the same species. Events without a "pokemon" field are
+    skipped (they're informational like effectiveness/critical_hit).
+    """
+    if attacker_idx is None:
+        return  # No PvP tagging needed (journey mode uses "side" instead)
+    atk_name_id = id(attacker)
+    def_name_id = id(defender)
+    for i in range(start_idx, len(events)):
+        evt = events[i]
+        if "player_index" in evt:
+            continue  # Already tagged
+        if "pokemon" not in evt:
+            continue  # Informational events (effectiveness, critical_hit, no_effect, turn_end)
+        # Use object identity: which pokemon object's name matches?
+        # Since we stored the name from attacker/defender, match by name
+        # but handle same-species by checking event semantics
+        pname = evt["pokemon"]
+        if pname == attacker.name and pname == defender.name:
+            # Same species: determine from event type semantics
+            etype = evt.get("event", "")
+            if etype in ("move_use", "miss", "recoil", "heal", "status_prevent", "status_cure"):
+                evt["player_index"] = attacker_idx
+            elif etype in ("damage", "faint", "status_apply"):
+                # Could be attacker (self-destruct faint, recoil faint) or defender
+                # For damage: always the defender
+                # For faint: could be either; check if it's self-destruct/recoil
+                if etype == "damage":
+                    evt["player_index"] = defender_idx
+                elif etype == "faint":
+                    # If defender is fainted, first faint event goes to defender
+                    # Self-destruct faint is for attacker
+                    if defender.is_fainted and not hasattr(defender, '_faint_tagged'):
+                        evt["player_index"] = defender_idx
+                        defender._faint_tagged = True
+                    else:
+                        evt["player_index"] = attacker_idx
+                else:
+                    evt["player_index"] = defender_idx
+            else:
+                evt["player_index"] = attacker_idx
+        elif pname == attacker.name:
+            evt["player_index"] = attacker_idx
+        elif pname == defender.name:
+            evt["player_index"] = defender_idx
+    # Clean up temporary attribute
+    if hasattr(defender, '_faint_tagged'):
+        del defender._faint_tagged
+
+
+def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events,
+                  attacker_idx=None, defender_idx=None):
+    """Resolve a single move execution.
+
+    attacker_idx/defender_idx: player indices (0 or 1) for PvP event tagging.
+    When provided, every event gets a "player_index" field indicating which
+    player the event pertains to.
+    """
     # Use Struggle if the move is struggle
     is_struggle = move.get("id") == "struggle"
+
+    # Track where new events start so we can post-tag them with player_index
+    _ev_start = len(events)
 
     events.append({
         "event": "move_use",
@@ -577,36 +639,46 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
             # Accuracy check first
             if not check_accuracy(move, attacker_pokemon, defender_pokemon):
                 events.append({"event": "miss", "pokemon": attacker_pokemon.name, "text": f"{attacker_pokemon.name}'s attack missed!"})
+                _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
                 return
             apply_status_effect({"effect": "sleep", "effect_chance": 100}, defender_pokemon, events)
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         if move_id in ("stun-spore", "thunder-wave"):
             if not check_accuracy(move, attacker_pokemon, defender_pokemon):
                 events.append({"event": "miss", "pokemon": attacker_pokemon.name, "text": f"{attacker_pokemon.name}'s attack missed!"})
+                _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
                 return
             apply_status_effect({"effect": "paralyze", "effect_chance": 100}, defender_pokemon, events)
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         if move_id in ("poison-powder", "poison-gas"):
             if not check_accuracy(move, attacker_pokemon, defender_pokemon):
                 events.append({"event": "miss", "pokemon": attacker_pokemon.name, "text": f"{attacker_pokemon.name}'s attack missed!"})
+                _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
                 return
             apply_status_effect({"effect": "poison", "effect_chance": 100}, defender_pokemon, events)
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         if move_id == "confuse-ray":
             if not check_accuracy(move, attacker_pokemon, defender_pokemon):
                 events.append({"event": "miss", "pokemon": attacker_pokemon.name, "text": f"{attacker_pokemon.name}'s attack missed!"})
+                _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
                 return
             events.append({"event": "status_apply", "pokemon": defender_pokemon.name, "status": "confuse", "text": f"{defender_pokemon.name} became confused!"})
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         if move_id == "supersonic":
             if not check_accuracy(move, attacker_pokemon, defender_pokemon):
                 events.append({"event": "miss", "pokemon": attacker_pokemon.name, "text": f"{attacker_pokemon.name}'s attack missed!"})
+                _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
                 return
             events.append({"event": "status_apply", "pokemon": defender_pokemon.name, "status": "confuse", "text": f"{defender_pokemon.name} became confused!"})
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         if move_id == "rest":
@@ -614,12 +686,14 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
             attacker_pokemon.status = "sleep"
             attacker_pokemon.sleep_turns = 2
             events.append({"event": "heal", "pokemon": attacker_pokemon.name, "new_hp": attacker_pokemon.current_hp, "max_hp": attacker_pokemon.max_hp, "text": f"{attacker_pokemon.name} went to sleep and became healthy!"})
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         if move_id == "recover":
             heal = attacker_pokemon.max_hp // 2
             attacker_pokemon.current_hp = min(attacker_pokemon.max_hp, attacker_pokemon.current_hp + heal)
             events.append({"event": "heal", "pokemon": attacker_pokemon.name, "new_hp": attacker_pokemon.current_hp, "max_hp": attacker_pokemon.max_hp, "text": f"{attacker_pokemon.name} recovered health!"})
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         # Disable, transform, metronome, etc. - simplified: just show the move was used
@@ -630,6 +704,7 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
             elif move_id == "leech-seed":
                 if not check_accuracy(move, attacker_pokemon, defender_pokemon):
                     events.append({"event": "miss", "pokemon": attacker_pokemon.name, "text": f"{attacker_pokemon.name}'s attack missed!"})
+                    _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
                     return
                 if "grass" in defender_pokemon.types:
                     events.append({"event": "no_effect", "text": "It doesn't affect {defender_pokemon.name}..."})
@@ -639,10 +714,12 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
                 pass  # Already handled
             else:
                 events.append({"event": "no_effect", "text": f"But it failed!"})
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
         if not stat_applied:
             events.append({"event": "no_effect", "text": "But nothing happened!"})
+        _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
         return
 
     # === Damage-dealing moves ===
@@ -654,6 +731,7 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
             "pokemon": attacker_pokemon.name,
             "text": f"{attacker_pokemon.name}'s attack missed!"
         })
+        _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
         return
 
     # Calculate damage
@@ -668,6 +746,7 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
             "multiplier": 0,
             "text": f"It doesn't affect {defender_pokemon.name}..."
         })
+        _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
         return
     elif effectiveness >= 2:
         events.append({
@@ -743,6 +822,8 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events):
     if not defender_pokemon.is_fainted:
         apply_status_effect(move, defender_pokemon, events)
 
+    _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
+
 
 def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
     """Resolve a full battle turn.
@@ -783,6 +864,7 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
 
     # Execute moves
     for pid, atk_pokemon, move, tap in movers:
+        def_pid = 1 if pid == 0 else 0
         def_pokemon = p2_pokemon if pid == 0 else p1_pokemon
 
         if atk_pokemon.is_fainted:
@@ -790,6 +872,9 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
 
         # Check status prevents action
         can_act, status_events = check_status_prevents_action(atk_pokemon)
+        # Tag status prevention events with attacker's player_index
+        for sevt in status_events:
+            sevt["player_index"] = pid
         events.extend(status_events)
         if not can_act:
             continue
@@ -798,7 +883,8 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
         if def_pokemon.is_fainted:
             continue
 
-        resolve_move(atk_pokemon, def_pokemon, move, tap, events)
+        resolve_move(atk_pokemon, def_pokemon, move, tap, events,
+                     attacker_idx=pid, defender_idx=def_pid)
 
     # End-of-turn: burn and poison damage
     for pid, pokemon in enumerate([p1_pokemon, p2_pokemon]):
@@ -810,6 +896,7 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
             pokemon.current_hp = max(0, pokemon.current_hp - dot)
             events.append({
                 "event": "dot_damage",
+                "player_index": pid,
                 "pokemon": pokemon.name,
                 "status": "burn",
                 "damage": dot,
@@ -821,6 +908,7 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
                 pokemon.is_fainted = True
                 events.append({
                     "event": "faint",
+                    "player_index": pid,
                     "pokemon": pokemon.name,
                     "text": f"{pokemon.name} fainted!"
                 })
@@ -830,6 +918,7 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
             pokemon.current_hp = max(0, pokemon.current_hp - dot)
             events.append({
                 "event": "dot_damage",
+                "player_index": pid,
                 "pokemon": pokemon.name,
                 "status": "poison",
                 "damage": dot,
@@ -841,6 +930,7 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
                 pokemon.is_fainted = True
                 events.append({
                     "event": "faint",
+                    "player_index": pid,
                     "pokemon": pokemon.name,
                     "text": f"{pokemon.name} fainted!"
                 })

@@ -2172,7 +2172,12 @@ async def _handle_wild_action(player, encounter, data):
 
 
 def _resolve_single_move(attacker, defender, move, tap_score, side):
-    """Resolve one side's move in a wild battle. Returns events list."""
+    """Resolve one side's move in a wild battle. Returns events list.
+
+    side: "player" or "wild" — indicates who the attacker is.
+    Events on the defender get the opposite side (defender_side).
+    """
+    defender_side = "wild" if side == "player" else "player"
     events = []
     events.append({"type": "move_use", "side": side, "pokemon": attacker.name, "move": move["name"],
                    "move_type": move.get("type", "normal"), "is_damage_move": move.get("power", 0) > 0})
@@ -2192,16 +2197,16 @@ def _resolve_single_move(attacker, defender, move, tap_score, side):
                     accuracy = move.get("accuracy", 100)
                     if random.randint(1, 100) <= accuracy:
                         defender.status = status
-                        events.append({"type": "status_apply", "pokemon": defender.name, "status": status})
+                        events.append({"type": "status_apply", "side": defender_side, "pokemon": defender.name, "status": status})
                     else:
-                        events.append({"type": "miss", "pokemon": attacker.name})
+                        events.append({"type": "miss", "side": side, "pokemon": attacker.name})
                     break
         return events
 
     # Damage move
     accuracy = move.get("accuracy", 100)
     if random.randint(1, 100) > accuracy:
-        events.append({"type": "miss", "pokemon": attacker.name})
+        events.append({"type": "miss", "side": side, "pokemon": attacker.name})
         return events
 
     # Tap multiplier: 0.85 - 1.15
@@ -2219,12 +2224,12 @@ def _resolve_single_move(attacker, defender, move, tap_score, side):
         return events
 
     defender.current_hp = max(0, defender.current_hp - damage)
-    events.append({"type": "damage", "pokemon": defender.name, "damage": damage,
+    events.append({"type": "damage", "side": defender_side, "pokemon": defender.name, "damage": damage,
                    "hp": defender.current_hp, "max_hp": defender.max_hp})
 
     if defender.current_hp <= 0:
         defender.is_fainted = True
-        events.append({"type": "faint", "pokemon": defender.name})
+        events.append({"type": "faint", "side": defender_side, "pokemon": defender.name})
 
     # Deduct PP
     if move.get("id") != "struggle":

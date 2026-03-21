@@ -1744,6 +1744,7 @@ function handleMessage(msg) {
     case 'turn_result':
       clearTimer();
       S.animating = true;
+      if (msg.your_player_index !== undefined) S.myPlayerIndex = msg.your_player_index;
       playTurnEvents(msg.events).then(() => {
         S.myTeam = msg.your_team_status;
         S.oppTeam = msg.opponent_team_status;
@@ -2433,7 +2434,10 @@ async function playTurnEvents(events) {
       case 'move_use':
         setBattleText(`${evt.pokemon} used ${evt.move}!`);
         if (evt.move_type && evt.is_damage_move) {
-          playMoveEffect(evt.move_type, !isOpponentPokemon(evt.pokemon));
+          const isMeMove = (evt.player_index !== undefined && S.myPlayerIndex !== undefined)
+            ? evt.player_index === S.myPlayerIndex
+            : !isOpponentPokemon(evt.pokemon);
+          playMoveEffect(evt.move_type, isMeMove);
         }
         await delay(800);
         break;
@@ -2452,8 +2456,10 @@ async function playTurnEvents(events) {
         break;
       case 'damage': {
         playSound('hit');
-        // Flash the target sprite
-        const isOpp = isOpponentPokemon(evt.pokemon);
+        // Flash the target sprite — use player_index when available for reliable targeting
+        const isOpp = (evt.player_index !== undefined && S.myPlayerIndex !== undefined)
+          ? evt.player_index !== S.myPlayerIndex
+          : isOpponentPokemon(evt.pokemon);
         const spriteId = isOpp ? 'opp-sprite' : 'player-sprite';
         document.getElementById(spriteId).classList.add('hit-flash');
         // Animate HP bar
@@ -2466,7 +2472,9 @@ async function playTurnEvents(events) {
       }
       case 'dot_damage': {
         setBattleText(evt.text);
-        const isOpp2 = isOpponentPokemon(evt.pokemon);
+        const isOpp2 = (evt.player_index !== undefined && S.myPlayerIndex !== undefined)
+          ? evt.player_index !== S.myPlayerIndex
+          : isOpponentPokemon(evt.pokemon);
         const barId2 = isOpp2 ? 'opp-hp-bar' : 'player-hp-bar';
         const textId2 = isOpp2 ? 'opp-hp-text' : 'player-hp-text';
         setHpBar(barId2, textId2, evt.new_hp, evt.max_hp, !isOpp2);
@@ -2475,7 +2483,9 @@ async function playTurnEvents(events) {
       }
       case 'recoil': {
         setBattleText(evt.text);
-        const isOpp3 = isOpponentPokemon(evt.pokemon);
+        const isOpp3 = (evt.player_index !== undefined && S.myPlayerIndex !== undefined)
+          ? evt.player_index !== S.myPlayerIndex
+          : isOpponentPokemon(evt.pokemon);
         const barId3 = isOpp3 ? 'opp-hp-bar' : 'player-hp-bar';
         const textId3 = isOpp3 ? 'opp-hp-text' : 'player-hp-text';
         setHpBar(barId3, textId3, evt.new_hp, evt.max_hp, !isOpp3);
@@ -2485,7 +2495,9 @@ async function playTurnEvents(events) {
       case 'faint': {
         setBattleText(evt.text);
         playSound('faint');
-        const isOpp4 = isOpponentPokemon(evt.pokemon);
+        const isOpp4 = (evt.player_index !== undefined && S.myPlayerIndex !== undefined)
+          ? evt.player_index !== S.myPlayerIndex
+          : isOpponentPokemon(evt.pokemon);
         const spriteId4 = isOpp4 ? 'opp-sprite' : 'player-sprite';
         document.getElementById(spriteId4).classList.add('faint');
         await delay(1200);
@@ -3933,7 +3945,7 @@ async function playJourneyEvents(events) {
         break;
       case 'damage': {
         playSound('hit');
-        const isOpp = S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon;
+        const isOpp = evt.side ? evt.side !== 'player' : (S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon);
         const sId = isOpp ? 'opp-sprite' : 'player-sprite';
         document.getElementById(sId).classList.add('hit-flash');
         setHpBar(isOpp ? 'opp-hp-bar' : 'player-hp-bar', isOpp ? 'opp-hp-text' : 'player-hp-text', evt.hp, evt.max_hp, !isOpp);
@@ -3948,7 +3960,7 @@ async function playJourneyEvents(events) {
       case 'faint': {
         setBattleText(evt.pokemon + ' fainted!');
         playSound('faint');
-        const isOppF = S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon;
+        const isOppF = evt.side ? evt.side !== 'player' : (S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon);
         document.getElementById(isOppF ? 'opp-sprite' : 'player-sprite').classList.add('faint');
         await delay(1200);
         break;
