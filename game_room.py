@@ -497,21 +497,12 @@ class GameRoom:
         p2_action = p2.chosen_action or {"type": "move", "move_index": 0}
 
         if p1_action["type"] == "move" and p2_action["type"] == "move":
-            # Both attacking
+            # Both attacking — resolve_turn tags events with player_index internally
             move_events, switches_needed = resolve_turn(
                 p1_active, p2_active,
                 p1_action, p2_action,
                 p1.tap_score, p2.tap_score
             )
-
-            # Tag events with player indices
-            for evt in move_events:
-                if "pokemon" in evt:
-                    if evt["pokemon"] == p1_active.name:
-                        evt["player_index"] = 0
-                    elif evt["pokemon"] == p2_active.name:
-                        evt["player_index"] = 1
-
             events.extend(move_events)
 
         elif p1_action["type"] == "move":
@@ -521,13 +512,6 @@ class GameRoom:
                 p1_action, {"type": "move", "move_index": -1},  # dummy
                 p1.tap_score, 0.5
             )
-            # Filter: only p1's move events (p2 "used" nothing since they switched)
-            for evt in move_events:
-                if "pokemon" in evt:
-                    if evt["pokemon"] == p1_active.name:
-                        evt["player_index"] = 0
-                    else:
-                        evt["player_index"] = 1
             events.extend(move_events)
 
         elif p2_action["type"] == "move":
@@ -538,20 +522,16 @@ class GameRoom:
                 p2_action,
                 0.5, p2.tap_score
             )
-            for evt in move_events:
-                if "pokemon" in evt:
-                    if evt["pokemon"] == p2_active.name:
-                        evt["player_index"] = 1
-                    else:
-                        evt["player_index"] = 0
             events.extend(move_events)
 
-        # Send turn result to both players
+        # Send turn result to both players, including your_player_index for
+        # reliable client-side event targeting (fixes same-species PvP bug)
         for i, p in enumerate([p1, p2]):
             await p.send({
                 "type": "turn_result",
                 "turn": self.turn_count,
                 "events": events,
+                "your_player_index": i,
                 "your_team_status": p.team_status(full=True),
                 "opponent_team_status": self.players[1 - i].team_status(full=False),
                 "your_active": p.active_pokemon,
