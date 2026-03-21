@@ -138,6 +138,8 @@ class AccountManager:
         cols = {row[1] for row in conn.execute("PRAGMA table_info(players)").fetchall()}
         if "currency" not in cols:
             conn.execute("ALTER TABLE players ADD COLUMN currency INTEGER DEFAULT 500")
+        if "encounters_since_legendary" not in cols:
+            conn.execute("ALTER TABLE players ADD COLUMN encounters_since_legendary INTEGER DEFAULT 0")
         # Check existing columns in player_pokemon
         cols = {row[1] for row in conn.execute("PRAGMA table_info(player_pokemon)").fetchall()}
         if "moves" not in cols:
@@ -619,6 +621,41 @@ class AccountManager:
         conn.commit()
         conn.close()
         return True
+
+    # ─── Legendary Pity Counter ─────────────────────────
+
+    def get_encounter_counter(self, player_id):
+        """Returns current encounters_since_legendary counter value."""
+        conn = self._conn()
+        row = conn.execute(
+            "SELECT encounters_since_legendary FROM players WHERE id = ?", (player_id,)
+        ).fetchone()
+        conn.close()
+        return row["encounters_since_legendary"] if row else 0
+
+    def increment_encounter_counter(self, player_id):
+        """Increment encounters_since_legendary by 1. Returns new value."""
+        conn = self._conn()
+        conn.execute(
+            "UPDATE players SET encounters_since_legendary = encounters_since_legendary + 1 WHERE id = ?",
+            (player_id,)
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT encounters_since_legendary FROM players WHERE id = ?", (player_id,)
+        ).fetchone()
+        conn.close()
+        return row["encounters_since_legendary"] if row else 0
+
+    def reset_encounter_counter(self, player_id):
+        """Reset encounters_since_legendary to 0."""
+        conn = self._conn()
+        conn.execute(
+            "UPDATE players SET encounters_since_legendary = 0 WHERE id = ?",
+            (player_id,)
+        )
+        conn.commit()
+        conn.close()
 
     # ─── Badges & Progression ─────────────────────────
 

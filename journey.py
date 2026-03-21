@@ -20,7 +20,8 @@ from ai_player import BotPlayer
 
 # ─── Constants ────────────────────────────────────────
 
-RARITY_WEIGHTS = {"common": 60, "uncommon": 25, "rare": 12, "legendary": 3}
+RARITY_WEIGHTS = {"common": 60, "uncommon": 25, "rare": 13, "legendary": 1}
+PITY_THRESHOLD = 50
 
 BALL_MODIFIERS = {
     "pokeball": 1.0,
@@ -99,8 +100,10 @@ CURRENCY_MASTERS_WIN = 2000
 
 # ─── Wild Encounter ──────────────────────────────────
 
-def generate_wild_pokemon(player_team_avg_level):
-    """Pick a random wild Pokemon based on rarity weights, scaled to player level."""
+def generate_wild_pokemon(player_team_avg_level, pity_counter=0):
+    """Pick a random wild Pokemon based on rarity weights, scaled to player level.
+    If pity_counter >= PITY_THRESHOLD, forces a legendary encounter.
+    """
     pokemon_list = list(pokemon_data.POKEMON.values())
 
     # Group by rarity
@@ -109,12 +112,16 @@ def generate_wild_pokemon(player_team_avg_level):
         r = p.get("rarity", "common")
         by_rarity.setdefault(r, []).append(p)
 
-    # Weighted rarity selection
-    rarity = random.choices(
-        list(RARITY_WEIGHTS.keys()),
-        weights=list(RARITY_WEIGHTS.values()),
-        k=1
-    )[0]
+    # Pity system: guarantee legendary every PITY_THRESHOLD encounters
+    if pity_counter >= PITY_THRESHOLD:
+        rarity = "legendary"
+    else:
+        # Weighted rarity selection
+        rarity = random.choices(
+            list(RARITY_WEIGHTS.keys()),
+            weights=list(RARITY_WEIGHTS.values()),
+            k=1
+        )[0]
 
     pool = by_rarity.get(rarity, by_rarity.get("common", []))
     species = random.choice(pool)
