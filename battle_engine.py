@@ -73,6 +73,9 @@ class PokemonInstance:
         self.mega_name = None
         self._original_stats = None  # Saved for revert
 
+        # Shiny (persisted)
+        self.is_shiny = False
+
         # Dynamax (per-battle)
         self.is_dynamaxed = False
         self.dynamax_turns_left = 0
@@ -182,6 +185,7 @@ class PokemonInstance:
             "is_mega": self.is_mega,
             "is_dynamaxed": self.is_dynamaxed,
             "dynamax_turns_left": self.dynamax_turns_left,
+            "is_shiny": self.is_shiny,
             "moves": [
                 {
                     "id": m["id"],
@@ -216,6 +220,7 @@ class PokemonInstance:
             "is_mega": self.is_mega,
             "is_dynamaxed": self.is_dynamaxed,
             "dynamax_turns_left": self.dynamax_turns_left,
+            "is_shiny": self.is_shiny,
             "moves": [
                 {"id": m["id"], "name": m["name"], "type": m["type"]}
                 for m in self.moves
@@ -242,6 +247,7 @@ def build_journey_team(owned_pokemon_list, pokemon_db, moves_db):
             custom_moves = json.loads(p["moves"]) if p.get("moves") else None
             inst = PokemonInstance(species, moves_db, level=p.get("level", 5), custom_moves=custom_moves)
             inst.db_id = p.get("id")  # Track DB row ID for XP awards
+            inst.is_shiny = bool(p.get("is_shiny", 0))
             # Compute XP progress inline (avoids circular import with player_accounts)
             level = p.get("level", 5)
             xp = p.get("xp", 0)

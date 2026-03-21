@@ -138,6 +138,9 @@ def generate_wild_pokemon(player_team_avg_level, pity_counter=0):
         moves = species["moves"][:2]  # Fallback
 
     wild = PokemonInstance(species, pokemon_data.MOVES, level=level, custom_moves=moves)
+    # 10% chance of shiny encounter
+    is_shiny = random.random() < 0.10
+    wild.is_shiny = is_shiny
     return wild, rarity
 
 
@@ -222,6 +225,7 @@ class WildEncounter:
                 "status": self.wild.status,
                 "rarity": self.wild_rarity,
                 "is_mega": getattr(self.wild, 'is_mega', False),
+                "is_shiny": getattr(self.wild, 'is_shiny', False),
             },
             "your_pokemon": active.serialize_full(),
             "your_team": [p.serialize_full() for p in self.team],
