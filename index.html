@@ -635,6 +635,17 @@ input.invalid { border-color: var(--red); }
   text-align: center;
   line-height: 2;
 }
+.pin-title { font-size: var(--fs-lg); color: var(--accent); text-align: center; }
+.pin-subtitle { font-size: var(--fs-sm); color: var(--text-dim); text-align: center; }
+.pin-input-row { display: flex; justify-content: center; gap: 12px; }
+.pin-digit {
+  width: 56px; height: 64px; font-size: var(--fs-3xl);
+  text-align: center; background: var(--bg3);
+  border: 2px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: 'Press Start 2P', monospace;
+  -webkit-text-security: disc;
+}
+.pin-digit:focus { border-color: var(--accent); outline: none; }
 
 /* ─── Starter Select Screen ────────────────────── */
 .starter-screen {
@@ -1192,6 +1203,32 @@ input.invalid { border-color: var(--red); }
       <div id="login-error" class="error-text"></div>
       <div class="login-welcome">New? Just pick a name and go!<br>Returning? Enter the same name.</div>
     </div>
+    <!-- PIN Setup (new users + existing without PIN) -->
+    <div id="pin-setup" class="login-form" style="display:none">
+      <div class="pin-title">Set Your 4-Digit PIN</div>
+      <div class="pin-subtitle" id="pin-setup-subtitle">Choose a PIN to protect your account</div>
+      <div class="pin-input-row">
+        <input id="pin-digit-1" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+        <input id="pin-digit-2" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+        <input id="pin-digit-3" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+        <input id="pin-digit-4" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+      </div>
+      <button class="btn btn-primary" onclick="submitPinSetup()">SET PIN</button>
+      <div id="pin-setup-error" class="error-text"></div>
+    </div>
+    <!-- PIN Verify (existing users with PIN) -->
+    <div id="pin-verify" class="login-form" style="display:none">
+      <div class="pin-title">Enter Your PIN</div>
+      <div class="pin-subtitle" id="pin-verify-subtitle"></div>
+      <div class="pin-input-row">
+        <input id="pin-verify-1" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+        <input id="pin-verify-2" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+        <input id="pin-verify-3" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+        <input id="pin-verify-4" type="tel" maxlength="1" inputmode="numeric" class="pin-digit" autocomplete="off">
+      </div>
+      <button class="btn btn-primary" onclick="submitPinVerify()">LOGIN</button>
+      <div id="pin-verify-error" class="error-text"></div>
+    </div>
   </div>
 
   <!-- STARTER SELECT SCREEN -->
@@ -1596,6 +1633,10 @@ const S = {
   isAiBattle: false,
   // Account state
   account: null,
+  // PIN login state
+  _pinMode: null,       // null, 'setup', 'verify'
+  _pinUsername: null,    // username during PIN flow
+  _pinIsNewUser: false,  // true if registering new user
   // Journey state
   journeyMode: false,
   encounterType: null, // 'wild' or 'gym'
@@ -1659,6 +1700,14 @@ function handleMessage(msg) {
     // ─── Account Messages ───────────────────────────
     case 'register_ok':
     case 'login_ok':
+      S._pinMode = null;
+      S._pinUsername = null;
+      S._pinIsNewUser = false;
+      // Reset login screen visibility
+      var loginFormEl = document.querySelector('#screen-login .login-form:not(#pin-setup):not(#pin-verify)');
+      if (loginFormEl) loginFormEl.style.display = '';
+      document.getElementById('pin-setup').style.display = 'none';
+      document.getElementById('pin-verify').style.display = 'none';
       S.account = msg.profile;
       S.playerName = msg.profile.username;
       localStorage.setItem('pb_token', msg.profile.token);
@@ -1675,13 +1724,35 @@ function handleMessage(msg) {
       document.getElementById('login-error').textContent = msg.message;
       break;
     case 'login_error':
-      // If login failed and we have a pending username, try registering
+      // If login failed and we have a pending username, show PIN setup for new user
       if (S._pendingUsername) {
-        send({ type: 'register', username: S._pendingUsername });
+        S._pinMode = 'setup';
+        S._pinUsername = S._pendingUsername;
+        S._pinIsNewUser = true;
         S._pendingUsername = null;
+        showPinSetup(S._pinUsername, true);
       } else {
         document.getElementById('login-error').textContent = msg.message;
         localStorage.removeItem('pb_token');
+      }
+      break;
+    case 'needs_pin_setup':
+      S._pinMode = 'setup';
+      S._pinUsername = msg.username;
+      showPinSetup(msg.username, false);
+      break;
+    case 'needs_pin':
+      S._pinMode = 'verify';
+      S._pinUsername = msg.username;
+      showPinVerify(msg.username);
+      break;
+    case 'pin_error':
+      if (S._pinMode === 'verify') {
+        document.getElementById('pin-verify-error').textContent = msg.message;
+        clearPinInputs('verify');
+      } else {
+        document.getElementById('pin-setup-error').textContent = msg.message;
+        clearPinInputs('setup');
       }
       break;
     case 'starter_chosen':
@@ -2135,8 +2206,99 @@ function logout() {
   localStorage.removeItem('pb_username');
   S.account = null;
   S.playerName = null;
+  S._pinMode = null;
+  S._pinUsername = null;
+  S._pinIsNewUser = false;
+  // Reset login screen visibility
+  var loginFormEl = document.querySelector('#screen-login .login-form:not(#pin-setup):not(#pin-verify)');
+  if (loginFormEl) loginFormEl.style.display = '';
+  document.getElementById('pin-setup').style.display = 'none';
+  document.getElementById('pin-verify').style.display = 'none';
   showScreen('login');
 }
+
+/* ─── PIN Login Functions ──────────────────────── */
+function showPinSetup(username, isNewUser) {
+  document.querySelector('#screen-login .login-form:not(#pin-setup):not(#pin-verify)').style.display = 'none';
+  document.getElementById('pin-verify').style.display = 'none';
+  document.getElementById('pin-setup').style.display = '';
+  document.getElementById('pin-setup-error').textContent = '';
+  document.getElementById('pin-setup-subtitle').textContent =
+    isNewUser ? 'Create a PIN for your new account' : 'Set a PIN to protect your account';
+  clearPinInputs('setup');
+  document.getElementById('pin-digit-1').focus();
+}
+
+function showPinVerify(username) {
+  document.querySelector('#screen-login .login-form:not(#pin-setup):not(#pin-verify)').style.display = 'none';
+  document.getElementById('pin-setup').style.display = 'none';
+  document.getElementById('pin-verify').style.display = '';
+  document.getElementById('pin-verify-error').textContent = '';
+  document.getElementById('pin-verify-subtitle').textContent = 'Welcome back, ' + username + '!';
+  clearPinInputs('verify');
+  document.getElementById('pin-verify-1').focus();
+}
+
+function submitPinSetup() {
+  var pin = getPinValue('setup');
+  if (!/^\d{4}$/.test(pin)) {
+    document.getElementById('pin-setup-error').textContent = 'Enter 4 digits';
+    return;
+  }
+  if (S._pinIsNewUser) {
+    send({ type: 'register', username: S._pinUsername, pin: pin });
+  } else {
+    send({ type: 'set_pin', pin: pin });
+  }
+}
+
+function submitPinVerify() {
+  var pin = getPinValue('verify');
+  if (!/^\d{4}$/.test(pin)) {
+    document.getElementById('pin-verify-error').textContent = 'Enter 4 digits';
+    return;
+  }
+  send({ type: 'verify_pin', pin: pin });
+}
+
+function clearPinInputs(prefix) {
+  if (prefix === 'setup') {
+    for (var i = 1; i <= 4; i++) document.getElementById('pin-digit-' + i).value = '';
+  } else {
+    for (var i = 1; i <= 4; i++) document.getElementById('pin-verify-' + i).value = '';
+  }
+}
+
+function getPinValue(prefix) {
+  var ids = prefix === 'setup'
+    ? ['pin-digit-1','pin-digit-2','pin-digit-3','pin-digit-4']
+    : ['pin-verify-1','pin-verify-2','pin-verify-3','pin-verify-4'];
+  return ids.map(function(id) { return document.getElementById(id).value; }).join('');
+}
+
+// PIN digit auto-advance: input -> focus next, backspace -> focus prev, Enter -> submit
+document.querySelectorAll('.pin-digit').forEach(function(input, idx, all) {
+  input.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+    if (this.value.length === 1) {
+      var next = all[idx + 1];
+      if (next) next.focus();
+    }
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace' && !this.value) {
+      var prev = all[idx - 1];
+      if (prev) { prev.focus(); prev.value = ''; }
+    }
+    if (e.key === 'Enter') {
+      if (this.id.startsWith('pin-digit')) {
+        submitPinSetup();
+      } else {
+        submitPinVerify();
+      }
+    }
+  });
+});
 
 function chooseStar(dexId) {
   send({ type: 'choose_starter', dex_id: dexId });

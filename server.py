@@ -529,7 +529,11 @@ async def handle_message(player, msg, room_mgr):
     # ─── Account Messages ─────────────────────────────
     if msg_type == "register":
         username = str(data.get("username", "")).strip()
-        result, error = account_mgr.register(username)
+        pin = data.get("pin")
+        if not pin or not re.match(r'^\d{4}$', str(pin)):
+            await player.send({"type": "register_error", "message": "PIN must be 4 digits."})
+            return
+        result, error = account_mgr.register(username, pin=str(pin))
         if error:
             await player.send({"type": "register_error", "message": error})
         else:
@@ -551,15 +555,48 @@ async def handle_message(player, msg, room_mgr):
         profile = None
         if token:
             profile = account_mgr.login_by_token(token)
+            if profile:
+                # Token auto-login bypasses PIN
+                player.name = profile["username"]
+                player.account_id = profile["id"]
+                full = account_mgr.get_profile(profile["id"])
+                await player.send({"type": "login_ok", "profile": full})
+                await player.send({
+                    "type": "pokemon_list",
+                    "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
+                    "evolutions": pokemon_data.EVOLUTIONS,
+                    "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
+                    "dynamax": pokemon_data.DYNAMAX,
+                })
+            else:
+                await player.send({"type": "login_error", "message": "Account not found."})
         elif username:
             profile = account_mgr.login_by_username(username.strip())
+            if profile:
+                # Store pending account for PIN verification
+                player._pending_pin_account = profile
+                if profile.get("has_pin"):
+                    await player.send({"type": "needs_pin", "username": profile["username"]})
+                else:
+                    await player.send({"type": "needs_pin_setup", "username": profile["username"]})
+            else:
+                await player.send({"type": "login_error", "message": "Account not found."})
+        else:
+            await player.send({"type": "login_error", "message": "Account not found."})
+        return
 
-        if profile:
-            player.name = profile["username"]
-            player.account_id = profile["id"]
-            full = account_mgr.get_profile(profile["id"])
+    if msg_type == "verify_pin":
+        pending = getattr(player, '_pending_pin_account', None)
+        if not pending:
+            await player.send({"type": "pin_error", "message": "No pending login."})
+            return
+        pin = str(data.get("pin", ""))
+        if pin == pending["pin"]:
+            player.name = pending["username"]
+            player.account_id = pending["id"]
+            player._pending_pin_account = None
+            full = account_mgr.get_profile(pending["id"])
             await player.send({"type": "login_ok", "profile": full})
-            # Also send pokemon list for My Team screen
             await player.send({
                 "type": "pokemon_list",
                 "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
@@ -568,7 +605,31 @@ async def handle_message(player, msg, room_mgr):
                 "dynamax": pokemon_data.DYNAMAX,
             })
         else:
-            await player.send({"type": "login_error", "message": "Account not found."})
+            await player.send({"type": "pin_error", "message": "Wrong PIN. Try again."})
+        return
+
+    if msg_type == "set_pin":
+        pending = getattr(player, '_pending_pin_account', None)
+        if not pending:
+            await player.send({"type": "pin_error", "message": "No pending login."})
+            return
+        pin = str(data.get("pin", ""))
+        if not re.match(r'^\d{4}$', pin):
+            await player.send({"type": "pin_error", "message": "PIN must be 4 digits."})
+            return
+        account_mgr.set_pin(pending["id"], pin)
+        player.name = pending["username"]
+        player.account_id = pending["id"]
+        player._pending_pin_account = None
+        full = account_mgr.get_profile(pending["id"])
+        await player.send({"type": "login_ok", "profile": full})
+        await player.send({
+            "type": "pokemon_list",
+            "pokemon_list": pokemon_data.get_pokemon_list_for_client(),
+            "evolutions": pokemon_data.EVOLUTIONS,
+            "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
+            "dynamax": pokemon_data.DYNAMAX,
+        })
         return
 
     if msg_type == "choose_starter":
