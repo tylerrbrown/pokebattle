@@ -276,6 +276,9 @@ async def _handle_trade_message(player, msg_type, data):
         # Tell the opponent what's being offered
         opp = room.get_opponent(player)
         if opp:
+            # Pokedex: opponent sees this Pokemon
+            if getattr(opp, 'account_id', None):
+                account_mgr.mark_seen(opp.account_id, poke["dex_id"])
             await opp.send({"type": "trade_partner_offer", "offer": offer_info})
         return True
 
@@ -308,6 +311,13 @@ async def _handle_trade_message(player, msg_type, data):
                 p1.account_id, room.offers[1],
             )
             if success:
+                # Pokedex: mark received Pokemon as caught for each player
+                # After swap: p0 now owns offers[1], p1 now owns offers[0]
+                for receiver, received_id in [(p0, room.offers[1]), (p1, room.offers[0])]:
+                    if receiver and getattr(receiver, 'account_id', None):
+                        poke = account_mgr.get_pokemon_by_id(received_id, receiver.account_id)
+                        if poke:
+                            account_mgr.mark_caught(receiver.account_id, poke["dex_id"])
                 for p in room.players:
                     if p:
                         await p.send({"type": "trade_complete"})
@@ -639,6 +649,7 @@ async def handle_message(player, msg, room_mgr):
         dex_id = data.get("dex_id")
         initial_moves = pokemon_data.get_initial_moves(dex_id, 5)
         if account_mgr.choose_starter(player.account_id, dex_id, default_moves=initial_moves):
+            account_mgr.mark_caught(player.account_id, dex_id)
             full = account_mgr.get_profile(player.account_id)
             await player.send({"type": "starter_chosen", "profile": full})
         else:
@@ -886,6 +897,7 @@ async def handle_message(player, msg, room_mgr):
         team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
         encounter = WildEncounter(player, team, wild, rarity)
         active_encounters[player.id] = encounter
+        account_mgr.mark_seen(player.account_id, wild.dex_id)
         await player.send({"type": "wild_encounter_start", **encounter.serialize_state()})
 
     elif msg_type == "start_training":
@@ -992,6 +1004,8 @@ async def handle_message(player, msg, room_mgr):
         encounter.wild = gym_team[0]
         encounter.is_gym = True
         active_encounters[player.id] = encounter
+        # Pokedex: mark all gym Pokemon as seen
+        account_mgr.mark_seen_batch(player.account_id, [p.dex_id for p in gym_team])
 
         await player.send({
             "type": "gym_battle_start",
@@ -1080,6 +1094,7 @@ async def handle_message(player, msg, room_mgr):
         encounter.is_gym = True
         encounter.trainer_category = "e4"
         active_encounters[player.id] = encounter
+        account_mgr.mark_seen_batch(player.account_id, [p.dex_id for p in trainer_team])
         await player.send({
             "type": "gym_battle_start",
             **encounter.serialize_state(),
@@ -1125,6 +1140,7 @@ async def handle_message(player, msg, room_mgr):
         encounter.is_gym = True
         encounter.trainer_category = "champion"
         active_encounters[player.id] = encounter
+        account_mgr.mark_seen_batch(player.account_id, [p.dex_id for p in trainer_team])
         await player.send({
             "type": "gym_battle_start",
             **encounter.serialize_state(),
@@ -1193,6 +1209,7 @@ async def handle_message(player, msg, room_mgr):
         encounter.is_gym = True
         encounter.trainer_category = "masters"
         active_encounters[player.id] = encounter
+        account_mgr.mark_seen_batch(player.account_id, [p.dex_id for p in trainer_team])
         await player.send({
             "type": "gym_battle_start",
             **encounter.serialize_state(),
@@ -1469,6 +1486,8 @@ async def handle_message(player, msg, room_mgr):
         new_poke = pokemon_data.get_pokemon(new_dex_id)
         account_mgr.update_pokemon_species(pokemon_row_id, new_dex_id)
         account_mgr.use_item(player.account_id, item_id)
+        # Pokedex: mark evolved form as caught
+        account_mgr.mark_caught(player.account_id, new_dex_id)
         await player.send({
             "type": "evolution_item_result",
             "success": True,
@@ -1500,6 +1519,37 @@ async def handle_message(player, msg, room_mgr):
             "currency": profile.get("currency", 500),
             "pokeballs": profile.get("pokeballs", 10),
             "total_pokemon": profile.get("total_pokemon", 0),
+        })
+
+    # ─── Pokedex Messages ────────────────────────────
+    elif msg_type == "get_pokedex":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        # Backfill on first access: mark all owned Pokemon as caught
+        pokedex = account_mgr.get_pokedex(player.account_id)
+        if not pokedex:
+            count = account_mgr.backfill_pokedex(player.account_id)
+            if count > 0:
+                pokedex = account_mgr.get_pokedex(player.account_id)
+        counts = account_mgr.get_pokedex_counts(player.account_id)
+        total = len(pokemon_data.POKEMON)
+        entries = []
+        for dex_id in sorted(pokemon_data.POKEMON.keys()):
+            poke = pokemon_data.POKEMON[dex_id]
+            entry = pokedex.get(dex_id, {})
+            entries.append({
+                "dex_id": dex_id,
+                "name": poke["name"],
+                "types": poke["types"],
+                "base_stats": poke.get("base_stats", {}),
+                "seen": entry.get("seen", False),
+                "caught": entry.get("caught", False),
+            })
+        await player.send({
+            "type": "pokedex_data",
+            "entries": entries,
+            "counts": {"seen": counts["seen"], "caught": counts["caught"], "total": total},
         })
 
     # ─── Trade Messages ─────────────────────────────
@@ -1871,6 +1921,9 @@ async def _handle_use_rare_candy(player, data):
             account_mgr.update_pokemon_species(pokemon_row_id, final_dex)
             result["evolution"] = evolutions[-1]  # Primary evolution for overlay
             result["all_evolutions"] = evolutions  # Full chain
+            # Pokedex: mark each evolved form as caught
+            for evo_step in evolutions:
+                account_mgr.mark_caught(player.account_id, evo_step["to_dex_id"])
 
     inventory = account_mgr.get_inventory(player.account_id)
     await player.send({
@@ -1922,6 +1975,8 @@ async def _handle_wild_action(player, encounter, data):
             # Add to collection
             moves_for_db = pokemon_data.get_initial_moves(wild.dex_id, wild.level)
             added = account_mgr.catch_pokemon(player.account_id, wild.dex_id, wild.level, default_moves=moves_for_db, is_shiny=getattr(wild, 'is_shiny', False))
+            # Pokedex: mark as caught
+            account_mgr.mark_caught(player.account_id, wild.dex_id)
             # Award currency
             account_mgr.add_currency(player.account_id, CURRENCY_WILD_CATCH)
             # Award XP to active Pokemon
@@ -2471,6 +2526,9 @@ def _award_encounter_xp(encounter, defeated):
                     "to_name": pokemon_data.POKEMON.get(evo["evolves_to"], {}).get("name", "???"),
                 }
                 account_mgr.update_pokemon_species(db_id, evo["evolves_to"])
+                # Pokedex: mark evolved form as caught
+                if player_id:
+                    account_mgr.mark_caught(player_id, evo["evolves_to"])
 
         result["lucky_egg_active"] = has_lucky_egg
         results.append(result)
