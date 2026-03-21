@@ -126,6 +126,19 @@ class AccountManager:
                 UNIQUE(player_id, item_type)
             );
             CREATE INDEX IF NOT EXISTS idx_inv_player ON player_inventory(player_id);
+
+            CREATE TABLE IF NOT EXISTS player_pokedex (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                dex_id INTEGER NOT NULL,
+                seen INTEGER DEFAULT 0,
+                caught INTEGER DEFAULT 0,
+                first_seen_at INTEGER,
+                first_caught_at INTEGER,
+                FOREIGN KEY (player_id) REFERENCES players(id),
+                UNIQUE(player_id, dex_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_pokedex_player ON player_pokedex(player_id);
         """)
         # Schema migrations for existing databases
         self._migrate(conn)
@@ -402,6 +415,15 @@ class AccountManager:
             (player_id,)
         ).fetchall()
 
+        pokedex_seen = conn.execute(
+            "SELECT COUNT(*) as cnt FROM player_pokedex WHERE player_id = ? AND seen = 1",
+            (player_id,)
+        ).fetchone()["cnt"]
+        pokedex_caught = conn.execute(
+            "SELECT COUNT(*) as cnt FROM player_pokedex WHERE player_id = ? AND caught = 1",
+            (player_id,)
+        ).fetchone()["cnt"]
+
         conn.close()
 
         return {
@@ -413,6 +435,8 @@ class AccountManager:
             "currency": dict(row).get("currency", 500),
             "team": [self._enrich_pokemon_xp(dict(r)) for r in team],
             "total_pokemon": total_pokemon,
+            "pokedex_seen": pokedex_seen,
+            "pokedex_caught": pokedex_caught,
             "badges": [r["gym_id"] for r in badges],
             "milestones": [r["milestone"] for r in milestones],
             "inventory": {r["item_type"]: r["quantity"] for r in inventory},
@@ -717,6 +741,96 @@ class AccountManager:
         ).fetchall()
         conn.close()
         return [r["milestone"] for r in rows]
+
+    # ─── Pokedex ─────────────────────────────────────
+
+    def mark_seen(self, player_id, dex_id):
+        """Mark a Pokemon as seen in the Pokedex. UPSERT — sets seen=1."""
+        conn = self._conn()
+        now = int(time.time())
+        conn.execute(
+            """INSERT INTO player_pokedex (player_id, dex_id, seen, first_seen_at)
+               VALUES (?, ?, 1, ?)
+               ON CONFLICT(player_id, dex_id) DO UPDATE SET seen = 1""",
+            (player_id, dex_id, now)
+        )
+        conn.commit()
+        conn.close()
+
+    def mark_seen_batch(self, player_id, dex_ids):
+        """Mark multiple Pokemon as seen in a single transaction."""
+        if not dex_ids:
+            return
+        conn = self._conn()
+        now = int(time.time())
+        for dex_id in dex_ids:
+            conn.execute(
+                """INSERT INTO player_pokedex (player_id, dex_id, seen, first_seen_at)
+                   VALUES (?, ?, 1, ?)
+                   ON CONFLICT(player_id, dex_id) DO UPDATE SET seen = 1""",
+                (player_id, dex_id, now)
+            )
+        conn.commit()
+        conn.close()
+
+    def mark_caught(self, player_id, dex_id):
+        """Mark a Pokemon as caught (and seen) in the Pokedex. UPSERT."""
+        conn = self._conn()
+        now = int(time.time())
+        conn.execute(
+            """INSERT INTO player_pokedex (player_id, dex_id, seen, caught, first_seen_at, first_caught_at)
+               VALUES (?, ?, 1, 1, ?, ?)
+               ON CONFLICT(player_id, dex_id) DO UPDATE SET seen = 1, caught = 1,
+               first_caught_at = COALESCE(first_caught_at, ?)""",
+            (player_id, dex_id, now, now, now)
+        )
+        conn.commit()
+        conn.close()
+
+    def get_pokedex(self, player_id):
+        """Get player's Pokedex data. Returns dict {dex_id: {"seen": bool, "caught": bool}}."""
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT dex_id, seen, caught FROM player_pokedex WHERE player_id = ?",
+            (player_id,)
+        ).fetchall()
+        conn.close()
+        return {r["dex_id"]: {"seen": bool(r["seen"]), "caught": bool(r["caught"])} for r in rows}
+
+    def get_pokedex_counts(self, player_id):
+        """Get Pokedex summary counts."""
+        conn = self._conn()
+        seen = conn.execute(
+            "SELECT COUNT(*) as cnt FROM player_pokedex WHERE player_id = ? AND seen = 1",
+            (player_id,)
+        ).fetchone()["cnt"]
+        caught = conn.execute(
+            "SELECT COUNT(*) as cnt FROM player_pokedex WHERE player_id = ? AND caught = 1",
+            (player_id,)
+        ).fetchone()["cnt"]
+        conn.close()
+        return {"seen": seen, "caught": caught}
+
+    def backfill_pokedex(self, player_id):
+        """Backfill Pokedex for existing players: mark all owned Pokemon as caught."""
+        conn = self._conn()
+        # Get distinct dex_ids the player owns
+        rows = conn.execute(
+            "SELECT DISTINCT dex_id FROM player_pokemon WHERE player_id = ?",
+            (player_id,)
+        ).fetchall()
+        now = int(time.time())
+        for r in rows:
+            conn.execute(
+                """INSERT INTO player_pokedex (player_id, dex_id, seen, caught, first_seen_at, first_caught_at)
+                   VALUES (?, ?, 1, 1, ?, ?)
+                   ON CONFLICT(player_id, dex_id) DO UPDATE SET seen = 1, caught = 1,
+                   first_caught_at = COALESCE(first_caught_at, ?)""",
+                (player_id, r["dex_id"], now, now, now)
+            )
+        conn.commit()
+        conn.close()
+        return len(rows)
 
     # ─── Trading ─────────────────────────────────────
 
