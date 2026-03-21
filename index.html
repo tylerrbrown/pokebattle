@@ -985,6 +985,56 @@ input.invalid { border-color: var(--red); }
 .bug-report-box textarea:focus{border-color:var(--accent);outline:none}
 .bug-report-btns{display:flex;gap:10px;justify-content:center}
 
+/* ─── Pokedex ────────────────────────────────── */
+.btn-pokedex { background:linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; font-weight:bold; }
+.btn-pokedex:hover { filter:brightness(1.1); }
+.pokedex-screen { padding:12px; gap:8px; }
+.pokedex-header { display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+.pokedex-title { font-size:var(--fs-xl); color:#ef4444; }
+.pokedex-counts { font-size:var(--fs-2xs); color:var(--text-dim); display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+.pokedex-counts .stat { color:var(--text); }
+.pokedex-filters { display:flex; gap:6px; flex-wrap:wrap; align-items:center; flex-shrink:0; padding:4px 0; }
+.pokedex-search { flex:1; min-width:100px; font-size:var(--fs-xs) !important; padding:6px 10px !important; }
+.pokedex-filter-btn { font-family:inherit; font-size:var(--fs-2xs); padding:5px 8px; border-radius:6px; background:var(--bg3); color:var(--text-dim); border:1px solid var(--border); cursor:pointer; }
+.pokedex-filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.pokedex-type-select { font-family:inherit; font-size:var(--fs-2xs); padding:4px 6px; border-radius:6px; background:var(--bg); color:var(--text); border:1px solid var(--border); }
+.pokedex-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(72px,1fr)); gap:4px; overflow-y:auto; flex:1; padding:2px 0; }
+.pokedex-entry { display:flex; flex-direction:column; align-items:center; padding:4px 2px; background:var(--bg2); border:2px solid var(--border); border-radius:6px; cursor:pointer; transition:all 0.15s; min-height:80px; }
+.pokedex-entry:hover { border-color:var(--accent); background:var(--bg3); }
+.pokedex-entry.caught { border-color:var(--green); }
+.pokedex-entry.seen { border-color:var(--blue); }
+.pokedex-entry.unseen { opacity:0.4; cursor:default; }
+.pokedex-entry.unseen:hover { border-color:var(--border); background:var(--bg2); }
+.pokedex-entry img { width:48px; height:48px; image-rendering:pixelated; }
+.pokedex-entry.seen img { filter:brightness(0); }
+.pokedex-entry .dex-name { font-size:9px; color:var(--text-dim); text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; width:100%; line-height:1.2; }
+.pokedex-entry .dex-num { font-size:8px; color:var(--text-dim); }
+.pokedex-entry.caught .dex-name { color:var(--text); }
+/* Detail overlay */
+.pokedex-detail-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; }
+.pokedex-detail-overlay.active { display:flex; }
+.pokedex-detail { background:var(--bg2); border:2px solid var(--accent); border-radius:12px; padding:16px; width:92%; max-width:380px; max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+.pokedex-detail-top { display:flex; align-items:center; gap:12px; }
+.pokedex-detail-sprite { width:96px; height:96px; image-rendering:pixelated; }
+.pokedex-detail-sprite.silhouette { filter:brightness(0); }
+.pokedex-detail-info { flex:1; }
+.pokedex-detail-name { font-size:var(--fs-md); color:var(--text); margin-bottom:4px; }
+.pokedex-detail-dexnum { font-size:var(--fs-2xs); color:var(--text-dim); }
+.pokedex-detail-types { display:flex; gap:4px; margin-top:4px; }
+.pokedex-detail-status { font-size:var(--fs-2xs); margin-top:6px; padding:3px 8px; border-radius:4px; display:inline-block; }
+.pokedex-detail-status.caught { background:var(--green); color:#1a1a2e; }
+.pokedex-detail-status.seen { background:var(--blue); color:#fff; }
+.pokedex-detail-status.unseen { background:var(--border); color:var(--text-dim); }
+.pokedex-stat-bars { display:flex; flex-direction:column; gap:4px; }
+.pokedex-stat-row { display:flex; align-items:center; gap:6px; }
+.pokedex-stat-label { font-size:9px; color:var(--text-dim); width:32px; text-align:right; }
+.pokedex-stat-val { font-size:9px; color:var(--text); width:26px; text-align:right; }
+.pokedex-stat-bar-bg { flex:1; height:8px; background:var(--bg); border-radius:4px; overflow:hidden; }
+.pokedex-stat-bar { height:100%; border-radius:4px; transition:width 0.3s; }
+.pokedex-detail-nav { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+.pokedex-detail-nav button { font-family:inherit; font-size:var(--fs-xs); padding:6px 14px; border-radius:6px; background:var(--bg3); color:var(--text); border:1px solid var(--border); cursor:pointer; }
+.pokedex-detail-nav button:hover { border-color:var(--accent); }
+
 /* ─── Backpack / Storage ──────────────────────── */
 .backpack-screen { padding:16px; gap:10px; }
 .backpack-header { display:flex; justify-content:space-between; align-items:center; }
@@ -1339,6 +1389,7 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-shop" onclick="showShop()">SHOP</button>
       <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
       <button class="btn btn-backpack" onclick="showBackpack()">BACKPACK</button>
+      <button class="btn btn-pokedex" onclick="showPokedex()">POKEDEX</button>
       <button class="btn btn-trade" onclick="showTradeMenu()">TRADE</button>
       <button class="btn btn-training" onclick="showTraining()">TRAINING</button>
       <button class="btn btn-ai" onclick="createJourneyBattle()">BATTLE AI</button>
@@ -1377,6 +1428,31 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
     </div>
     <div class="region-grid" id="region-grid"></div>
+  </div>
+
+  <!-- POKEDEX SCREEN -->
+  <div id="screen-pokedex" class="screen pokedex-screen">
+    <div class="pokedex-header">
+      <span class="pokedex-title">POKEDEX</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div class="pokedex-counts" id="pokedex-counts"></div>
+    <div class="pokedex-filters">
+      <input class="pokedex-search" type="text" id="pokedex-search" placeholder="Search..." oninput="filterPokedex()" autocomplete="off">
+      <button class="pokedex-filter-btn active" data-filter="all" onclick="setPokedexFilter(this,'all')">All</button>
+      <button class="pokedex-filter-btn" data-filter="caught" onclick="setPokedexFilter(this,'caught')">Caught</button>
+      <button class="pokedex-filter-btn" data-filter="seen" onclick="setPokedexFilter(this,'seen')">Seen</button>
+      <button class="pokedex-filter-btn" data-filter="unseen" onclick="setPokedexFilter(this,'unseen')">Unseen</button>
+      <select class="pokedex-type-select" id="pokedex-type-filter" onchange="filterPokedex()">
+        <option value="">All Types</option>
+      </select>
+    </div>
+    <div class="pokedex-grid" id="pokedex-grid"></div>
+  </div>
+
+  <!-- Pokedex Detail Overlay -->
+  <div class="pokedex-detail-overlay" id="pokedex-detail-overlay" onclick="if(event.target===this)closePokedexDetail()">
+    <div class="pokedex-detail" id="pokedex-detail"></div>
   </div>
 
   <!-- TRADE MENU SCREEN -->
@@ -1718,6 +1794,12 @@ const S = {
   isAiBattle: false,
   // Account state
   account: null,
+  // Pokedex state
+  pokedexSeen: new Set(),
+  pokedexCaught: new Set(),
+  _pokedexEntries: [],
+  _pokedexFilter: 'all',
+  _pokedexTotal: 0,
   // PIN login state
   _pinMode: null,       // null, 'setup', 'verify'
   _pinUsername: null,    // username during PIN flow
@@ -2243,6 +2325,17 @@ function handleMessage(msg) {
     case 'trade_left':
       resetTradeState();
       goHome();
+      break;
+    case 'pokedex_data':
+      S._pokedexEntries = msg.entries;
+      S._pokedexTotal = msg.counts.total;
+      S.pokedexSeen = new Set();
+      S.pokedexCaught = new Set();
+      msg.entries.forEach(function(e) {
+        if (e.seen) S.pokedexSeen.add(e.dex_id);
+        if (e.caught) S.pokedexCaught.add(e.dex_id);
+      });
+      renderPokedex(msg);
       break;
     case 'bug_report_submitted':
       var brs=document.getElementById('bug-report-status');
@@ -3872,6 +3965,161 @@ function skipLearnMove() {
   processLearnMoveQueue();
 }
 
+/* ─── Pokedex ──────────────────────────────────── */
+function showPokedex() {
+  showScreen('pokedex');
+  send({ type: 'get_pokedex' });
+}
+
+function renderPokedex(data) {
+  var counts = data.counts;
+  var el = document.getElementById('pokedex-counts');
+  el.innerHTML = '<span>Seen: <span class="stat">' + counts.seen + '</span></span>' +
+    '<span>Caught: <span class="stat">' + counts.caught + '</span> / ' + counts.total + '</span>';
+
+  // Populate type filter dropdown if not already done
+  var typeSelect = document.getElementById('pokedex-type-filter');
+  if (typeSelect.options.length <= 1) {
+    var allTypes = new Set();
+    data.entries.forEach(function(e) { e.types.forEach(function(t) { allTypes.add(t); }); });
+    Array.from(allTypes).sort().forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+      typeSelect.appendChild(opt);
+    });
+  }
+
+  renderPokedexGrid();
+}
+
+function renderPokedexGrid() {
+  var entries = S._pokedexEntries;
+  if (!entries || !entries.length) return;
+
+  var searchVal = (document.getElementById('pokedex-search').value || '').toLowerCase().trim();
+  var typeFilter = document.getElementById('pokedex-type-filter').value;
+  var statusFilter = S._pokedexFilter;
+
+  var filtered = entries.filter(function(e) {
+    // Status filter
+    if (statusFilter === 'caught' && !e.caught) return false;
+    if (statusFilter === 'seen' && !e.seen) return false;
+    if (statusFilter === 'unseen' && (e.seen || e.caught)) return false;
+    // Search by name or dex number
+    if (searchVal) {
+      var num = '#' + String(e.dex_id).padStart(3, '0');
+      if (e.name.toLowerCase().indexOf(searchVal) === -1 && num.indexOf(searchVal) === -1 && String(e.dex_id) !== searchVal) return false;
+    }
+    // Type filter
+    if (typeFilter && e.types.indexOf(typeFilter) === -1) return false;
+    return true;
+  });
+
+  var grid = document.getElementById('pokedex-grid');
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var e = filtered[i];
+    var cls = e.caught ? 'caught' : (e.seen ? 'seen' : 'unseen');
+    var num = '#' + String(e.dex_id).padStart(3, '0');
+    var name = (e.caught || e.seen) ? e.name : '???';
+    var clickAttr = (e.seen || e.caught) ? ' onclick="showPokedexDetail(' + e.dex_id + ')"' : '';
+    if (e.caught || e.seen) {
+      html += '<div class="pokedex-entry ' + cls + '"' + clickAttr + '>' +
+        '<img src="sprites/front/' + e.dex_id + '.png" loading="lazy" alt="' + name + '">' +
+        '<span class="dex-num">' + num + '</span>' +
+        '<span class="dex-name">' + name + '</span></div>';
+    } else {
+      html += '<div class="pokedex-entry unseen">' +
+        '<div style="width:48px;height:48px;background:var(--bg3);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:var(--fs-lg)">?</div>' +
+        '<span class="dex-num">' + num + '</span>' +
+        '<span class="dex-name">???</span></div>';
+    }
+  }
+  grid.innerHTML = html;
+}
+
+function setPokedexFilter(btn, filter) {
+  S._pokedexFilter = filter;
+  document.querySelectorAll('.pokedex-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderPokedexGrid();
+}
+
+function filterPokedex() {
+  renderPokedexGrid();
+}
+
+function showPokedexDetail(dexId) {
+  var entry = S._pokedexEntries.find(function(e) { return e.dex_id === dexId; });
+  if (!entry) return;
+
+  var isCaught = entry.caught;
+  var isSeen = entry.seen;
+  var statusCls = isCaught ? 'caught' : (isSeen ? 'seen' : 'unseen');
+  var statusText = isCaught ? 'CAUGHT' : (isSeen ? 'SEEN' : 'UNKNOWN');
+  var num = '#' + String(dexId).padStart(3, '0');
+  var spriteCls = isSeen && !isCaught ? ' silhouette' : '';
+
+  // Type badges
+  var typesHtml = '';
+  if (isCaught || isSeen) {
+    entry.types.forEach(function(t) {
+      typesHtml += '<span class="move-type-badge" style="background:var(--type-' + t + ');font-size:10px;padding:2px 6px">' + t.toUpperCase() + '</span>';
+    });
+  }
+
+  // Stat bars (only show for caught)
+  var statsHtml = '';
+  if (isCaught && entry.base_stats) {
+    var statDefs = [
+      { key: 'hp', label: 'HP', color: '#4ade80' },
+      { key: 'attack', label: 'ATK', color: '#ef4444' },
+      { key: 'defense', label: 'DEF', color: '#f97316' },
+      { key: 'special', label: 'SPC', color: '#4a9eff' },
+      { key: 'speed', label: 'SPE', color: '#facc15' },
+    ];
+    statsHtml = '<div class="pokedex-stat-bars">';
+    statDefs.forEach(function(sd) {
+      var val = entry.base_stats[sd.key] || 0;
+      var pct = Math.min(100, (val / 255) * 100);
+      statsHtml += '<div class="pokedex-stat-row">' +
+        '<span class="pokedex-stat-label">' + sd.label + '</span>' +
+        '<span class="pokedex-stat-val">' + val + '</span>' +
+        '<div class="pokedex-stat-bar-bg"><div class="pokedex-stat-bar" style="width:' + pct + '%;background:' + sd.color + '"></div></div></div>';
+    });
+    statsHtml += '</div>';
+  }
+
+  // Navigation
+  var allDexIds = S._pokedexEntries.map(function(e) { return e.dex_id; });
+  var curIdx = allDexIds.indexOf(dexId);
+  var prevId = curIdx > 0 ? allDexIds[curIdx - 1] : null;
+  var nextId = curIdx < allDexIds.length - 1 ? allDexIds[curIdx + 1] : null;
+
+  var html = '<div class="pokedex-detail-top">' +
+    '<img class="pokedex-detail-sprite' + spriteCls + '" src="sprites/front/' + dexId + '.png" alt="' + entry.name + '">' +
+    '<div class="pokedex-detail-info">' +
+    '<div class="pokedex-detail-name">' + ((isCaught || isSeen) ? entry.name : '???') + '</div>' +
+    '<div class="pokedex-detail-dexnum">' + num + '</div>' +
+    '<div class="pokedex-detail-types">' + typesHtml + '</div>' +
+    '<span class="pokedex-detail-status ' + statusCls + '">' + statusText + '</span>' +
+    '</div></div>' +
+    statsHtml +
+    '<div class="pokedex-detail-nav">' +
+    (prevId !== null ? '<button onclick="showPokedexDetail(' + prevId + ')">PREV</button>' : '<span></span>') +
+    '<button onclick="closePokedexDetail()">CLOSE</button>' +
+    (nextId !== null ? '<button onclick="showPokedexDetail(' + nextId + ')">NEXT</button>' : '<span></span>') +
+    '</div>';
+
+  document.getElementById('pokedex-detail').innerHTML = html;
+  document.getElementById('pokedex-detail-overlay').classList.add('active');
+}
+
+function closePokedexDetail() {
+  document.getElementById('pokedex-detail-overlay').classList.remove('active');
+}
+
 /* ─── Hub ──────────────────────────────────────── */
 function goHome(showSave) {
   S.journeyMode = false;
@@ -3920,6 +4168,7 @@ function updateHubProfile() {
     '<span>Items: <span class="stat">' + itemTotal + '</span></span>' +
     (rareCandyCount > 0 ? '<span>Rare Candy: <span class="stat">' + rareCandyCount + '</span></span>' : '') +
     '<span>Pokemon: <span class="stat">' + (a.total_pokemon || 0) + '/' + (S.pokemonList ? S.pokemonList.length : '?') + '</span></span>' +
+    '<span>Pokedex: <span class="stat">' + (a.pokedex_caught || 0) + '/' + (S.pokemonList ? S.pokemonList.length : '?') + '</span></span>' +
     '<span>Best Lv: <span class="stat">' + maxLv + '</span></span>' +
     '<div class="hub-badges">' + badgeHtml + '</div>';
 }
