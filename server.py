@@ -34,6 +34,14 @@ from journey import (
 from battle_engine import build_journey_team, resolve_turn, calculate_damage, STRUGGLE
 
 APP_DIR = pathlib.Path(__file__).parent
+
+
+def _get_current_moves(poke_row):
+    """Get a Pokemon's current move list, falling back to learnset + species defaults if DB is NULL."""
+    if poke_row.get("moves"):
+        return json.loads(poke_row["moves"])
+    return pokemon_data.get_initial_moves(poke_row["dex_id"], poke_row.get("level", 5))
+
 DB_PATH = APP_DIR / "pokebattle.db"
 PORT = int(os.environ.get("POKEBATTLE_PORT", 5060))
 ADMIN_SECRET = os.environ.get("POKEBATTLE_ADMIN_SECRET", "pb-x9f2k7m4-admin-2024")
@@ -556,7 +564,8 @@ async def handle_message(player, msg, room_mgr):
             await player.send({"type": "error", "message": "Not logged in."})
             return
         dex_id = data.get("dex_id")
-        if account_mgr.choose_starter(player.account_id, dex_id):
+        initial_moves = pokemon_data.get_initial_moves(dex_id, 5)
+        if account_mgr.choose_starter(player.account_id, dex_id, default_moves=initial_moves):
             full = account_mgr.get_profile(player.account_id)
             await player.send({"type": "starter_chosen", "profile": full})
         else:
@@ -1152,7 +1161,7 @@ async def handle_message(player, msg, room_mgr):
             return
         dex_id = poke_row["dex_id"]
         level = poke_row["level"]
-        current_moves = json.loads(poke_row["moves"]) if poke_row.get("moves") else []
+        current_moves = _get_current_moves(poke_row)
         # Get all moves learnable at or below current level from learnset
         learnset = pokemon_data.get_learnset(dex_id)
         learnable = []
@@ -1165,6 +1174,23 @@ async def handle_message(player, msg, room_mgr):
                     learnable.append({
                         "move_id": entry["move"],
                         "level_learned": entry["level"],
+                        "name": move_data["name"],
+                        "type": move_data["type"],
+                        "category": move_data["category"],
+                        "power": move_data["power"],
+                        "accuracy": move_data["accuracy"],
+                        "pp": move_data["pp"],
+                    })
+        # Include species default moves from pokemon.json not already in learnable
+        species = pokemon_data.POKEMON.get(dex_id)
+        if species:
+            for mid in species["moves"]:
+                if mid not in seen and mid in pokemon_data.MOVES:
+                    seen.add(mid)
+                    move_data = pokemon_data.MOVES[mid]
+                    learnable.append({
+                        "move_id": mid,
+                        "level_learned": 1,
                         "name": move_data["name"],
                         "type": move_data["type"],
                         "category": move_data["category"],
@@ -1215,10 +1241,15 @@ async def handle_message(player, msg, room_mgr):
             return
         dex_id = poke_row["dex_id"]
         level = poke_row["level"]
-        current_moves = json.loads(poke_row["moves"]) if poke_row.get("moves") else []
-        # Validate that the new move is in the learnset at or below current level
+        current_moves = _get_current_moves(poke_row)
+        # Validate that the new move is in the learnset or species defaults
         learnset = pokemon_data.get_learnset(dex_id)
         valid_moves = {entry["move"] for entry in learnset if entry["level"] <= level}
+        species = pokemon_data.POKEMON.get(dex_id)
+        if species:
+            for mid in species["moves"]:
+                if mid in pokemon_data.MOVES:
+                    valid_moves.add(mid)
         if new_move not in valid_moves:
             await player.send({"type": "error", "message": "Cannot learn that move yet."})
             return
@@ -1266,7 +1297,7 @@ async def handle_message(player, msg, room_mgr):
         poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
         if not poke_row:
             return
-        current_moves = json.loads(poke_row["moves"]) if poke_row.get("moves") else []
+        current_moves = _get_current_moves(poke_row)
         if replace_move == "__add__":
             # Add to empty slot (fewer than 4 moves)
             if len(current_moves) < 4:
@@ -1670,7 +1701,7 @@ async def _handle_use_rare_candy(player, data):
             # Re-fetch to get latest moves
             all_pokemon = account_mgr.get_all_pokemon(player.account_id)
             poke_row = next((p for p in all_pokemon if p["id"] == pokemon_row_id), None)
-            current_moves = json.loads(poke_row["moves"]) if poke_row and poke_row.get("moves") else []
+            current_moves = _get_current_moves(poke_row) if poke_row else []
 
             auto_learned = []
             pending_learn = []
@@ -1756,13 +1787,8 @@ async def _handle_wild_action(player, encounter, data):
         })
         if caught:
             # Add to collection
-            moves_for_db = pokemon_data.get_moves_at_level(wild.dex_id, wild.level)
-            added = account_mgr.catch_pokemon(player.account_id, wild.dex_id, wild.level)
-            # Set moves on the caught Pokemon
-            all_pokemon = account_mgr.get_all_pokemon(player.account_id)
-            if all_pokemon:
-                latest = all_pokemon[-1]
-                account_mgr.update_pokemon_moves(latest["id"], moves_for_db)
+            moves_for_db = pokemon_data.get_initial_moves(wild.dex_id, wild.level)
+            added = account_mgr.catch_pokemon(player.account_id, wild.dex_id, wild.level, default_moves=moves_for_db)
             # Award currency
             account_mgr.add_currency(player.account_id, CURRENCY_WILD_CATCH)
             # Award XP to active Pokemon
@@ -2260,7 +2286,7 @@ def _award_encounter_xp(encounter, defeated):
             if result["new_moves"]:
                 all_pokemon = account_mgr.get_all_pokemon(encounter.player.account_id)
                 poke_row = next((p for p in all_pokemon if p["id"] == db_id), None)
-                current_moves = json.loads(poke_row["moves"]) if poke_row and poke_row.get("moves") else []
+                current_moves = _get_current_moves(poke_row) if poke_row else []
 
                 auto_learned = []
                 pending_learn = []
@@ -2347,6 +2373,10 @@ async def main():
     global account_mgr
     account_mgr = AccountManager(DB_PATH)
     print(f"Database initialized at {DB_PATH}")
+
+    # Fix Pokemon with missing or sparse moves
+    account_mgr.fix_null_moves(pokemon_data)
+    account_mgr.fix_sparse_moves(pokemon_data)
 
     # Start cleanup task
     asyncio.create_task(room_cleanup_task())

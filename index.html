@@ -2058,6 +2058,8 @@ function showError(msg) {
     document.getElementById('trade-menu-error').textContent = msg;
   } else if (S.screen === 'trade' || S.screen === 'tradewait') {
     showToast(msg);
+  } else if (S.screen === 'movemgmt') {
+    showToast(msg);
   } else {
     setBattleText(msg);
   }
