@@ -959,6 +959,42 @@ input.invalid { border-color: var(--red); }
 .btn-masters:hover { filter:brightness(1.1); }
 .btn-travel { background:linear-gradient(135deg,#14b8a6,#0d9488); color:#fff; font-weight:bold; }
 .btn-travel:hover { filter:brightness(1.1); }
+.btn-tournament { grid-column:1/-1; background:linear-gradient(135deg,#ffd700,#f59e0b); color:#1a1a2e; font-weight:bold; text-shadow:0 1px 2px rgba(0,0,0,0.2); }
+.btn-tournament:hover { filter:brightness(1.1); }
+
+/* ─── Tournament Screen ──────────────────────── */
+.tournament-screen { padding:16px; gap:10px; }
+.tournament-header { display:flex; justify-content:space-between; align-items:center; }
+.tournament-title { font-size:var(--fs-xl); color:#ffd700; }
+.tournament-entry { display:flex; flex-direction:column; align-items:center; gap:16px; padding:20px; }
+.tournament-entry-title { font-size:var(--fs-lg); color:#ffd700; text-align:center; }
+.tournament-entry-fee { font-size:var(--fs-sm); color:var(--text-dim); }
+.tournament-bracket { display:flex; flex-direction:column; gap:8px; width:100%; }
+.bracket-round-label { font-size:var(--fs-xs); color:#ffd700; font-weight:bold; padding:4px 0; border-bottom:1px solid rgba(255,215,0,0.2); }
+.bracket-match { display:flex; align-items:center; gap:10px; padding:10px; background:var(--bg2); border:2px solid var(--border); border-radius:8px; transition:all 0.2s; }
+.bracket-match.current { border-color:#ffd700; box-shadow:0 0 12px rgba(255,215,0,0.3); cursor:pointer; }
+.bracket-match.current:hover { filter:brightness(1.1); }
+.bracket-match.won { border-color:var(--green); opacity:0.85; }
+.bracket-match.lost { border-color:#ef4444; opacity:0.6; }
+.bracket-match.locked { opacity:0.4; }
+.bracket-match-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:var(--fs-xs); font-weight:bold; background:var(--bg); color:var(--text-dim); flex-shrink:0; }
+.bracket-match.current .bracket-match-num { background:#ffd700; color:#1a1a2e; }
+.bracket-match.won .bracket-match-num { background:var(--green); color:#fff; }
+.bracket-match.lost .bracket-match-num { background:#ef4444; color:#fff; }
+.bracket-match-info { flex:1; min-width:0; }
+.bracket-match-name { font-size:var(--fs-sm); font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bracket-match-detail { font-size:var(--fs-2xs); color:var(--text-dim); }
+.bracket-match-status { font-size:var(--fs-2xs); font-weight:bold; flex-shrink:0; }
+.bracket-match.won .bracket-match-status { color:var(--green); }
+.bracket-match.lost .bracket-match-status { color:#ef4444; }
+.bracket-match.current .bracket-match-status { color:#ffd700; }
+.bracket-match.locked .bracket-match-status { color:var(--text-dim); }
+.tournament-total { text-align:center; padding:10px; font-size:var(--fs-sm); color:#ffd700; border-top:1px solid rgba(255,215,0,0.2); margin-top:4px; }
+.tournament-champion-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; animation:fadeIn 0.5s; }
+.tournament-champion-title { font-size:var(--fs-3xl); color:#ffd700; text-shadow:0 0 30px rgba(255,215,0,0.6); animation:pulse 1.5s infinite; }
+.tournament-champion-sub { font-size:var(--fs-md); color:var(--text); text-align:center; }
+.tournament-champion-rewards { font-size:var(--fs-sm); color:var(--yellow); text-align:center; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
 .btn-bug{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-weight:bold}
 
 /* ─── Regions Screen ─────────────────────────── */
@@ -1386,6 +1422,7 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-e4" id="hub-e4-btn" style="display:none" onclick="showEliteFour()">ELITE FOUR</button>
       <button class="btn btn-champion" id="hub-champion-btn" style="display:none" onclick="showChampion()">CHAMPION</button>
       <button class="btn btn-masters" id="hub-masters-btn" style="display:none" onclick="showMastersEight()">MASTERS 8</button>
+      <button class="btn btn-tournament" id="hub-tournament-btn" style="display:none" onclick="showTournament()">TOURNAMENT</button>
       <button class="btn btn-shop" onclick="showShop()">SHOP</button>
       <button class="btn btn-secondary" onclick="showMyTeam()">MY TEAM</button>
       <button class="btn btn-backpack" onclick="showBackpack()">BACKPACK</button>
@@ -1707,7 +1744,16 @@ input.invalid { border-color: var(--red); }
     <div class="gym-list" id="masters-list"></div>
   </div>
 
-  <!-- TRAINER INTRO SCREEN (shared for E4/Champion/Masters) -->
+  <!-- TOURNAMENT SCREEN -->
+  <div id="screen-tournament" class="screen tournament-screen">
+    <div class="tournament-header">
+      <span class="tournament-title">TOURNAMENT</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div id="tournament-content"></div>
+  </div>
+
+  <!-- TRAINER INTRO SCREEN (shared for E4/Champion/Masters/Tournament) -->
   <div id="screen-trainerintro" class="screen gymintro-screen">
     <div class="gymintro-name" id="trainerintro-name"></div>
     <div class="gymintro-title" id="trainerintro-title"></div>
@@ -1823,6 +1869,9 @@ const S = {
   _megaData: {},    // dex_id -> mega evolution data
   _dynamaxData: {}, // dynamax data: max_move_powers, max_move_names, gigantamax
   _dynamaxUsed: false,
+  // Tournament state
+  _tournamentState: null,
+  _tournamentComplete: false,
 };
 
 /* ─── Toast Notifications ──────────────────────── */
@@ -2239,6 +2288,28 @@ function handleMessage(msg) {
         S.account.total_pokemon = msg.total_pokemon;
       }
       updateHubProgression();
+      break;
+    // ─── Tournament Messages ──────────────────────
+    case 'tournament_data':
+      if (msg.rounds) {
+        renderTournament(msg);
+        if (S.screen !== 'tournament') showScreen('tournament');
+      } else {
+        renderTournamentEntry(msg);
+        showScreen('tournament');
+      }
+      break;
+    case 'tournament_started':
+      renderTournament(msg);
+      showScreen('tournament');
+      break;
+    case 'tournament_eliminated':
+      showToast(msg.message || 'Tournament over.');
+      goHome();
+      break;
+    case 'tournament_forfeited':
+      showToast(msg.message || 'Tournament forfeited.');
+      goHome();
       break;
     // ─── Move Management Messages ─────────────────
     case 'learnable_moves':
@@ -4126,6 +4197,8 @@ function goHome(showSave) {
   S.encounter = null;
   S.encounterType = null;
   S.gymData = null;
+  S._tournamentState = null;
+  S._tournamentComplete = false;
   clearBattleBackground();
   send({ type: 'get_profile' });
   send({ type: 'get_progression' });
@@ -5063,6 +5136,7 @@ var BATTLE_THEMES = {
   e4: 'indigo-plateau',
   champion: 'hall-of-fame',
   masters: 'world-stage',
+  tournament: 'world-stage',
   pvp: 'stadium'
 };
 
@@ -5107,13 +5181,15 @@ function updateHubProgression() {
   var e4Btn = document.getElementById('hub-e4-btn');
   var champBtn = document.getElementById('hub-champion-btn');
   var mastersBtn = document.getElementById('hub-masters-btn');
+  var tournamentBtn = document.getElementById('hub-tournament-btn');
   if (e4Btn) e4Btn.style.display = badges.length >= 8 ? '' : 'none';
   var allE4 = ['e4_1','e4_2','e4_3','e4_4'].every(function(id) { return milestones.indexOf(prefix + id + '_defeated') >= 0; });
   if (champBtn) champBtn.style.display = allE4 ? '' : 'none';
-  // Masters unlocked by any region's champion defeat
+  // Masters + Tournament unlocked by any region's champion defeat
   var hasChampion = milestones.indexOf('champion_defeated') >= 0 ||
     milestones.some(function(m) { return m.endsWith(':champion_defeated'); });
   if (mastersBtn) mastersBtn.style.display = hasChampion ? '' : 'none';
+  if (tournamentBtn) tournamentBtn.style.display = hasChampion ? '' : 'none';
 }
 
 function showEliteFour() {
@@ -5180,6 +5256,118 @@ function renderMastersList(data) {
   });
 }
 
+/* ─── Tournament Mode ─────────────────────────── */
+
+function showTournament() {
+  showScreen('tournament');
+  document.getElementById('tournament-content').innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px">Loading...</div>';
+  send({ type: 'get_tournament' });
+}
+
+function renderTournamentEntry(data) {
+  var content = document.getElementById('tournament-content');
+  var currency = data.currency || 0;
+  var fee = data.entry_fee || 500;
+  var canAfford = currency >= fee;
+  content.innerHTML =
+    '<div class="tournament-entry">' +
+      '<div class="tournament-entry-title">POKEMON WORLD TOURNAMENT</div>' +
+      '<div style="font-size:var(--fs-sm);color:var(--text);text-align:center;max-width:300px">' +
+        'Battle through 4 rounds of increasingly powerful trainers!<br>' +
+        '<span style="color:var(--text-dim)">Quarterfinal &rarr; Semifinal &rarr; Final &rarr; Championship</span>' +
+      '</div>' +
+      '<div class="tournament-entry-fee">Entry Fee: <span style="color:' + (canAfford ? '#ffd700' : '#ef4444') + '">$' + fee + '</span>' +
+        ' &nbsp;|&nbsp; Your Balance: $' + currency + '</div>' +
+      '<div style="font-size:var(--fs-xs);color:var(--text-dim);text-align:center">' +
+        'Prize Pool: $16,000 + 14 Rare Candy<br>Team HP/PP reset between rounds' +
+      '</div>' +
+      '<button class="btn btn-tournament" style="width:80%;max-width:250px" ' +
+        (canAfford ? 'onclick="startTournament()"' : 'disabled style="opacity:0.5;width:80%;max-width:250px"') +
+        '>ENTER TOURNAMENT</button>' +
+    '</div>';
+}
+
+function renderTournament(data) {
+  var content = document.getElementById('tournament-content');
+  var html = '<div class="tournament-bracket">';
+  data.rounds.forEach(function(r, i) {
+    var cls = 'bracket-match';
+    if (r.status === 'win') cls += ' won';
+    else if (r.status === 'loss') cls += ' lost';
+    else if (r.status === 'current') cls += ' current';
+    else cls += ' locked';
+
+    var statusText = '';
+    if (r.status === 'win') statusText = 'WIN';
+    else if (r.status === 'loss') statusText = 'LOSS';
+    else if (r.status === 'current') statusText = 'BATTLE';
+    else statusText = 'LOCKED';
+
+    var numIcon = '';
+    if (r.status === 'win') numIcon = 'V';
+    else if (r.status === 'loss') numIcon = 'X';
+    else numIcon = '' + (i + 1);
+
+    html += '<div class="bracket-round-label">' + r.round_name + '</div>';
+    html += '<div class="' + cls + '"' +
+      (r.status === 'current' ? ' onclick="startTournamentMatch()"' : '') + '>';
+    html += '<div class="bracket-match-num">' + numIcon + '</div>';
+    html += '<div class="bracket-match-info">';
+    html += '<div class="bracket-match-name">' + r.opponent_name +
+      ' <span class="move-type-badge" style="background:var(--type-' + r.opponent_type + ');font-size:var(--fs-2xs)">' + r.opponent_type + '</span></div>';
+    html += '<div class="bracket-match-detail">' + r.opponent_title + ' | ' + r.team_size + ' Pokemon (Lv.' + r.max_level + ')</div>';
+    html += '<div class="bracket-match-detail">Reward: $' + r.reward_currency + '</div>';
+    html += '</div>';
+    html += '<div class="bracket-match-status">' + statusText + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  if (data.total_winnings > 0) {
+    html += '<div class="tournament-total">Total Winnings: $' + data.total_winnings + '</div>';
+  }
+
+  if (data.is_complete) {
+    html += '<div style="text-align:center;padding:16px">' +
+      '<div style="font-size:var(--fs-lg);color:#ffd700;margin-bottom:8px">TOURNAMENT CHAMPION!</div>' +
+      '<button class="btn btn-tournament" onclick="goHome(true)">BACK TO HUB</button>' +
+      '</div>';
+  } else if (!data.is_eliminated) {
+    html += '<div style="text-align:center;padding:8px">' +
+      '<button class="btn btn-secondary" style="font-size:var(--fs-xs)" onclick="forfeitTournament()">FORFEIT</button>' +
+      '</div>';
+  }
+
+  content.innerHTML = html;
+}
+
+function startTournament() {
+  send({ type: 'start_tournament' });
+}
+
+function startTournamentMatch() {
+  send({ type: 'start_tournament_match' });
+}
+
+function forfeitTournament() {
+  if (confirm('Forfeit the tournament? Entry fee is not refunded.')) {
+    send({ type: 'tournament_forfeit' });
+  }
+}
+
+function showTournamentChampion(tournamentState) {
+  // Show a celebration overlay then go to tournament bracket
+  var overlay = document.createElement('div');
+  overlay.className = 'tournament-champion-overlay';
+  overlay.innerHTML =
+    '<div class="tournament-champion-title">TOURNAMENT CHAMPION!</div>' +
+    '<div class="tournament-champion-sub">You defeated all 4 opponents!</div>' +
+    '<div class="tournament-champion-rewards">Total: $' + (tournamentState.total_winnings || 16000) + ' + Rare Candy earned</div>' +
+    '<button class="btn btn-tournament" style="min-width:200px" onclick="this.parentElement.remove();goHome(true)">BACK TO HUB</button>';
+  document.body.appendChild(overlay);
+  playSound('win');
+}
+
 function showTrainerIntro(trainer) {
   _currentTrainer = trainer;
   showScreen('trainerintro');
@@ -5204,6 +5392,9 @@ function showTrainerIntro(trainer) {
   } else if (trainer.category === 'masters') {
     battleBtn.onclick = function() { send({type:'masters_battle_start', m8_id: trainer.id}); };
     backBtn.onclick = function() { showMastersEight(); };
+  } else if (trainer.category === 'tournament') {
+    battleBtn.onclick = function() { send({type:'tournament_battle_start'}); };
+    backBtn.onclick = function() { showTournament(); };
   }
 }
 
@@ -5218,6 +5409,17 @@ function showTrainerVictory(msg) {
   else if (msg.category === 'masters') {
     badge = msg.trainer_name + ' defeated!';
     if (msg.all_masters_beaten) { title = 'WORLD CHAMPION!'; badge = 'You defeated all Masters Eight! You are the World Champion!'; }
+  } else if (msg.category === 'tournament') {
+    if (msg.tournament_complete) {
+      title = 'TOURNAMENT CHAMPION!';
+      badge = 'You won the entire tournament!';
+    } else {
+      title = (msg.tournament_round_name || 'Round') + ' COMPLETE!';
+      badge = msg.trainer_name + ' defeated!';
+    }
+    // Store tournament state for returning to bracket
+    S._tournamentState = msg.tournament_state;
+    S._tournamentComplete = msg.tournament_complete;
   }
   document.getElementById('gym-result-title').textContent = title;
   document.getElementById('gym-result-title').className = 'gameover-title win';
@@ -5239,10 +5441,18 @@ function showTrainerDefeat(msg) {
   S.journeyMode = false;
   S.pendingXpResults = [];
   var o = document.getElementById('gym-result-overlay');
-  document.getElementById('gym-result-title').textContent = 'DEFEAT';
+  var title = 'DEFEAT';
+  var badge = '';
+  if (msg.category === 'tournament') {
+    title = 'ELIMINATED';
+    badge = 'Tournament over at the ' + (msg.tournament_round_name || 'Quarterfinal') + '.';
+    S._tournamentState = null;
+    S._tournamentComplete = false;
+  }
+  document.getElementById('gym-result-title').textContent = title;
   document.getElementById('gym-result-title').className = 'gameover-title lose';
   document.getElementById('gym-result-dialog').textContent = msg.dialog_lose || 'You were defeated...';
-  document.getElementById('gym-result-badge').textContent = '';
+  document.getElementById('gym-result-badge').textContent = badge;
   document.getElementById('gym-result-currency').textContent = '';
   o.classList.add('active');
   playSound('faint');
@@ -5284,7 +5494,23 @@ function dismissGymResult() {
   document.getElementById('gym-result-overlay').classList.remove('active');
   const xp = S.pendingXpResults;
   S.pendingXpResults = [];
-  processAllXpResults(xp, function() { goHome(true); });
+  // Route back to tournament bracket if we were in a tournament
+  if (S._tournamentState) {
+    var ts = S._tournamentState;
+    var isComplete = S._tournamentComplete;
+    S._tournamentState = null;
+    S._tournamentComplete = false;
+    processAllXpResults(xp, function() {
+      if (isComplete) {
+        showTournamentChampion(ts);
+      } else {
+        renderTournament(ts);
+        showScreen('tournament');
+      }
+    });
+  } else {
+    processAllXpResults(xp, function() { goHome(true); });
+  }
 }
 
 function startWildEncounter() { send({type:'wild_encounter'}); }

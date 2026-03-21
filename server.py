@@ -31,6 +31,8 @@ from journey import (
     CURRENCY_PVP_WIN, CURRENCY_PVP_BOT_WIN,
     get_gym, get_next_gym, get_elite_four_member, get_masters_opponent,
     get_gym_leaders, get_elite_four, get_champion,
+    generate_tournament_bracket, CURRENCY_TOURNAMENT, RARE_CANDY_TOURNAMENT,
+    TOURNAMENT_ROUND_NAMES,
 )
 from battle_engine import PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE
 
@@ -143,6 +145,67 @@ account_mgr = None  # Initialized in main()
 active_encounters = {}  # player.id -> WildEncounter
 trade_rooms = {}  # code -> TradeRoom
 player_trade_rooms = {}  # player.id -> code
+active_tournaments = {}  # player.account_id -> TournamentState
+
+
+class TournamentState:
+    """In-memory state for an active tournament run."""
+
+    DIFFICULTY_PER_ROUND = [0.4, 0.6, 0.8, 1.0]
+
+    def __init__(self, player_account_id, bracket):
+        self.player_account_id = player_account_id
+        self.bracket = bracket  # list of 4 opponent dicts from generate_tournament_bracket
+        self.current_round = 0  # 0-3
+        self.results = []  # list of "win" / "loss" per completed round
+        self.created_at = time.time()
+
+    @property
+    def is_complete(self):
+        return len(self.results) >= 4 and all(r == "win" for r in self.results)
+
+    @property
+    def is_eliminated(self):
+        return any(r == "loss" for r in self.results)
+
+    def current_opponent(self):
+        if self.current_round < len(self.bracket):
+            return self.bracket[self.current_round]
+        return None
+
+    def difficulty(self):
+        return self.DIFFICULTY_PER_ROUND[min(self.current_round, 3)]
+
+    def serialize(self):
+        """Serialize for sending to client."""
+        rounds = []
+        for i, opp in enumerate(self.bracket):
+            status = "locked"
+            if i < len(self.results):
+                status = self.results[i]
+            elif i == self.current_round:
+                status = "current"
+            rounds.append({
+                "round_num": i,
+                "round_name": TOURNAMENT_ROUND_NAMES[i],
+                "opponent_name": opp["name"],
+                "opponent_title": opp["title"],
+                "opponent_type": opp["type"],
+                "team_size": len(opp["team"]),
+                "max_level": max(t["level"] for t in opp["team"]),
+                "reward_currency": opp["reward_currency"],
+                "status": status,
+            })
+        return {
+            "current_round": self.current_round,
+            "rounds": rounds,
+            "is_complete": self.is_complete,
+            "is_eliminated": self.is_eliminated,
+            "total_winnings": sum(
+                CURRENCY_TOURNAMENT[i] for i in range(len(self.results))
+                if i < len(self.results) and self.results[i] == "win"
+            ),
+        }
 
 
 # ─── Trade Room ────────────────────────────────────────
@@ -1635,6 +1698,137 @@ async def handle_message(player, msg, room_mgr):
             "counts": {"seen": counts["seen"], "caught": counts["caught"], "total": total},
         })
 
+
+    # ─── Tournament Messages ─────────────────────────
+    elif msg_type == "get_tournament":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        milestones = account_mgr.get_milestones(player.account_id)
+        if "champion_defeated" not in milestones:
+            await player.send({"type": "error", "message": "Beat the Champion first to unlock tournaments!"})
+            return
+        ts = active_tournaments.get(player.account_id)
+        if ts and not ts.is_eliminated and not ts.is_complete:
+            await player.send({"type": "tournament_data", **ts.serialize()})
+        else:
+            # No active tournament — show entry screen
+            currency = account_mgr.get_currency(player.account_id)
+            await player.send({
+                "type": "tournament_data",
+                "active": False,
+                "currency": currency,
+                "entry_fee": 500,
+            })
+
+    elif msg_type == "start_tournament":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        milestones = account_mgr.get_milestones(player.account_id)
+        if "champion_defeated" not in milestones:
+            await player.send({"type": "error", "message": "Beat the Champion first!"})
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokemon in team."})
+            return
+        # Deduct entry fee
+        if not account_mgr.spend_currency(player.account_id, 500):
+            await player.send({"type": "error", "message": "Not enough PokeDollars! Entry fee is $500."})
+            return
+        # Generate bracket
+        avg_level = sum(p["level"] for p in team_data) / len(team_data)
+        bracket = generate_tournament_bracket(avg_level)
+        ts = TournamentState(player.account_id, bracket)
+        active_tournaments[player.account_id] = ts
+        await player.send({"type": "tournament_started", **ts.serialize()})
+
+    elif msg_type == "start_tournament_match":
+        # Show trainer intro for current tournament opponent
+        if not getattr(player, 'account_id', None):
+            return
+        ts = active_tournaments.get(player.account_id)
+        if not ts or ts.is_eliminated or ts.is_complete:
+            await player.send({"type": "error", "message": "No active tournament."})
+            return
+        opponent = ts.current_opponent()
+        if not opponent:
+            await player.send({"type": "error", "message": "No more opponents."})
+            return
+        await player.send({
+            "type": "trainer_intro",
+            "trainer": {
+                "id": opponent["id"],
+                "name": opponent["name"],
+                "title": opponent["title"],
+                "type": opponent["type"],
+                "dialog_intro": opponent["dialog_intro"],
+                "team_size": len(opponent["team"]),
+                "max_level": max(t["level"] for t in opponent["team"]),
+                "category": "tournament",
+                "tournament_round_name": opponent["round_name"],
+            }
+        })
+
+    elif msg_type == "tournament_battle_start":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        ts = active_tournaments.get(player.account_id)
+        if not ts or ts.is_eliminated or ts.is_complete:
+            await player.send({"type": "error", "message": "No active tournament."})
+            return
+        opponent = ts.current_opponent()
+        if not opponent:
+            await player.send({"type": "error", "message": "No more opponents."})
+            return
+        # Build player team fresh (HP/PP reset between tournament matches)
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokemon in team."})
+            return
+        player_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        trainer_team = build_trainer_team(opponent["team"])
+        encounter = WildEncounter(player, player_team, None, None)
+        encounter.gym = opponent
+        encounter.gym_team = trainer_team
+        encounter.gym_active = 0
+        encounter.wild = trainer_team[0]
+        encounter.is_gym = True
+        encounter.trainer_category = "tournament"
+        active_encounters[player.id] = encounter
+        await player.send({
+            "type": "gym_battle_start",
+            **encounter.serialize_state(),
+            "gym_name": opponent["name"],
+            "gym_team_size": len(trainer_team),
+        })
+
+    elif msg_type == "tournament_continue":
+        # Advance to next round after viewing results
+        if not getattr(player, 'account_id', None):
+            return
+        ts = active_tournaments.get(player.account_id)
+        if not ts:
+            await player.send({"type": "error", "message": "No active tournament."})
+            return
+        if ts.is_complete:
+            await player.send({"type": "tournament_data", **ts.serialize()})
+        elif ts.is_eliminated:
+            del active_tournaments[player.account_id]
+            await player.send({"type": "tournament_eliminated", "message": "Tournament over."})
+        else:
+            await player.send({"type": "tournament_data", **ts.serialize()})
+
+    elif msg_type == "tournament_forfeit":
+        if not getattr(player, 'account_id', None):
+            return
+        ts = active_tournaments.get(player.account_id)
+        if ts:
+            del active_tournaments[player.account_id]
+        await player.send({"type": "tournament_forfeited", "message": "You forfeited the tournament."})
+
     # ─── Trade Messages ─────────────────────────────
     elif msg_type in ("create_trade", "join_trade", "trade_offer", "trade_confirm", "trade_cancel"):
         await _handle_trade_message(player, msg_type, data)
@@ -2341,6 +2535,34 @@ async def _handle_wild_action(player, encounter, data):
                             "all_masters_beaten": all_beaten,
                             "xp_results": xp_results,
                         })
+                    elif category == "tournament":
+                        # Tournament round victory
+                        ts = active_tournaments.get(player.account_id)
+                        round_num = ts.current_round if ts else 0
+                        rare_candy = _award_rare_candy(player, "tournament")
+                        is_champion = (ts and round_num == 3)
+                        if ts:
+                            ts.results.append("win")
+                            ts.current_round += 1
+                            if ts.is_complete:
+                                # Tournament champion!
+                                account_mgr.record_milestone(player.account_id, "tournament_champion")
+                                # First-time bonus: 5 Rare Candy XL
+                                milestones = account_mgr.get_milestones(player.account_id)
+                        await player.send({
+                            "type": "trainer_victory",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_win": trainer["dialog_win"],
+                            "currency_gained": reward,
+                            "rare_candy_gained": rare_candy,
+                            "category": "tournament",
+                            "tournament_round": round_num,
+                            "tournament_round_name": TOURNAMENT_ROUND_NAMES[min(round_num, 3)],
+                            "tournament_complete": is_champion,
+                            "tournament_state": ts.serialize() if ts else None,
+                            "xp_results": xp_results,
+                        })
                     else:
                         # Regular gym — use region-specific badge tracking
                         account_mgr.earn_badge(player.account_id, trainer["id"], region=battle_region)
@@ -2390,7 +2612,25 @@ async def _handle_wild_action(player, encounter, data):
                 if is_gym:
                     trainer = encounter.gym
                     category = getattr(encounter, 'trainer_category', 'gym')
-                    if category in ("e4", "champion", "masters"):
+                    if category == "tournament":
+                        # Tournament loss — eliminate player
+                        ts = active_tournaments.get(player.account_id)
+                        round_num = ts.current_round if ts else 0
+                        if ts:
+                            ts.results.append("loss")
+                        await player.send({
+                            "type": "trainer_defeat",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_lose": trainer.get("dialog_lose", ""),
+                            "category": "tournament",
+                            "tournament_round": round_num,
+                            "tournament_round_name": TOURNAMENT_ROUND_NAMES[min(round_num, 3)],
+                        })
+                        # Clean up tournament state
+                        if ts and player.account_id in active_tournaments:
+                            del active_tournaments[player.account_id]
+                    elif category in ("e4", "champion", "masters"):
                         await player.send({
                             "type": "trainer_defeat",
                             "events": events,
@@ -2511,9 +2751,10 @@ def _wild_attacks(encounter):
     return _resolve_single_move(wild, target, wild_move, tap, "wild")
 
 
-def _award_rare_candy(player, battle_type):
+def _award_rare_candy(player, battle_type, tournament_round=None):
     """Award Rare Candy based on battle type. Returns quantity awarded (0 if none).
-    Drop rates: wild=10%, gym=100% x1, e4=100% x2, champion/masters=100% x3."""
+    Drop rates: wild=10%, gym=100% x1, e4=100% x2, champion/masters=100% x3,
+    tournament=round+2 (2,3,4,5)."""
     if battle_type == "wild":
         if random.random() < 0.10:
             qty = 1
@@ -2525,6 +2766,11 @@ def _award_rare_candy(player, battle_type):
         qty = 2
     elif battle_type in ("champion", "masters"):
         qty = 3
+    elif battle_type == "tournament":
+        # Determine round from active tournament state
+        ts = active_tournaments.get(player.account_id)
+        rnd = ts.current_round if ts else (tournament_round or 0)
+        qty = RARE_CANDY_TOURNAMENT[min(rnd, 3)]
     else:
         return 0
     account_mgr.add_item(player.account_id, "rare_candy", qty)
@@ -2648,6 +2894,10 @@ async def handler(websocket):
                 if opp:
                     await opp.send({"type": "trade_cancelled", "message": f"{player.name} disconnected."})
             _cleanup_trade_room(trade_code)
+        # Clean up tournament state on disconnect
+        acct_id = getattr(player, 'account_id', None)
+        if acct_id and acct_id in active_tournaments:
+            del active_tournaments[acct_id]
 
 
 # ─── Background Tasks ──────────────────────────────────

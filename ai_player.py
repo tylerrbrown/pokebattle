@@ -23,7 +23,15 @@ BOT_NAMES = [
 class BotPlayer:
     """AI player with the same interface as Player."""
 
-    def __init__(self, name=None):
+    # Difficulty presets per tournament round (also usable elsewhere)
+    DIFFICULTY_PRESETS = {
+        0.4: {"noise_lo": 0.80, "noise_hi": 1.20, "switch_pct": 0.25, "tap_lo": 0.3, "tap_hi": 0.7},
+        0.6: {"noise_lo": 0.88, "noise_hi": 1.12, "switch_pct": 0.35, "tap_lo": 0.4, "tap_hi": 0.8},
+        0.8: {"noise_lo": 0.92, "noise_hi": 1.08, "switch_pct": 0.45, "tap_lo": 0.5, "tap_hi": 0.85},
+        1.0: {"noise_lo": 0.95, "noise_hi": 1.05, "switch_pct": 0.55, "tap_lo": 0.6, "tap_hi": 0.9},
+    }
+
+    def __init__(self, name=None, difficulty=0.5):
         self.ws = None
         self.id = 'bot_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
         self.name = name or random.choice(BOT_NAMES)
@@ -38,6 +46,44 @@ class BotPlayer:
         self.tap_score = 0.5
         self.reconnect_token = None
         self.is_bot = True
+
+        # Difficulty knobs (defaults match original behavior)
+        self._difficulty = difficulty
+        self._noise_lo = 0.85
+        self._noise_hi = 1.15
+        self._switch_threshold = 0.30  # chance to switch on bad matchup
+        self._tap_lo = 0.3
+        self._tap_hi = 0.8
+        if difficulty != 0.5:
+            self.set_difficulty(difficulty)
+
+    def set_difficulty(self, level):
+        """Set AI difficulty level (0.0 to 1.0).
+
+        Higher = smarter: less move randomness, more switching, better taps.
+        Uses preset lookup for exact matches, interpolates otherwise.
+        """
+        self._difficulty = level
+        # Find closest preset or interpolate
+        presets = sorted(self.DIFFICULTY_PRESETS.keys())
+        if level in self.DIFFICULTY_PRESETS:
+            p = self.DIFFICULTY_PRESETS[level]
+        else:
+            # Linear interpolation between closest presets
+            lo_key = max(k for k in presets if k <= level) if any(k <= level for k in presets) else presets[0]
+            hi_key = min(k for k in presets if k >= level) if any(k >= level for k in presets) else presets[-1]
+            if lo_key == hi_key:
+                p = self.DIFFICULTY_PRESETS[lo_key]
+            else:
+                t = (level - lo_key) / (hi_key - lo_key)
+                lo_p = self.DIFFICULTY_PRESETS[lo_key]
+                hi_p = self.DIFFICULTY_PRESETS[hi_key]
+                p = {k: lo_p[k] + t * (hi_p[k] - lo_p[k]) for k in lo_p}
+        self._noise_lo = p["noise_lo"]
+        self._noise_hi = p["noise_hi"]
+        self._switch_threshold = p["switch_pct"]
+        self._tap_lo = p["tap_lo"]
+        self._tap_hi = p["tap_hi"]
 
     async def send(self, msg):
         """No-op — bot has no WebSocket."""
@@ -97,9 +143,9 @@ class BotPlayer:
         if not my_pokemon or my_pokemon.is_fainted:
             return {"type": "move", "move_index": 0}
 
-        # Consider switching if at type disadvantage
+        # Consider switching if at type disadvantage (uses difficulty-scaled threshold)
         matchup = self._calc_type_matchup(my_pokemon, opp_pokemon)
-        switch_chance = 0.05 if matchup >= 1.0 else (0.30 if matchup <= 0.5 else 0.10)
+        switch_chance = 0.05 if matchup >= 1.0 else (self._switch_threshold if matchup <= 0.5 else 0.10)
 
         if random.random() < switch_chance:
             target = self._find_best_switch(opp_pokemon)
@@ -115,8 +161,8 @@ class BotPlayer:
         return self._find_best_switch_from(available, opp_pokemon)
 
     def get_tap_score(self):
-        """Random tap score — slightly worse than a decent human."""
-        return random.uniform(0.3, 0.8)
+        """Random tap score — difficulty-scaled range."""
+        return random.uniform(self._tap_lo, self._tap_hi)
 
     # ─── Internal ─────────────────────────────────────
 
@@ -159,8 +205,8 @@ class BotPlayer:
         stab = 1.5 if move["type"] in attacker.types else 1.0
         score = power * (accuracy / 100.0) * effectiveness * stab
 
-        # Randomness for variety
-        score *= random.uniform(0.85, 1.15)
+        # Randomness for variety (tighter range = smarter at higher difficulty)
+        score *= random.uniform(self._noise_lo, self._noise_hi)
         return score
 
     def _calc_type_matchup(self, my_pokemon, opp_pokemon):
