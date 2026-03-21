@@ -1163,6 +1163,22 @@ input.invalid { border-color: var(--red); }
 @keyframes dynamax-pulse { 0%,100%{filter:drop-shadow(0 0 10px rgba(239,68,68,0.5))} 50%{filter:drop-shadow(0 0 20px rgba(239,68,68,0.9))} }
 .dynamaxed-sprite { animation:dynamax-pulse 2s ease-in-out infinite; }
 
+/* ─── Shiny Pokemon ──────────────────────────── */
+.shiny-sprite { filter: hue-rotate(180deg) saturate(1.3); }
+.shiny-star { color: #ffd700; font-size: var(--fs-sm); margin-left: 4px;
+  text-shadow: 0 0 4px rgba(255,215,0,0.7); }
+@keyframes shiny-sparkle {
+  0% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+  100% { opacity: 0; transform: scale(0.5) rotate(360deg); }
+}
+.shiny-sparkle-particle {
+  position: absolute; width: 8px; height: 8px;
+  background: radial-gradient(circle, #fff 30%, #ffd700 70%);
+  border-radius: 50%; pointer-events: none;
+  animation: shiny-sparkle 0.8s ease-out forwards;
+}
+
 /* ─── Learn Move Overlay (level-up) ───────────── */
 .learnmove-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:200;
@@ -2904,6 +2920,37 @@ function clearTimer() {
   }
 }
 
+/* ─── Shiny Sparkle Effect ─────────────────────── */
+function playShinySparkle(spriteId) {
+  const sprite = document.getElementById(spriteId);
+  if (!sprite) return;
+  const parent = sprite.parentElement;
+  if (!parent) return;
+  const origPos = parent.style.position;
+  if (!origPos || origPos === 'static') parent.style.position = 'relative';
+  const rect = sprite.getBoundingClientRect();
+  const parentRect = parent.getBoundingClientRect();
+  const cx = rect.left - parentRect.left + rect.width / 2;
+  const cy = rect.top - parentRect.top + rect.height / 2;
+  const particles = [];
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'shiny-sparkle-particle';
+    const angle = (i / 14) * Math.PI * 2;
+    const dist = 30 + Math.random() * 40;
+    const x = cx + Math.cos(angle) * dist - 4;
+    const y = cy + Math.sin(angle) * dist - 4;
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.animationDelay = (Math.random() * 0.4) + 's';
+    parent.appendChild(p);
+    particles.push(p);
+  }
+  setTimeout(() => {
+    particles.forEach(p => { if (p.parentElement) p.parentElement.removeChild(p); });
+  }, 1200);
+}
+
 /* ─── Audio (Web Audio API) ─────────────────────── */
 let audioCtx;
 function getAudioCtx() {
@@ -3005,8 +3052,8 @@ function _bpCard(p, isTeam) {
   var types = pk ? pk.types : [];
   var sel = (isTeam && _bpSelectedTeamId === p.id) ? ' selected' : '';
   var html = '<div class="bp-card' + sel + '" onclick="bpTap(' + p.id + ',' + isTeam + ')">';
-  html += '<img src="/sprites/front/' + p.dex_id + '.png">';
-  html += '<div class="bp-name">' + name + '</div>';
+  html += '<img src="/sprites/front/' + p.dex_id + '.png"' + (p.is_shiny ? ' class="shiny-sprite"' : '') + '>';
+  html += '<div class="bp-name">' + name + (p.is_shiny ? ' <span class="shiny-star">\u2605</span>' : '') + '</div>';
   html += '<div class="bp-level">Lv.' + p.level + '</div>';
   html += '<div class="bp-types">';
   types.forEach(function(t) {
@@ -3150,8 +3197,8 @@ function _tradeCard(p, isSelected) {
   var types = pk ? pk.types : [];
   var sel = isSelected ? ' selected' : '';
   var html = '<div class="bp-card' + sel + '" onclick="tradeSelectPokemon(' + p.id + ')">';
-  html += '<img src="/sprites/front/' + p.dex_id + '.png">';
-  html += '<div class="bp-name">' + name + '</div>';
+  html += '<img src="/sprites/front/' + p.dex_id + '.png"' + (p.is_shiny ? ' class="shiny-sprite"' : '') + '>';
+  html += '<div class="bp-name">' + name + (p.is_shiny ? ' <span class="shiny-star">\u2605</span>' : '') + '</div>';
   html += '<div class="bp-level">Lv.' + p.level + '</div>';
   html += '<div class="bp-types">';
   types.forEach(function(t) {
@@ -3305,10 +3352,11 @@ function renderMyTeam(team, allPokemon) {
     var xpPct = (p.xp_progress !== undefined) ? (p.xp_progress * 100).toFixed(1) : 0;
     var xpText = (p.xp_to_next !== undefined) ? p.xp_to_next + ' XP to next' : '';
     var atMax = p.level >= 100;
+    var shinyClass = p.is_shiny ? ' class="shiny-sprite"' : '';
     card.innerHTML =
-      '<img src="/sprites/front/' + String(p.dex_id).padStart(3,'0') + '.png" alt="' + name + '">' +
+      '<img src="/sprites/front/' + String(p.dex_id).padStart(3,'0') + '.png" alt="' + name + '"' + shinyClass + '>' +
       '<div class="myteam-info">' +
-        '<div class="pname">' + (p.nickname || name) + '</div>' +
+        '<div class="pname">' + (p.nickname || name) + (p.is_shiny ? ' <span class="shiny-star">\u2605</span>' : '') + '</div>' +
         '<div class="plevel">Lv. ' + p.level + (atMax ? ' (MAX)' : '') + '</div>' +
         '<div class="xp-bar-container"><div class="xp-bar-bg"><div class="xp-bar-fill" style="width:' + xpPct + '%"></div></div>' +
         '<div class="xp-text">' + xpText + '</div></div>' +
@@ -3802,6 +3850,7 @@ function setupJourneyBattle(msg) {
   renderJourneyBattle();
   if (S.encounterType === 'wild') {
     const w = msg.wild_pokemon;
+<<<<<<< HEAD
     if (w.rarity === 'legendary') {
       setBattleText('A legendary ' + w.name + ' appeared!');
       // Screen shake for legendary encounter
@@ -3813,6 +3862,15 @@ function setupJourneyBattle(msg) {
     } else {
       const rText = w.rarity && w.rarity !== 'common' ? ' (' + w.rarity + ')' : '';
       setBattleText('A wild ' + w.name + ' Lv.' + w.level + rText + ' appeared!');
+=======
+    const rText = w.rarity && w.rarity !== 'common' ? ' (' + w.rarity + ')' : '';
+    const shinyText = w.is_shiny ? ' \u2605 SHINY! \u2605' : '';
+    setBattleText('A wild ' + w.name + ' Lv.' + w.level + rText + shinyText + ' appeared!');
+    if (w.is_shiny) {
+      const os = document.getElementById('opp-sprite');
+      if (os) os.classList.add('shiny-sprite');
+      setTimeout(() => playShinySparkle('opp-sprite'), 300);
+>>>>>>> worktree-agent-a75d0a6e
     }
   }
   setTimeout(() => showJourneyMovePanel(), 1500);
@@ -3840,7 +3898,10 @@ function renderJourneyBattle() {
     ps.style.display = myPoke.is_fainted ? 'none' : '';
     // Dynamax sprite effect
     if (myPoke.is_dynamaxed) { ps.classList.add('dynamaxed-sprite'); } else { ps.classList.remove('dynamaxed-sprite'); }
+    // Shiny sprite effect
+    if (myPoke.is_shiny) { ps.classList.add('shiny-sprite'); } else { ps.classList.remove('shiny-sprite'); }
     let nh = myPoke.name + ' <span class="journey-level">Lv.' + (myPoke.level || '?') + '</span>';
+    if (myPoke.is_shiny) nh += ' <span class="shiny-star">\u2605</span>';
     if (myPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + myPoke.dynamax_turns_left + ' turns]</span>';
     if (myPoke.status) nh += ' <span class="poke-status-badge status-' + myPoke.status + '">' + myPoke.status.toUpperCase().slice(0,3) + '</span>';
     document.getElementById('player-name-battle').innerHTML = nh;
@@ -3867,11 +3928,18 @@ function renderJourneyBattle() {
     os.src = '/sprites/front/' + String(oppPoke.dex_id).padStart(3,'0') + '.png';
     os.classList.remove('faint');
     os.classList.remove('dynamaxed-sprite');
+    os.classList.remove('shiny-sprite');
     os.style.display = (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'none' : '';
     if (oppPoke.is_dynamaxed) os.classList.add('dynamaxed-sprite');
+    if (oppPoke.is_shiny) os.classList.add('shiny-sprite');
     const prefix = S.encounterType === 'gym' ? (S.gymData ? S.gymData.name + "'s " : '') : 'Wild ';
+<<<<<<< HEAD
     const isLegendary = S.encounterType === 'wild' && oppPoke.rarity === 'legendary';
     let nh = prefix + (isLegendary ? '<span class="legendary-name">' + oppPoke.name + '</span>' : oppPoke.name) + ' <span class="journey-level">Lv.' + (oppPoke.level || '?') + '</span>';
+=======
+    let nh = prefix + oppPoke.name + ' <span class="journey-level">Lv.' + (oppPoke.level || '?') + '</span>';
+    if (oppPoke.is_shiny) nh += ' <span class="shiny-star">\u2605</span>';
+>>>>>>> worktree-agent-a75d0a6e
     if (oppPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + oppPoke.dynamax_turns_left + ' turns]</span>';
     if (oppPoke.status) nh += ' <span class="poke-status-badge status-' + oppPoke.status + '">' + oppPoke.status.toUpperCase().slice(0,3) + '</span>';
     document.getElementById('opp-name').innerHTML = nh;
@@ -3898,6 +3966,12 @@ function renderJourneyBattle() {
     b.className = 'ball ' + (oppPoke && (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'fainted' : 'alive');
     ob.appendChild(b);
   }
+  // Shiny switch-in sparkle: play when active Pokemon changes to a shiny one
+  var shinySwitchKey = (myPoke ? myPoke.dex_id + '-' + S.myActive : '');
+  if (myPoke && myPoke.is_shiny && S._lastShinySwitch !== shinySwitchKey) {
+    setTimeout(() => playShinySparkle('player-sprite'), 300);
+  }
+  S._lastShinySwitch = shinySwitchKey;
 }
 
 function showJourneyMovePanel() {
@@ -4326,7 +4400,8 @@ function showCaughtResult(msg) {
   const p = msg.pokemon;
   const xp = msg.xp_results || [];
   const luckyEgg = xp.length > 0 && xp[0].lucky_egg_active;
-  let catchText = 'You caught ' + p.name + ' Lv.' + p.level + '! +$' + msg.currency_gained;
+  const shinyLabel = p.is_shiny ? '\u2605 Shiny ' : '';
+  let catchText = 'You caught ' + shinyLabel + p.name + ' Lv.' + p.level + '! +$' + msg.currency_gained;
   if (msg.rare_candy_gained > 0) catchText += ' | +' + msg.rare_candy_gained + ' Rare Candy';
   if (luckyEgg) catchText += ' (Lucky Egg: 2x XP!)';
   setBattleText(catchText);
@@ -4630,6 +4705,8 @@ function applyBattleBackground() {
       theme = BATTLE_THEMES.champion;
     } else if (_currentTrainer && _currentTrainer.category === 'masters') {
       theme = BATTLE_THEMES.masters;
+    } else if (_currentTrainer && _currentTrainer.category === 'tournament') {
+      theme = BATTLE_THEMES.tournament;
     } else if (S.currentGymId && BATTLE_THEMES.gym[S.currentGymId]) {
       theme = BATTLE_THEMES.gym[S.currentGymId];
     }
@@ -4724,9 +4801,13 @@ function showTrainerIntro(trainer) {
   document.getElementById('trainerintro-name').textContent = trainer.name;
   document.getElementById('trainerintro-title').textContent = trainer.title;
   document.getElementById('trainerintro-dialog').textContent = trainer.dialog_intro;
-  document.getElementById('trainerintro-info').innerHTML =
-    '<span class="move-type-badge" style="background:var(--type-' + trainer.type + ')">' + trainer.type + '</span> Type<br>' +
+  var infoHtml = '';
+  if (trainer.category === 'tournament' && trainer.tournament_round_name) {
+    infoHtml += '<div style="color:#ffd700;font-weight:bold;margin-bottom:6px">' + trainer.tournament_round_name + '</div>';
+  }
+  infoHtml += '<span class="move-type-badge" style="background:var(--type-' + trainer.type + ')">' + trainer.type + '</span> Type<br>' +
     trainer.team_size + ' Pokemon (up to Lv.' + trainer.max_level + ')';
+  document.getElementById('trainerintro-info').innerHTML = infoHtml;
   var battleBtn = document.getElementById('trainerintro-battle-btn');
   var backBtn = document.getElementById('trainerintro-back-btn');
   if (trainer.category === 'e4') {
