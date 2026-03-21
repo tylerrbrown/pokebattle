@@ -658,7 +658,7 @@ input.invalid { border-color: var(--red); }
 .starter-subtitle { font-size: var(--fs-sm); color: var(--text-dim); text-align: center; }
 .starter-grid {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -672,11 +672,13 @@ input.invalid { border-color: var(--red); }
   cursor: pointer;
   background: var(--bg2);
   transition: all 0.2s;
-  width: 120px;
+  min-width: 100px;
+  max-width: 140px;
+  flex: 1;
 }
 .starter-card:hover { border-color: var(--accent); background: var(--bg3); transform: scale(1.05); }
 .starter-card img { width: 80px; height: 80px; image-rendering: pixelated; }
-.starter-card .starter-name { font-size: var(--fs-xs); margin-top: 8px; text-align: center; }
+.starter-card .starter-name { font-size: var(--fs-2xs); margin-top: 8px; text-align: center; width: 100%; word-break: keep-all; }
 .starter-card .starter-type { font-size: var(--fs-xs); margin-top: 4px; }
 
 /* ─── My Team Screen ───────────────────────────── */
