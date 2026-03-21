@@ -606,3 +606,168 @@ def get_masters_opponent(opponent_id):
         if m["id"] == opponent_id:
             return m
     return None
+
+
+# ─── Tournament Mode ────────────────────────────────
+
+CURRENCY_TOURNAMENT = [1000, 2000, 3000, 10000]
+RARE_CANDY_TOURNAMENT = [2, 3, 4, 5]
+
+TOURNAMENT_ROUND_NAMES = [
+    "Quarterfinal",
+    "Semifinal",
+    "Final",
+    "Championship",
+]
+
+TOURNAMENT_NAMES = [
+    "Ace Trainer Kira", "Pokemon Ranger Hiro", "Veteran Marcus",
+    "Battle Girl Lena", "Dragon Tamer Ryuu", "Psychic Elena",
+    "Cooltrainer Felix", "Black Belt Kenji", "Hex Maniac Luna",
+    "Swimmer Kai", "Bird Keeper Falk", "Scientist Ada",
+    "Juggler Dario", "Tamer Brock", "Beauty Selene",
+    "Gentleman Arthur", "Firebreather Blaze", "Skier Frost",
+    "Sailor Drake", "Lass Penny",
+]
+
+TOURNAMENT_TITLES = [
+    "Rising Star", "Battle Prodigy", "Tournament Veteran",
+    "Fierce Competitor", "Type Specialist", "Strategy Master",
+    "Unshakable Will", "Seasoned Warrior", "Dark Horse",
+    "Crowd Favorite",
+]
+
+# Pokemon tiers for tournament team generation
+# Tier 1: common/weaker Pokemon (Round 1)
+TOURNAMENT_TIER1 = [
+    1, 4, 7, 10, 13, 16, 19, 21, 23, 25, 27, 29, 32, 35, 37, 39,
+    41, 43, 46, 48, 50, 52, 54, 56, 58, 60, 63, 66, 69, 72, 74,
+    77, 79, 81, 83, 84, 86, 88, 90, 92, 96, 98, 100, 102, 104,
+    108, 109, 111, 114, 116, 118, 120, 129, 133, 138, 140,
+]
+# Tier 2: evolved/strong Pokemon (Round 2)
+TOURNAMENT_TIER2 = [
+    2, 3, 5, 6, 8, 9, 12, 15, 18, 20, 22, 24, 26, 28, 31, 34,
+    36, 38, 40, 42, 44, 45, 47, 49, 51, 53, 55, 57, 59, 62, 65,
+    68, 71, 73, 76, 78, 80, 82, 85, 87, 89, 91, 94, 95, 97, 99,
+    101, 103, 105, 106, 107, 110, 112, 113, 115, 117, 119, 121,
+    122, 123, 124, 125, 126, 127, 128, 130, 131, 134, 135, 136,
+    137, 139, 141, 142, 143,
+]
+# Tier 3: top-tier Pokemon (Round 3-4)
+TOURNAMENT_TIER3 = [
+    3, 6, 9, 26, 31, 34, 59, 65, 68, 76, 94, 95, 103, 112, 121,
+    124, 125, 126, 127, 128, 130, 131, 134, 135, 136, 142, 143,
+    149, 248,
+]
+
+# Type-themed pools for semifinal (Round 2)
+TOURNAMENT_TYPE_POOLS = {
+    "fire": [4, 5, 6, 37, 38, 58, 59, 77, 78, 126, 136],
+    "water": [7, 8, 9, 54, 55, 60, 61, 62, 79, 80, 116, 117, 118, 119, 120, 121, 130, 131, 134],
+    "grass": [1, 2, 3, 43, 44, 45, 69, 70, 71, 102, 103, 114],
+    "electric": [25, 26, 81, 82, 100, 101, 125, 135],
+    "psychic": [63, 64, 65, 96, 97, 122, 124],
+    "fighting": [56, 57, 66, 67, 68, 106, 107],
+    "dragon": [147, 148, 149],
+    "poison": [23, 24, 29, 30, 31, 32, 33, 34, 41, 42, 88, 89, 109, 110],
+    "ground": [27, 28, 50, 51, 74, 75, 76, 95, 104, 105, 111, 112],
+    "rock": [74, 75, 76, 95, 111, 112, 138, 139, 140, 141, 142],
+    "ice": [86, 87, 90, 91, 124, 131],
+}
+
+
+def generate_tournament_opponent(round_num, player_avg_level):
+    """Generate a tournament opponent for the given round (0-3).
+
+    Returns a trainer dict matching the format used by gym/E4/champion:
+    {id, name, title, type, team, reward_currency, dialog_intro, dialog_win, dialog_lose}
+    """
+    name = random.choice(TOURNAMENT_NAMES)
+    title = random.choice(TOURNAMENT_TITLES)
+
+    # Team size: 4 for QF, 5 for SF, 6 for F and Championship
+    team_sizes = [4, 5, 6, 6]
+    team_size = team_sizes[min(round_num, 3)]
+
+    # Level offsets per round
+    level_offsets = [
+        (2, 5),    # QF: +2 to +5
+        (5, 10),   # SF: +5 to +10
+        (10, 15),  # F: +10 to +15
+        (15, 20),  # Championship: +15 to +20
+    ]
+    lo, hi = level_offsets[min(round_num, 3)]
+
+    if round_num == 0:
+        # Quarterfinal: random Pokemon from tier 1-2, mixed types
+        pool = TOURNAMENT_TIER1 + TOURNAMENT_TIER2
+        chosen = random.sample(pool, min(team_size, len(pool)))
+        team_type = "normal"
+    elif round_num == 1:
+        # Semifinal: type-themed team
+        chosen_type = random.choice(list(TOURNAMENT_TYPE_POOLS.keys()))
+        type_pool = TOURNAMENT_TYPE_POOLS[chosen_type]
+        # If not enough Pokemon of that type, supplement with tier 2
+        if len(type_pool) < team_size:
+            chosen = list(type_pool) + random.sample(TOURNAMENT_TIER2, team_size - len(type_pool))
+        else:
+            chosen = random.sample(type_pool, team_size)
+        team_type = chosen_type
+    elif round_num == 2:
+        # Final: strong Pokemon with type coverage
+        pool = TOURNAMENT_TIER2 + TOURNAMENT_TIER3
+        chosen = random.sample(pool, min(team_size, len(pool)))
+        team_type = "dragon"
+    else:
+        # Championship: top-tier only
+        pool = TOURNAMENT_TIER3
+        if len(pool) < team_size:
+            chosen = list(pool)
+            while len(chosen) < team_size:
+                chosen.append(random.choice(pool))
+        else:
+            chosen = random.sample(pool, team_size)
+        team_type = "dragon"
+
+    # Build team spec
+    team_spec = []
+    for dex_id in chosen:
+        offset = random.randint(lo, hi)
+        level = max(5, min(100, int(player_avg_level) + offset + random.randint(-2, 2)))
+        team_spec.append({"dex_id": dex_id, "level": level})
+
+    reward = CURRENCY_TOURNAMENT[min(round_num, 3)]
+
+    # Dialog
+    round_name = TOURNAMENT_ROUND_NAMES[min(round_num, 3)]
+    dialog_intro = f"I'm {name}! This is the {round_name} — don't expect me to go easy!"
+    dialog_win = f"Amazing battle! You've earned your place in the next round!"
+    dialog_lose = f"The tournament is over for you. Better luck next time!"
+
+    if round_num == 3:
+        dialog_intro = f"I'm {name}! The Championship round — only the strongest make it here!"
+        dialog_win = "Incredible! You're the Tournament Champion! What a display of power!"
+        dialog_lose = "So close to the championship... Train harder and come back!"
+
+    return {
+        "id": f"tournament_r{round_num}",
+        "name": name,
+        "title": title,
+        "type": team_type,
+        "team": team_spec,
+        "reward_currency": reward,
+        "dialog_intro": dialog_intro,
+        "dialog_win": dialog_win,
+        "dialog_lose": dialog_lose,
+        "round_num": round_num,
+        "round_name": round_name,
+    }
+
+
+def generate_tournament_bracket(player_avg_level):
+    """Generate a full 4-round tournament bracket.
+
+    Returns a list of 4 opponent dicts (one per round).
+    """
+    return [generate_tournament_opponent(i, player_avg_level) for i in range(4)]
