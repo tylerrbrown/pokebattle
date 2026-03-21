@@ -1,0 +1,1872 @@
+[
+  {
+    "id": "kanto",
+    "name": "Kanto",
+    "generation": 1,
+    "dex_range": [1, 151],
+    "description": "The classic region where it all began. Home to the original 151 Pokemon.",
+    "color": "#ef4444",
+    "icon_dex_id": 25,
+    "gyms": [
+      {
+        "id": 1, "name": "Brock", "type": "rock", "badge": "Boulder Badge",
+        "dialog": {
+          "intro": "I'm Brock! I'm the Pewter City Gym Leader! My rock-hard willpower is evident!",
+          "defeat": "Your Pokemon's trust in you is incredible! Take this Boulder Badge!",
+          "badge": "Boulder Badge earned!"
+        },
+        "team": [
+          {"species": "Geodude", "level": 12},
+          {"species": "Onix", "level": 14}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Misty", "type": "water", "badge": "Cascade Badge",
+        "dialog": {
+          "intro": "I'm Misty! My policy is an all-out offensive with water-type Pokemon!",
+          "defeat": "You really are a tough trainer! Here, take the Cascade Badge!",
+          "badge": "Cascade Badge earned!"
+        },
+        "team": [
+          {"species": "Staryu", "level": 18},
+          {"species": "Starmie", "level": 21}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Lt. Surge", "type": "electric", "badge": "Thunder Badge",
+        "dialog": {
+          "intro": "I'm Lt. Surge! I've been to war and survived with my electric Pokemon!",
+          "defeat": "The Thunder Badge is yours! Your Pokemon fought with real spirit!",
+          "badge": "Thunder Badge earned!"
+        },
+        "team": [
+          {"species": "Voltorb", "level": 21},
+          {"species": "Pikachu", "level": 18},
+          {"species": "Raichu", "level": 24}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Erika", "type": "grass", "badge": "Rainbow Badge",
+        "dialog": {
+          "intro": "I'm Erika. I adore grass-type Pokemon. Shall we battle?",
+          "defeat": "You're so talented! Here, take the Rainbow Badge!",
+          "badge": "Rainbow Badge earned!"
+        },
+        "team": [
+          {"species": "Victreebel", "level": 29},
+          {"species": "Tangela", "level": 24},
+          {"species": "Vileplume", "level": 29}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Koga", "type": "poison", "badge": "Soul Badge",
+        "dialog": {
+          "intro": "I'm Koga! A master of poison techniques! Fwahahaha!",
+          "defeat": "You have proven your worth! Take the Soul Badge!",
+          "badge": "Soul Badge earned!"
+        },
+        "team": [
+          {"species": "Koffing", "level": 37},
+          {"species": "Muk", "level": 39},
+          {"species": "Weezing", "level": 37},
+          {"species": "Venomoth", "level": 43}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Sabrina", "type": "psychic", "badge": "Marsh Badge",
+        "dialog": {
+          "intro": "I had a vision of you coming. I'm Sabrina. I see you losing!",
+          "defeat": "Your power... it exceeds what I foresaw. Take the Marsh Badge.",
+          "badge": "Marsh Badge earned!"
+        },
+        "team": [
+          {"species": "Kadabra", "level": 38},
+          {"species": "Mr. Mime", "level": 37},
+          {"species": "Venomoth", "level": 38},
+          {"species": "Alakazam", "level": 43}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Blaine", "type": "fire", "badge": "Volcano Badge",
+        "dialog": {
+          "intro": "I'm Blaine! My fiery Pokemon will incinerate all challengers!",
+          "defeat": "You have beaten my fire! Take the Volcano Badge as proof!",
+          "badge": "Volcano Badge earned!"
+        },
+        "team": [
+          {"species": "Growlithe", "level": 42},
+          {"species": "Ponyta", "level": 40},
+          {"species": "Rapidash", "level": 42},
+          {"species": "Arcanine", "level": 47}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Giovanni", "type": "ground", "badge": "Earth Badge",
+        "dialog": {
+          "intro": "I'm Giovanni! I'll show you the true power of ground-type Pokemon!",
+          "defeat": "Ha! You have proven yourself worthy! Take the Earth Badge!",
+          "badge": "Earth Badge earned!"
+        },
+        "team": [
+          {"species": "Rhyhorn", "level": 45},
+          {"species": "Dugtrio", "level": 42},
+          {"species": "Nidoqueen", "level": 44},
+          {"species": "Nidoking", "level": 45},
+          {"species": "Rhydon", "level": 50}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Lorelei", "type": "ice", "title": "Ice Master",
+        "dialog": {
+          "intro": "Welcome to the Pokemon League! I am Lorelei. No one can best my icy Pokemon!",
+          "defeat": "You're better than I thought! Go on ahead!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Dewgong", "level": 54},
+          {"species": "Cloyster", "level": 53},
+          {"species": "Slowbro", "level": 54},
+          {"species": "Jynx", "level": 56},
+          {"species": "Lapras", "level": 56}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Bruno", "type": "fighting", "title": "Fighting Fury",
+        "dialog": {
+          "intro": "I am Bruno of the Elite Four! Through rigorous training, my fighting Pokemon have become the strongest!",
+          "defeat": "Your strength exceeds mine! Move forward, challenger!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Onix", "level": 53},
+          {"species": "Hitmonchan", "level": 55},
+          {"species": "Hitmonlee", "level": 55},
+          {"species": "Onix", "level": 56},
+          {"species": "Machamp", "level": 58}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Agatha", "type": "ghost", "title": "Ghost Specialist",
+        "dialog": {
+          "intro": "I am Agatha. I've heard of your exploits! Let me show you what ghost Pokemon can do!",
+          "defeat": "You win! I see now why Oak's taken interest in you. Continue on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Gengar", "level": 56},
+          {"species": "Golbat", "level": 56},
+          {"species": "Haunter", "level": 55},
+          {"species": "Arbok", "level": 58},
+          {"species": "Gengar", "level": 60}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Lance", "type": "dragon", "title": "Dragon Master",
+        "dialog": {
+          "intro": "I am Lance, the last of the Elite Four! My dragon Pokemon will crush you!",
+          "defeat": "Incredible! You've conquered the Elite Four! Now face the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Gyarados", "level": 58},
+          {"species": "Dragonair", "level": 56},
+          {"species": "Dragonair", "level": 56},
+          {"species": "Aerodactyl", "level": 60},
+          {"species": "Dragonite", "level": 62}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Blue", "type": "normal", "title": "Pokemon Champion",
+      "dialog": {
+        "intro": "So, you finally made it! I'm the Pokemon League Champion! You think you can beat ME?",
+        "defeat": "NO! That's impossible! You beat me? ...Fine. You are the new Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Pidgeot", "level": 61},
+        {"species": "Alakazam", "level": 59},
+        {"species": "Rhydon", "level": 61},
+        {"species": "Gyarados", "level": 63},
+        {"species": "Arcanine", "level": 63},
+        {"species": "Exeggutor", "level": 65}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "johto",
+    "name": "Johto",
+    "generation": 2,
+    "dex_range": [152, 251],
+    "description": "A region of tradition and ancient legends. Home to the Legendary Beasts.",
+    "color": "#3b82f6",
+    "icon_dex_id": 249,
+    "gyms": [
+      {
+        "id": 1, "name": "Falkner", "type": "flying", "badge": "Zephyr Badge",
+        "dialog": {
+          "intro": "I'm Falkner, the Violet City Gym Leader! My father's Pokemon are my pride!",
+          "defeat": "I see... My father's Pokemon have lost. Here, the Zephyr Badge!",
+          "badge": "Zephyr Badge earned!"
+        },
+        "team": [
+          {"species": "Pidgey", "level": 14},
+          {"species": "Pidgeotto", "level": 16}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Bugsy", "type": "bug", "badge": "Hive Badge",
+        "dialog": {
+          "intro": "I'm Bugsy! I never lose when it comes to bug-type Pokemon!",
+          "defeat": "You're incredible! Here, take the Hive Badge!",
+          "badge": "Hive Badge earned!"
+        },
+        "team": [
+          {"species": "Metapod", "level": 17},
+          {"species": "Kakuna", "level": 17},
+          {"species": "Scyther", "level": 20}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Whitney", "type": "normal", "badge": "Plain Badge",
+        "dialog": {
+          "intro": "Everyone's so mean to me! But I'm not gonna lose!",
+          "defeat": "Waaah! You're so mean! ...Fine, take the Plain Badge!",
+          "badge": "Plain Badge earned!"
+        },
+        "team": [
+          {"species": "Clefairy", "level": 22},
+          {"species": "Miltank", "level": 25}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Morty", "type": "ghost", "badge": "Fog Badge",
+        "dialog": {
+          "intro": "I see everything with my mind's eye. I'm Morty, master of ghosts!",
+          "defeat": "I see your bond with your Pokemon transcends this realm. The Fog Badge is yours.",
+          "badge": "Fog Badge earned!"
+        },
+        "team": [
+          {"species": "Gastly", "level": 25},
+          {"species": "Haunter", "level": 25},
+          {"species": "Haunter", "level": 27},
+          {"species": "Gengar", "level": 30}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Chuck", "type": "fighting", "badge": "Storm Badge",
+        "dialog": {
+          "intro": "I'm Chuck! My fighting Pokemon are powerful enough to move mountains!",
+          "defeat": "What incredible fighting spirit! The Storm Badge is yours!",
+          "badge": "Storm Badge earned!"
+        },
+        "team": [
+          {"species": "Primeape", "level": 34},
+          {"species": "Poliwrath", "level": 36}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Jasmine", "type": "steel", "badge": "Mineral Badge",
+        "dialog": {
+          "intro": "I'm Jasmine... Um, I use steel-type Pokemon...",
+          "defeat": "You're very strong... Here, the Mineral Badge...",
+          "badge": "Mineral Badge earned!"
+        },
+        "team": [
+          {"species": "Magnemite", "level": 35},
+          {"species": "Magnemite", "level": 35},
+          {"species": "Steelix", "level": 40}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Pryce", "type": "ice", "badge": "Glacier Badge",
+        "dialog": {
+          "intro": "I'm Pryce. I've trained Pokemon since before you were born!",
+          "defeat": "You've shown me warmth I thought was lost. Take the Glacier Badge.",
+          "badge": "Glacier Badge earned!"
+        },
+        "team": [
+          {"species": "Seel", "level": 37},
+          {"species": "Dewgong", "level": 39},
+          {"species": "Piloswine", "level": 43}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Clair", "type": "dragon", "badge": "Rising Badge",
+        "dialog": {
+          "intro": "I'm Clair! The dragon master of Blackthorn City!",
+          "defeat": "I can't believe I lost... Fine! Take the Rising Badge!",
+          "badge": "Rising Badge earned!"
+        },
+        "team": [
+          {"species": "Dragonair", "level": 43},
+          {"species": "Dragonair", "level": 43},
+          {"species": "Gyarados", "level": 43},
+          {"species": "Dragonite", "level": 50}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Will", "type": "psychic", "title": "Psychic Prodigy",
+        "dialog": {
+          "intro": "I am Will! I have trained all around the world to learn psychic techniques!",
+          "defeat": "I see... Your willpower is incredible. Move on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Xatu", "level": 56},
+          {"species": "Jynx", "level": 56},
+          {"species": "Slowbro", "level": 56},
+          {"species": "Exeggutor", "level": 58},
+          {"species": "Xatu", "level": 60}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Koga", "type": "poison", "title": "Poison Expert",
+        "dialog": {
+          "intro": "I'm Koga of the Elite Four! My ninja techniques are unmatched!",
+          "defeat": "Your skills rival my own. Proceed, challenger!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Ariados", "level": 56},
+          {"species": "Venomoth", "level": 58},
+          {"species": "Muk", "level": 57},
+          {"species": "Crobat", "level": 59},
+          {"species": "Weezing", "level": 60}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Bruno", "type": "fighting", "title": "Fighting Master",
+        "dialog": {
+          "intro": "I am Bruno! We will battle with the strongest of Pokemon!",
+          "defeat": "Having lost, I have no right to say anything. Go on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Hitmontop", "level": 57},
+          {"species": "Hitmonlee", "level": 57},
+          {"species": "Hitmonchan", "level": 57},
+          {"species": "Onix", "level": 58},
+          {"species": "Machamp", "level": 60}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Karen", "type": "dark", "title": "Dark Specialist",
+        "dialog": {
+          "intro": "I am Karen. Strong Pokemon, weak Pokemon — it only matters how you train them.",
+          "defeat": "You've proven that love for Pokemon transcends strength. Go!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Umbreon", "level": 58},
+          {"species": "Murkrow", "level": 58},
+          {"species": "Vileplume", "level": 58},
+          {"species": "Gengar", "level": 60},
+          {"species": "Houndoom", "level": 62}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Lance", "type": "dragon", "title": "Dragon Champion",
+      "dialog": {
+        "intro": "I am the Champion, Lance the dragon master! You dare challenge me?",
+        "defeat": "You are now the greatest trainer in all of Johto. Congratulations, Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Gyarados", "level": 62},
+        {"species": "Dragonite", "level": 62},
+        {"species": "Dragonite", "level": 62},
+        {"species": "Aerodactyl", "level": 63},
+        {"species": "Charizard", "level": 63},
+        {"species": "Dragonite", "level": 65}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "hoenn",
+    "name": "Hoenn",
+    "generation": 3,
+    "dex_range": [252, 386],
+    "description": "A tropical region of seas and volcanoes. Home to ancient titans of land and sea.",
+    "color": "#22c55e",
+    "icon_dex_id": 384,
+    "gyms": [
+      {
+        "id": 1, "name": "Roxanne", "type": "rock", "badge": "Stone Badge",
+        "dialog": {
+          "intro": "I'm Roxanne, the Rock-type gym leader. I learned a lot at the Trainer School!",
+          "defeat": "You're an excellent trainer! The Stone Badge is yours!",
+          "badge": "Stone Badge earned!"
+        },
+        "team": [
+          {"species": "Geodude", "level": 16},
+          {"species": "Nosepass", "level": 18}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Brawly", "type": "fighting", "badge": "Knuckle Badge",
+        "dialog": {
+          "intro": "I'm Brawly! I train with my Pokemon in the ocean waves!",
+          "defeat": "Whooa! You made a tsunami of an impression! Take the Knuckle Badge!",
+          "badge": "Knuckle Badge earned!"
+        },
+        "team": [
+          {"species": "Machop", "level": 19},
+          {"species": "Makuhita", "level": 22}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Wattson", "type": "electric", "badge": "Dynamo Badge",
+        "dialog": {
+          "intro": "Wahahahah! I'm Wattson! I'll make sparks fly!",
+          "defeat": "Wahahahah! Fine, fine, you got me! Take the Dynamo Badge!",
+          "badge": "Dynamo Badge earned!"
+        },
+        "team": [
+          {"species": "Voltorb", "level": 24},
+          {"species": "Electrike", "level": 24},
+          {"species": "Magneton", "level": 27}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Flannery", "type": "fire", "badge": "Heat Badge",
+        "dialog": {
+          "intro": "Welcome to the Lavaridge Gym! I'm Flannery and I'm burning with passion!",
+          "defeat": "You're too hot to handle! Take the Heat Badge!",
+          "badge": "Heat Badge earned!"
+        },
+        "team": [
+          {"species": "Numel", "level": 28},
+          {"species": "Slugma", "level": 28},
+          {"species": "Torkoal", "level": 31}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Norman", "type": "normal", "badge": "Balance Badge",
+        "dialog": {
+          "intro": "I'm Norman, your father! But in this gym, I'm just the leader. No holding back!",
+          "defeat": "I lost to my own child... I'm so proud! Take the Balance Badge!",
+          "badge": "Balance Badge earned!"
+        },
+        "team": [
+          {"species": "Spinda", "level": 34},
+          {"species": "Vigoroth", "level": 34},
+          {"species": "Linoone", "level": 34},
+          {"species": "Slaking", "level": 38}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Winona", "type": "flying", "badge": "Feather Badge",
+        "dialog": {
+          "intro": "I'm Winona! I soar the skies with my bird Pokemon!",
+          "defeat": "You've clipped my wings! Take the Feather Badge!",
+          "badge": "Feather Badge earned!"
+        },
+        "team": [
+          {"species": "Swablu", "level": 37},
+          {"species": "Tropius", "level": 37},
+          {"species": "Pelipper", "level": 37},
+          {"species": "Skarmory", "level": 39},
+          {"species": "Altaria", "level": 42}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Tate & Liza", "type": "psychic", "badge": "Mind Badge",
+        "dialog": {
+          "intro": "We're Tate and Liza! Our psychic bond lets us battle as one!",
+          "defeat": "Our psychic link couldn't overcome your strength! The Mind Badge is yours!",
+          "badge": "Mind Badge earned!"
+        },
+        "team": [
+          {"species": "Claydol", "level": 42},
+          {"species": "Xatu", "level": 42},
+          {"species": "Lunatone", "level": 44},
+          {"species": "Solrock", "level": 44}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Wallace", "type": "water", "badge": "Rain Badge",
+        "dialog": {
+          "intro": "I am Wallace. I represent beauty and elegance in battle!",
+          "defeat": "Your battle style was truly beautiful. Take the Rain Badge!",
+          "badge": "Rain Badge earned!"
+        },
+        "team": [
+          {"species": "Luvdisc", "level": 46},
+          {"species": "Whiscash", "level": 46},
+          {"species": "Sealeo", "level": 47},
+          {"species": "Seaking", "level": 47},
+          {"species": "Milotic", "level": 50}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Sidney", "type": "dark", "title": "Dark Strategist",
+        "dialog": {
+          "intro": "Welcome, challenger! I'm Sidney of the Elite Four! Let's do this!",
+          "defeat": "Well, how about that! You've got guts! Move on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Mightyena", "level": 58},
+          {"species": "Shiftry", "level": 58},
+          {"species": "Cacturne", "level": 58},
+          {"species": "Crawdaunt", "level": 59},
+          {"species": "Absol", "level": 62}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Phoebe", "type": "ghost", "title": "Ghost Whisperer",
+        "dialog": {
+          "intro": "I'm Phoebe! My bond with ghost Pokemon is deeper than you can imagine!",
+          "defeat": "The spirits tell me you're the real deal. Continue!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Dusclops", "level": 59},
+          {"species": "Banette", "level": 59},
+          {"species": "Sableye", "level": 59},
+          {"species": "Banette", "level": 60},
+          {"species": "Dusclops", "level": 62}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Glacia", "type": "ice", "title": "Ice Empress",
+        "dialog": {
+          "intro": "I am Glacia of the Elite Four. Prepare to be frozen solid!",
+          "defeat": "Your fire burns brighter than my ice. Advance!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Glalie", "level": 60},
+          {"species": "Sealeo", "level": 60},
+          {"species": "Sealeo", "level": 60},
+          {"species": "Glalie", "level": 61},
+          {"species": "Walrein", "level": 64}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Drake", "type": "dragon", "title": "Dragon Sailor",
+        "dialog": {
+          "intro": "I am Drake! I've sailed the world training my dragon Pokemon!",
+          "defeat": "Superb! You're worthy of facing the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Shelgon", "level": 61},
+          {"species": "Altaria", "level": 61},
+          {"species": "Flygon", "level": 62},
+          {"species": "Flygon", "level": 62},
+          {"species": "Salamence", "level": 65}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Steven", "type": "steel", "title": "Stone Collector Champion",
+      "dialog": {
+        "intro": "I'm Steven Stone, the Hoenn Champion. My steel Pokemon are as hard as the rare stones I collect!",
+        "defeat": "Your strength is as rare as the stones I seek. Congratulations, Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Skarmory", "level": 63},
+        {"species": "Claydol", "level": 63},
+        {"species": "Aggron", "level": 64},
+        {"species": "Cradily", "level": 64},
+        {"species": "Armaldo", "level": 64},
+        {"species": "Metagross", "level": 68}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "sinnoh",
+    "name": "Sinnoh",
+    "generation": 4,
+    "dex_range": [387, 493],
+    "description": "A northern region of mountains and myth. Home to the gods of time and space.",
+    "color": "#6366f1",
+    "icon_dex_id": 483,
+    "gyms": [
+      {
+        "id": 1, "name": "Roark", "type": "rock", "badge": "Coal Badge",
+        "dialog": {
+          "intro": "I'm Roark, the Oreburgh Gym Leader! My Pokemon are tougher than any rock!",
+          "defeat": "Your strength surpasses even the hardest rocks! Take the Coal Badge!",
+          "badge": "Coal Badge earned!"
+        },
+        "team": [
+          {"species": "Geodude", "level": 18},
+          {"species": "Onix", "level": 18},
+          {"species": "Cranidos", "level": 20}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Gardenia", "type": "grass", "badge": "Forest Badge",
+        "dialog": {
+          "intro": "I'm Gardenia! I love grass-type Pokemon more than anything!",
+          "defeat": "You're really great! Take the Forest Badge!",
+          "badge": "Forest Badge earned!"
+        },
+        "team": [
+          {"species": "Cherubi", "level": 22},
+          {"species": "Turtwig", "level": 22},
+          {"species": "Roserade", "level": 25}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Maylene", "type": "fighting", "badge": "Cobble Badge",
+        "dialog": {
+          "intro": "I'm Maylene! I've been training since I was little! My fighting Pokemon and I are ready!",
+          "defeat": "You're an amazing trainer! The Cobble Badge is yours!",
+          "badge": "Cobble Badge earned!"
+        },
+        "team": [
+          {"species": "Meditite", "level": 30},
+          {"species": "Machoke", "level": 30},
+          {"species": "Lucario", "level": 34}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Crasher Wake", "type": "water", "badge": "Fen Badge",
+        "dialog": {
+          "intro": "I'm Crasher Wake! My water Pokemon crash like tidal waves!",
+          "defeat": "You've weathered my storm! Take the Fen Badge!",
+          "badge": "Fen Badge earned!"
+        },
+        "team": [
+          {"species": "Gyarados", "level": 34},
+          {"species": "Quagsire", "level": 34},
+          {"species": "Floatzel", "level": 38}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Fantina", "type": "ghost", "badge": "Relic Badge",
+        "dialog": {
+          "intro": "Ohohoho! I am Fantina! My ghost Pokemon will make you tremble!",
+          "defeat": "Magnifique! Your skill is formidable! Take the Relic Badge!",
+          "badge": "Relic Badge earned!"
+        },
+        "team": [
+          {"species": "Duskull", "level": 38},
+          {"species": "Haunter", "level": 38},
+          {"species": "Mismagius", "level": 42}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Byron", "type": "steel", "badge": "Mine Badge",
+        "dialog": {
+          "intro": "I'm Byron! My steel Pokemon are forged in the depths of the earth!",
+          "defeat": "You've struck gold, trainer! Take the Mine Badge!",
+          "badge": "Mine Badge earned!"
+        },
+        "team": [
+          {"species": "Magneton", "level": 42},
+          {"species": "Steelix", "level": 42},
+          {"species": "Bastiodon", "level": 46}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Candice", "type": "ice", "badge": "Icicle Badge",
+        "dialog": {
+          "intro": "I'm Candice! I love ice-type Pokemon! Let's have a cool battle!",
+          "defeat": "You totally melted my defense! Take the Icicle Badge!",
+          "badge": "Icicle Badge earned!"
+        },
+        "team": [
+          {"species": "Sneasel", "level": 44},
+          {"species": "Piloswine", "level": 44},
+          {"species": "Abomasnow", "level": 46},
+          {"species": "Froslass", "level": 48}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Volkner", "type": "electric", "badge": "Beacon Badge",
+        "dialog": {
+          "intro": "I'm Volkner. I've been bored with weak challengers... Show me your best!",
+          "defeat": "Ah, finally! A trainer who excites me! Take the Beacon Badge!",
+          "badge": "Beacon Badge earned!"
+        },
+        "team": [
+          {"species": "Raichu", "level": 49},
+          {"species": "Ambipom", "level": 49},
+          {"species": "Luxray", "level": 51},
+          {"species": "Electivire", "level": 53}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Aaron", "type": "bug", "title": "Bug Enthusiast",
+        "dialog": {
+          "intro": "I'm Aaron of the Elite Four! People are wrong to underestimate bugs!",
+          "defeat": "You've proven that skill matters more than type! Keep going!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Dustox", "level": 60},
+          {"species": "Beautifly", "level": 60},
+          {"species": "Vespiquen", "level": 61},
+          {"species": "Heracross", "level": 62},
+          {"species": "Drapion", "level": 64}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Bertha", "type": "ground", "title": "Ground Guardian",
+        "dialog": {
+          "intro": "I'm Bertha. I've been with my ground Pokemon longer than you've been alive!",
+          "defeat": "You young ones are so full of energy! Advance!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Quagsire", "level": 61},
+          {"species": "Sudowoodo", "level": 61},
+          {"species": "Golem", "level": 62},
+          {"species": "Whiscash", "level": 62},
+          {"species": "Hippowdon", "level": 65}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Flint", "type": "fire", "title": "Fiery Battler",
+        "dialog": {
+          "intro": "I'm Flint! My burning passion for battle is hotter than any flame!",
+          "defeat": "Your spirit burns brighter than mine! Go face Lucian!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Rapidash", "level": 62},
+          {"species": "Steelix", "level": 62},
+          {"species": "Drifblim", "level": 63},
+          {"species": "Lopunny", "level": 63},
+          {"species": "Infernape", "level": 66}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Lucian", "type": "psychic", "title": "Psychic Scholar",
+        "dialog": {
+          "intro": "I'm Lucian. I've read every book on battle strategy. Let's see if practice beats theory!",
+          "defeat": "It seems real experience trumps theory. Face the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Mr. Mime", "level": 63},
+          {"species": "Espeon", "level": 63},
+          {"species": "Bronzong", "level": 64},
+          {"species": "Alakazam", "level": 64},
+          {"species": "Gallade", "level": 67}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Cynthia", "type": "dragon", "title": "Sinnoh Champion",
+      "dialog": {
+        "intro": "I'm Cynthia, the Sinnoh Champion. I've been looking forward to battling you!",
+        "defeat": "That was a truly magnificent battle! You've earned the title of Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Spiritomb", "level": 66},
+        {"species": "Roserade", "level": 66},
+        {"species": "Togekiss", "level": 66},
+        {"species": "Lucario", "level": 66},
+        {"species": "Milotic", "level": 66},
+        {"species": "Garchomp", "level": 70}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "unova",
+    "name": "Unova",
+    "generation": 5,
+    "dex_range": [494, 649],
+    "description": "A distant, diverse region inspired by a great city. Home to Reshiram and Zekrom.",
+    "color": "#a855f7",
+    "icon_dex_id": 644,
+    "gyms": [
+      {
+        "id": 1, "name": "Cilan", "type": "grass", "badge": "Trio Badge",
+        "dialog": {
+          "intro": "I'm Cilan! It's time for a battle with the finest ingredients!",
+          "defeat": "Excellent seasoning in your battle style! The Trio Badge is yours!",
+          "badge": "Trio Badge earned!"
+        },
+        "team": [
+          {"species": "Lillipup", "level": 18},
+          {"species": "Pansage", "level": 20}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Lenora", "type": "normal", "badge": "Basic Badge",
+        "dialog": {
+          "intro": "I'm Lenora! I'll show you the power of knowledge and normal-type Pokemon!",
+          "defeat": "You're a fascinating trainer! Take the Basic Badge!",
+          "badge": "Basic Badge earned!"
+        },
+        "team": [
+          {"species": "Herdier", "level": 22},
+          {"species": "Watchog", "level": 24}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Burgh", "type": "bug", "badge": "Insect Badge",
+        "dialog": {
+          "intro": "I'm Burgh, the artist! My bug Pokemon inspire my greatest works!",
+          "defeat": "Your battling was a true masterpiece! The Insect Badge is yours!",
+          "badge": "Insect Badge earned!"
+        },
+        "team": [
+          {"species": "Whirlipede", "level": 27},
+          {"species": "Dwebble", "level": 27},
+          {"species": "Leavanny", "level": 30}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Elesa", "type": "electric", "badge": "Bolt Badge",
+        "dialog": {
+          "intro": "I'm Elesa, the shining beauty! My electric Pokemon will dazzle you!",
+          "defeat": "Your battle style is electrifying! Take the Bolt Badge!",
+          "badge": "Bolt Badge earned!"
+        },
+        "team": [
+          {"species": "Emolga", "level": 32},
+          {"species": "Flaaffy", "level": 32},
+          {"species": "Zebstrika", "level": 35}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Clay", "type": "ground", "badge": "Quake Badge",
+        "dialog": {
+          "intro": "I'm Clay! In the mining business, we don't take kindly to pushovers!",
+          "defeat": "Well, I'll be! You struck gold, partner! Take the Quake Badge!",
+          "badge": "Quake Badge earned!"
+        },
+        "team": [
+          {"species": "Krokorok", "level": 37},
+          {"species": "Sandslash", "level": 37},
+          {"species": "Excadrill", "level": 40}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Skyla", "type": "flying", "badge": "Jet Badge",
+        "dialog": {
+          "intro": "I'm Skyla! I fly through the sky as free as the wind!",
+          "defeat": "You've soared past my defenses! The Jet Badge is yours!",
+          "badge": "Jet Badge earned!"
+        },
+        "team": [
+          {"species": "Swoobat", "level": 40},
+          {"species": "Skarmory", "level": 40},
+          {"species": "Swanna", "level": 44}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Brycen", "type": "ice", "badge": "Freeze Badge",
+        "dialog": {
+          "intro": "I'm Brycen. My icy Pokemon reflect my disciplined spirit!",
+          "defeat": "Your passion thawed my frozen defenses! Take the Freeze Badge!",
+          "badge": "Freeze Badge earned!"
+        },
+        "team": [
+          {"species": "Vanillish", "level": 44},
+          {"species": "Cryogonal", "level": 44},
+          {"species": "Beartic", "level": 48}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Drayden", "type": "dragon", "badge": "Legend Badge",
+        "dialog": {
+          "intro": "I'm Drayden! My dragon Pokemon are as fierce as my own spirit!",
+          "defeat": "You've earned the right to face the Elite Four! Take the Legend Badge!",
+          "badge": "Legend Badge earned!"
+        },
+        "team": [
+          {"species": "Druddigon", "level": 49},
+          {"species": "Flygon", "level": 49},
+          {"species": "Altaria", "level": 49},
+          {"species": "Haxorus", "level": 53}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Shauntal", "type": "ghost", "title": "Ghost Novelist",
+        "dialog": {
+          "intro": "I'm Shauntal! I write novels about ghost Pokemon. Shall I make you a character?",
+          "defeat": "What a dramatic ending! I must write about this! Continue!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Cofagrigus", "level": 62},
+          {"species": "Jellicent", "level": 62},
+          {"species": "Golurk", "level": 63},
+          {"species": "Drifblim", "level": 63},
+          {"species": "Chandelure", "level": 66}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Grimsley", "type": "dark", "title": "Dark Gambler",
+        "dialog": {
+          "intro": "I'm Grimsley! Life is a gamble, and so is battle!",
+          "defeat": "It seems luck was on your side today. Move on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Liepard", "level": 62},
+          {"species": "Scrafty", "level": 62},
+          {"species": "Krookodile", "level": 63},
+          {"species": "Honchkrow", "level": 63},
+          {"species": "Bisharp", "level": 66}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Caitlin", "type": "psychic", "title": "Psychic Dreamer",
+        "dialog": {
+          "intro": "I'm Caitlin... I see your dreams and aspirations. Let's battle!",
+          "defeat": "Your dreams are powerful. I'll remember this battle always. Go!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Reuniclus", "level": 63},
+          {"species": "Musharna", "level": 63},
+          {"species": "Sigilyph", "level": 63},
+          {"species": "Gothitelle", "level": 64},
+          {"species": "Metagross", "level": 67}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Marshal", "type": "fighting", "title": "Fighting Sage",
+        "dialog": {
+          "intro": "I'm Marshal! I train my body and my fighting Pokemon to their limits!",
+          "defeat": "Your fighting spirit is incredible! Face the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Throh", "level": 63},
+          {"species": "Sawk", "level": 63},
+          {"species": "Mienshao", "level": 64},
+          {"species": "Lucario", "level": 64},
+          {"species": "Conkeldurr", "level": 67}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Alder", "type": "bug", "title": "Wandering Champion",
+      "dialog": {
+        "intro": "I'm Alder, the Unova Champion! I wander this region seeking the meaning of strength!",
+        "defeat": "Ha! You've shown me what true strength is! You're the new Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Accelgor", "level": 66},
+        {"species": "Bouffalant", "level": 66},
+        {"species": "Escavalier", "level": 67},
+        {"species": "Reuniclus", "level": 67},
+        {"species": "Chandelure", "level": 67},
+        {"species": "Volcarona", "level": 70}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "kalos",
+    "name": "Kalos",
+    "generation": 6,
+    "dex_range": [650, 721],
+    "description": "An elegant region of beauty and fashion. Birthplace of Mega Evolution.",
+    "color": "#ec4899",
+    "icon_dex_id": 716,
+    "gyms": [
+      {
+        "id": 1, "name": "Viola", "type": "bug", "badge": "Bug Badge",
+        "dialog": {
+          "intro": "I'm Viola! I'll capture your Pokemon in my web of strategies!",
+          "defeat": "Wonderful shots! Take the Bug Badge!",
+          "badge": "Bug Badge earned!"
+        },
+        "team": [
+          {"species": "Surskit", "level": 18},
+          {"species": "Vivillon", "level": 20}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Grant", "type": "rock", "badge": "Cliff Badge",
+        "dialog": {
+          "intro": "I'm Grant! I climb the highest walls — just like my rock Pokemon!",
+          "defeat": "You've scaled my toughest challenge! Take the Cliff Badge!",
+          "badge": "Cliff Badge earned!"
+        },
+        "team": [
+          {"species": "Amaura", "level": 27},
+          {"species": "Tyrunt", "level": 29}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Korrina", "type": "fighting", "badge": "Rumble Badge",
+        "dialog": {
+          "intro": "I'm Korrina! My Lucario and I share the power of Mega Evolution!",
+          "defeat": "Your fighting spirit is incredible! Take the Rumble Badge!",
+          "badge": "Rumble Badge earned!"
+        },
+        "team": [
+          {"species": "Mienfoo", "level": 32},
+          {"species": "Machoke", "level": 32},
+          {"species": "Hawlucha", "level": 34}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Ramos", "type": "grass", "badge": "Plant Badge",
+        "dialog": {
+          "intro": "I'm Ramos! These old bones still have plenty of fight, like a mighty oak!",
+          "defeat": "You've got the spirit of spring! Take the Plant Badge!",
+          "badge": "Plant Badge earned!"
+        },
+        "team": [
+          {"species": "Jumpluff", "level": 36},
+          {"species": "Weepinbell", "level": 36},
+          {"species": "Gogoat", "level": 38}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Clemont", "type": "electric", "badge": "Voltage Badge",
+        "dialog": {
+          "intro": "I'm Clemont! Science is the future, and so are electric Pokemon!",
+          "defeat": "Your data is impressive! Take the Voltage Badge!",
+          "badge": "Voltage Badge earned!"
+        },
+        "team": [
+          {"species": "Emolga", "level": 39},
+          {"species": "Magneton", "level": 39},
+          {"species": "Heliolisk", "level": 42}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Valerie", "type": "fairy", "badge": "Fairy Badge",
+        "dialog": {
+          "intro": "I'm Valerie... I design clothes for Pokemon... and I battle, too...",
+          "defeat": "Your Pokemon are as beautiful as my finest designs. The Fairy Badge!",
+          "badge": "Fairy Badge earned!"
+        },
+        "team": [
+          {"species": "Mawile", "level": 42},
+          {"species": "Mr. Mime", "level": 42},
+          {"species": "Sylveon", "level": 46}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Olympia", "type": "psychic", "badge": "Psychic Badge",
+        "dialog": {
+          "intro": "I am Olympia! The stars have foretold your arrival!",
+          "defeat": "The stars did not lie — your destiny is great! Take the Psychic Badge!",
+          "badge": "Psychic Badge earned!"
+        },
+        "team": [
+          {"species": "Sigilyph", "level": 46},
+          {"species": "Slowking", "level": 46},
+          {"species": "Meowstic", "level": 50}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Wulfric", "type": "ice", "badge": "Iceberg Badge",
+        "dialog": {
+          "intro": "I'm Wulfric! My ice Pokemon are as powerful as avalanches!",
+          "defeat": "You've conquered the blizzard! Take the Iceberg Badge!",
+          "badge": "Iceberg Badge earned!"
+        },
+        "team": [
+          {"species": "Abomasnow", "level": 50},
+          {"species": "Cryogonal", "level": 50},
+          {"species": "Avalugg", "level": 53}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Malva", "type": "fire", "title": "Fiery Reporter",
+        "dialog": {
+          "intro": "I'm Malva! I'll show you the burning passion of fire Pokemon!",
+          "defeat": "You've burned brighter than my flames! Move on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Pyroar", "level": 64},
+          {"species": "Torkoal", "level": 64},
+          {"species": "Chandelure", "level": 65},
+          {"species": "Talonflame", "level": 65},
+          {"species": "Blaziken", "level": 68}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Siebold", "type": "water", "title": "Water Chef",
+        "dialog": {
+          "intro": "I'm Siebold! Battling is like cooking — it requires the finest ingredients!",
+          "defeat": "A Michelin-star performance! Proceed!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Clawitzer", "level": 64},
+          {"species": "Gyarados", "level": 65},
+          {"species": "Starmie", "level": 65},
+          {"species": "Barbaracle", "level": 66},
+          {"species": "Blastoise", "level": 68}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Wikstrom", "type": "steel", "title": "Steel Knight",
+        "dialog": {
+          "intro": "I am Wikstrom! My steel Pokemon are my sword and shield!",
+          "defeat": "You have bested this knight! Advance with honor!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Klefki", "level": 65},
+          {"species": "Probopass", "level": 65},
+          {"species": "Scizor", "level": 66},
+          {"species": "Aegislash", "level": 67},
+          {"species": "Steelix", "level": 68}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Drasna", "type": "dragon", "title": "Dragon Elder",
+        "dialog": {
+          "intro": "I'm Drasna! I simply love dragon Pokemon! They're so majestic!",
+          "defeat": "Oh my! You're simply wonderful! Go face the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Dragalge", "level": 65},
+          {"species": "Altaria", "level": 66},
+          {"species": "Druddigon", "level": 66},
+          {"species": "Flygon", "level": 67},
+          {"species": "Noivern", "level": 69}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Diantha", "type": "fairy", "title": "Kalos Champion",
+      "dialog": {
+        "intro": "I'm Diantha, the Kalos Champion! Shall we have a beautiful battle?",
+        "defeat": "Magnifique! You've won with grace and power! You're the new Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Hawlucha", "level": 66},
+        {"species": "Tyrantrum", "level": 66},
+        {"species": "Aurorus", "level": 66},
+        {"species": "Gourgeist", "level": 66},
+        {"species": "Goodra", "level": 68},
+        {"species": "Gardevoir", "level": 70}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "alola",
+    "name": "Alola",
+    "generation": 7,
+    "dex_range": [722, 809],
+    "description": "A sunny island paradise with unique trials. Home to the Ultra Beasts.",
+    "color": "#f97316",
+    "icon_dex_id": 791,
+    "gyms": [
+      {
+        "id": 1, "name": "Ilima", "type": "normal", "badge": "Normal Crystal",
+        "dialog": {
+          "intro": "I'm Ilima! As trial captain, I'll test your abilities!",
+          "defeat": "Splendid! You've passed the first trial!",
+          "badge": "Normal Crystal earned!"
+        },
+        "team": [
+          {"species": "Yungoos", "level": 18},
+          {"species": "Smeargle", "level": 20}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Lana", "type": "water", "badge": "Water Crystal",
+        "dialog": {
+          "intro": "I'm Lana... I fish with my water Pokemon. Shall we battle?",
+          "defeat": "You reeled in a victory! Take this crystal!",
+          "badge": "Water Crystal earned!"
+        },
+        "team": [
+          {"species": "Chinchou", "level": 24},
+          {"species": "Shellder", "level": 24},
+          {"species": "Araquanid", "level": 27}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Kiawe", "type": "fire", "badge": "Fire Crystal",
+        "dialog": {
+          "intro": "I'm Kiawe! My fire dances will light up this battle!",
+          "defeat": "Your fire burns bright! Take the Fire Crystal!",
+          "badge": "Fire Crystal earned!"
+        },
+        "team": [
+          {"species": "Growlithe", "level": 28},
+          {"species": "Fletchinder", "level": 28},
+          {"species": "Marowak", "level": 31}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Sophocles", "type": "electric", "badge": "Electric Crystal",
+        "dialog": {
+          "intro": "I'm Sophocles! My inventions and electric Pokemon are unstoppable!",
+          "defeat": "Your power overloaded my circuits! Take the Electric Crystal!",
+          "badge": "Electric Crystal earned!"
+        },
+        "team": [
+          {"species": "Togedemaru", "level": 33},
+          {"species": "Charjabug", "level": 33},
+          {"species": "Vikavolt", "level": 36}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Hala", "type": "fighting", "badge": "Fighting Crystal",
+        "dialog": {
+          "intro": "I'm Hala, the Kahuna! My fists strike with the force of Alola's volcanoes!",
+          "defeat": "You've earned the respect of the islands! Take the Fighting Crystal!",
+          "badge": "Fighting Crystal earned!"
+        },
+        "team": [
+          {"species": "Hariyama", "level": 40},
+          {"species": "Primeape", "level": 40},
+          {"species": "Bewear", "level": 42},
+          {"species": "Crabominable", "level": 44}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Olivia", "type": "rock", "badge": "Rock Crystal",
+        "dialog": {
+          "intro": "I'm Olivia, the Kahuna of Akala! My rock Pokemon are as solid as the island!",
+          "defeat": "You've shattered my defenses! The Rock Crystal is yours!",
+          "badge": "Rock Crystal earned!"
+        },
+        "team": [
+          {"species": "Nosepass", "level": 43},
+          {"species": "Boldore", "level": 43},
+          {"species": "Lycanroc", "level": 45},
+          {"species": "Golem", "level": 47}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Nanu", "type": "dark", "badge": "Dark Crystal",
+        "dialog": {
+          "intro": "I'm Nanu... *sigh* Fine, let's get this battle over with.",
+          "defeat": "You actually won... Take this, I guess.",
+          "badge": "Dark Crystal earned!"
+        },
+        "team": [
+          {"species": "Sableye", "level": 47},
+          {"species": "Krokorok", "level": 47},
+          {"species": "Honchkrow", "level": 48},
+          {"species": "Persian", "level": 50}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Hapu", "type": "ground", "badge": "Ground Crystal",
+        "dialog": {
+          "intro": "I'm Hapu, the youngest Kahuna! My ground Pokemon draw power from the earth!",
+          "defeat": "You've earned every island's respect! The Ground Crystal is yours!",
+          "badge": "Ground Crystal earned!"
+        },
+        "team": [
+          {"species": "Dugtrio", "level": 50},
+          {"species": "Flygon", "level": 50},
+          {"species": "Gastrodon", "level": 51},
+          {"species": "Mudsdale", "level": 53}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Molayne", "type": "steel", "title": "Steel Observer",
+        "dialog": {
+          "intro": "I'm Molayne! I observe the stars and train steel Pokemon!",
+          "defeat": "The stars aligned for you today! Continue!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Klefki", "level": 65},
+          {"species": "Bisharp", "level": 65},
+          {"species": "Magnezone", "level": 66},
+          {"species": "Metagross", "level": 67},
+          {"species": "Dugtrio", "level": 68}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Olivia", "type": "rock", "title": "Rock Kahuna",
+        "dialog": {
+          "intro": "We meet again! This time, I won't hold back!",
+          "defeat": "You've surpassed even a Kahuna! Move on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Armaldo", "level": 66},
+          {"species": "Cradily", "level": 66},
+          {"species": "Golem", "level": 67},
+          {"species": "Probopass", "level": 67},
+          {"species": "Lycanroc", "level": 69}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Acerola", "type": "ghost", "title": "Ghost Princess",
+        "dialog": {
+          "intro": "I'm Acerola! My ghost friends and I love to play — I mean battle!",
+          "defeat": "That was so fun! Keep going, you're almost there!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Sableye", "level": 66},
+          {"species": "Drifblim", "level": 67},
+          {"species": "Dhelmise", "level": 67},
+          {"species": "Froslass", "level": 68},
+          {"species": "Palossand", "level": 69}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Kahili", "type": "flying", "title": "Sky Golfer",
+        "dialog": {
+          "intro": "I'm Kahili! I'll drive this battle home like a hole-in-one!",
+          "defeat": "A perfect game! You've earned the right to face the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Skarmory", "level": 67},
+          {"species": "Crobat", "level": 67},
+          {"species": "Mandibuzz", "level": 68},
+          {"species": "Oricorio", "level": 68},
+          {"species": "Toucannon", "level": 70}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Kukui", "type": "fire", "title": "Professor Champion",
+      "dialog": {
+        "intro": "Alola, cousin! I'm Professor Kukui! Let me show you the power of Alola!",
+        "defeat": "Yeah! That's what I call a battle! You're Alola's Champion, cousin!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Lycanroc", "level": 68},
+        {"species": "Ninetales", "level": 68},
+        {"species": "Braviary", "level": 68},
+        {"species": "Magnezone", "level": 68},
+        {"species": "Snorlax", "level": 69},
+        {"species": "Incineroar", "level": 72}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "galar",
+    "name": "Galar",
+    "generation": 8,
+    "dex_range": [810, 905],
+    "description": "An industrial region with a love for Pokemon battles. Home of Dynamax!",
+    "color": "#0ea5e9",
+    "icon_dex_id": 888,
+    "gyms": [
+      {
+        "id": 1, "name": "Milo", "type": "grass", "badge": "Grass Badge",
+        "dialog": {
+          "intro": "I'm Milo! My grass Pokemon and I work the fields — and the battlefield!",
+          "defeat": "You've plowed right through me! Take the Grass Badge!",
+          "badge": "Grass Badge earned!"
+        },
+        "team": [
+          {"species": "Gossifleur", "level": 22},
+          {"species": "Eldegoss", "level": 24}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Nessa", "type": "water", "badge": "Water Badge",
+        "dialog": {
+          "intro": "I'm Nessa! My water Pokemon will wash away your confidence!",
+          "defeat": "You've made quite a splash! Take the Water Badge!",
+          "badge": "Water Badge earned!"
+        },
+        "team": [
+          {"species": "Goldeen", "level": 26},
+          {"species": "Arrokuda", "level": 26},
+          {"species": "Drednaw", "level": 29}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Kabu", "type": "fire", "badge": "Fire Badge",
+        "dialog": {
+          "intro": "I'm Kabu! I'll test your resolve with the heat of battle!",
+          "defeat": "You've passed my test! Take the Fire Badge!",
+          "badge": "Fire Badge earned!"
+        },
+        "team": [
+          {"species": "Ninetales", "level": 32},
+          {"species": "Arcanine", "level": 32},
+          {"species": "Centiskorch", "level": 35}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Bea", "type": "fighting", "badge": "Fighting Badge",
+        "dialog": {
+          "intro": "I'm Bea! My fighting Pokemon and I train in silence!",
+          "defeat": "...Your strength speaks louder than words. Take the Fighting Badge.",
+          "badge": "Fighting Badge earned!"
+        },
+        "team": [
+          {"species": "Hitmontop", "level": 37},
+          {"species": "Pangoro", "level": 37},
+          {"species": "Sirfetchd", "level": 39},
+          {"species": "Machamp", "level": 42}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Allister", "type": "ghost", "badge": "Ghost Badge",
+        "dialog": {
+          "intro": "I'm... Allister... My ghost Pokemon will... show you fear...",
+          "defeat": "You're... not afraid... Take the Ghost Badge...",
+          "badge": "Ghost Badge earned!"
+        },
+        "team": [
+          {"species": "Dusclops", "level": 42},
+          {"species": "Mimikyu", "level": 42},
+          {"species": "Cursola", "level": 44},
+          {"species": "Gengar", "level": 46}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Opal", "type": "fairy", "badge": "Fairy Badge",
+        "dialog": {
+          "intro": "I'm Opal! At my age, I know the true magic of fairy Pokemon!",
+          "defeat": "How enchanting! You've earned the Fairy Badge, dearie!",
+          "badge": "Fairy Badge earned!"
+        },
+        "team": [
+          {"species": "Weezing", "level": 46},
+          {"species": "Mawile", "level": 46},
+          {"species": "Togekiss", "level": 47},
+          {"species": "Alcremie", "level": 50}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Gordie", "type": "rock", "badge": "Rock Badge",
+        "dialog": {
+          "intro": "I'm Gordie! My rock Pokemon will crush your dreams!",
+          "defeat": "Crushed by a challenger! Take the Rock Badge!",
+          "badge": "Rock Badge earned!"
+        },
+        "team": [
+          {"species": "Barbaracle", "level": 49},
+          {"species": "Shuckle", "level": 49},
+          {"species": "Stonjourner", "level": 50},
+          {"species": "Coalossal", "level": 53}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Raihan", "type": "dragon", "badge": "Dragon Badge",
+        "dialog": {
+          "intro": "I'm Raihan! I'll take a selfie with your defeat! #DragonMaster",
+          "defeat": "You've photobombed my winning streak! Take the Dragon Badge!",
+          "badge": "Dragon Badge earned!"
+        },
+        "team": [
+          {"species": "Flygon", "level": 52},
+          {"species": "Goodra", "level": 52},
+          {"species": "Turtonator", "level": 53},
+          {"species": "Duraludon", "level": 55}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Marnie", "type": "dark", "title": "Punk Rocker",
+        "dialog": {
+          "intro": "I'm Marnie! Team Yell's cheerin' me on! Let's battle!",
+          "defeat": "That was ace! You're really strong! Go on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Liepard", "level": 67},
+          {"species": "Toxicroak", "level": 67},
+          {"species": "Scrafty", "level": 68},
+          {"species": "Morpeko", "level": 68},
+          {"species": "Grimmsnarl", "level": 70}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Hop", "type": "normal", "title": "Rival Champion",
+        "dialog": {
+          "intro": "It's me, Hop! I'm gonna give it everything I've got!",
+          "defeat": "You're just as amazing as Lee! Keep going, mate!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Dubwool", "level": 68},
+          {"species": "Cramorant", "level": 68},
+          {"species": "Snorlax", "level": 69},
+          {"species": "Corviknight", "level": 69},
+          {"species": "Cinderace", "level": 71}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Bede", "type": "fairy", "title": "Fairy Prodigy",
+        "dialog": {
+          "intro": "I'm Bede! I was chosen by Chairman Rose himself — I mean, I chose fairy Pokemon!",
+          "defeat": "Hmph! You're... adequate. Proceed!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Mawile", "level": 68},
+          {"species": "Gardevoir", "level": 69},
+          {"species": "Rapidash", "level": 69},
+          {"species": "Sylveon", "level": 70},
+          {"species": "Hatterene", "level": 72}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Nessa", "type": "water", "title": "Water Model",
+        "dialog": {
+          "intro": "We meet again! This time, my water Pokemon won't hold back!",
+          "defeat": "You've made a bigger splash than ever! Face the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Golisopod", "level": 69},
+          {"species": "Pelipper", "level": 69},
+          {"species": "Barraskewda", "level": 70},
+          {"species": "Toxapex", "level": 70},
+          {"species": "Drednaw", "level": 72}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Leon", "type": "fire", "title": "Unbeatable Champion",
+      "dialog": {
+        "intro": "I'm Leon, the unbeatable Champion! Let's have a champion time!",
+        "defeat": "My time as Champion is over... but what a battle! You're the new Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Aegislash", "level": 70},
+        {"species": "Dragapult", "level": 70},
+        {"species": "Haxorus", "level": 70},
+        {"species": "Seismitoad", "level": 70},
+        {"species": "Mr. Rime", "level": 71},
+        {"species": "Charizard", "level": 74}
+      ],
+      "reward": 5000
+    }
+  },
+  {
+    "id": "paldea",
+    "name": "Paldea",
+    "generation": 9,
+    "dex_range": [906, 1025],
+    "description": "An open-world region with three grand adventures. Home to the Treasures of Ruin.",
+    "color": "#eab308",
+    "icon_dex_id": 1007,
+    "gyms": [
+      {
+        "id": 1, "name": "Katy", "type": "bug", "badge": "Bug Badge",
+        "dialog": {
+          "intro": "I'm Katy! I run a bakery and train bug Pokemon on the side!",
+          "defeat": "Sweet victory for you! Take the Bug Badge!",
+          "badge": "Bug Badge earned!"
+        },
+        "team": [
+          {"species": "Nymble", "level": 20},
+          {"species": "Tarountula", "level": 20},
+          {"species": "Teddiursa", "level": 22}
+        ],
+        "reward": 500
+      },
+      {
+        "id": 2, "name": "Brassius", "type": "grass", "badge": "Grass Badge",
+        "dialog": {
+          "intro": "I'm Brassius! My art and grass Pokemon are one and the same!",
+          "defeat": "A masterpiece of a battle! The Grass Badge is yours!",
+          "badge": "Grass Badge earned!"
+        },
+        "team": [
+          {"species": "Petilil", "level": 24},
+          {"species": "Smoliv", "level": 24},
+          {"species": "Sudowoodo", "level": 27}
+        ],
+        "reward": 600
+      },
+      {
+        "id": 3, "name": "Iono", "type": "electric", "badge": "Electric Badge",
+        "dialog": {
+          "intro": "Hey-o! I'm Iono, your fave streamer! Let's give chat a show!",
+          "defeat": "OMG, chat, we lost! But GG! Take the Electric Badge!",
+          "badge": "Electric Badge earned!"
+        },
+        "team": [
+          {"species": "Wattrel", "level": 30},
+          {"species": "Luxio", "level": 30},
+          {"species": "Bellibolt", "level": 33},
+          {"species": "Mismagius", "level": 33}
+        ],
+        "reward": 700
+      },
+      {
+        "id": 4, "name": "Kofu", "type": "water", "badge": "Water Badge",
+        "dialog": {
+          "intro": "I'm Kofu! I'm a chef who battles with the freshest water Pokemon!",
+          "defeat": "A well-cooked battle! The Water Badge is yours!",
+          "badge": "Water Badge earned!"
+        },
+        "team": [
+          {"species": "Veluza", "level": 35},
+          {"species": "Wugtrio", "level": 35},
+          {"species": "Crabominable", "level": 38}
+        ],
+        "reward": 800
+      },
+      {
+        "id": 5, "name": "Larry", "type": "normal", "badge": "Normal Badge",
+        "dialog": {
+          "intro": "I'm Larry... Just a regular guy with regular Pokemon. Let's get this over with.",
+          "defeat": "Well, back to my regular routine. Take the Normal Badge.",
+          "badge": "Normal Badge earned!"
+        },
+        "team": [
+          {"species": "Komala", "level": 40},
+          {"species": "Dunsparce", "level": 40},
+          {"species": "Staraptor", "level": 43}
+        ],
+        "reward": 900
+      },
+      {
+        "id": 6, "name": "Ryme", "type": "ghost", "badge": "Ghost Badge",
+        "dialog": {
+          "intro": "Yo, I'm Ryme! My ghost Pokemon drop sick beats from beyond!",
+          "defeat": "That battle was fire! Take the Ghost Badge, fam!",
+          "badge": "Ghost Badge earned!"
+        },
+        "team": [
+          {"species": "Banette", "level": 44},
+          {"species": "Mimikyu", "level": 44},
+          {"species": "Houndstone", "level": 45},
+          {"species": "Toxtricity", "level": 48}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 7, "name": "Tulip", "type": "psychic", "badge": "Psychic Badge",
+        "dialog": {
+          "intro": "I'm Tulip! Beauty and psychic power go hand in hand!",
+          "defeat": "Your inner beauty shines through! Take the Psychic Badge!",
+          "badge": "Psychic Badge earned!"
+        },
+        "team": [
+          {"species": "Farigiraf", "level": 48},
+          {"species": "Gardevoir", "level": 48},
+          {"species": "Gallade", "level": 49},
+          {"species": "Espathra", "level": 52}
+        ],
+        "reward": 1100
+      },
+      {
+        "id": 8, "name": "Grusha", "type": "ice", "badge": "Ice Badge",
+        "dialog": {
+          "intro": "I'm Grusha. I used to snowboard, but now I battle. Let's go.",
+          "defeat": "Cool run. Take the Ice Badge.",
+          "badge": "Ice Badge earned!"
+        },
+        "team": [
+          {"species": "Frosmoth", "level": 52},
+          {"species": "Beartic", "level": 52},
+          {"species": "Cetitan", "level": 53},
+          {"species": "Altaria", "level": 55}
+        ],
+        "reward": 1500
+      }
+    ],
+    "elite_four": [
+      {
+        "id": 1, "name": "Rika", "type": "ground", "title": "Ground Interrogator",
+        "dialog": {
+          "intro": "I'm Rika! I'll dig up the truth about your strength!",
+          "defeat": "The evidence is clear — you're the real deal! Move on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Whiscash", "level": 68},
+          {"species": "Camerupt", "level": 68},
+          {"species": "Donphan", "level": 69},
+          {"species": "Dugtrio", "level": 69},
+          {"species": "Clodsire", "level": 72}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 2, "name": "Poppy", "type": "steel", "title": "Tiny Steel Expert",
+        "dialog": {
+          "intro": "I'm Poppy! D-don't underestimate me because I'm small!",
+          "defeat": "Wow, you're really strong! G-go on!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Copperajah", "level": 69},
+          {"species": "Bronzong", "level": 69},
+          {"species": "Corviknight", "level": 70},
+          {"species": "Magnezone", "level": 70},
+          {"species": "Tinkaton", "level": 72}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 3, "name": "Larry", "type": "flying", "title": "Secret Flying Expert",
+        "dialog": {
+          "intro": "It's me again, Larry. Surprise, I also train flying Pokemon. Let's just do this.",
+          "defeat": "Sigh. You won again. I need a vacation. Continue.",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Tropius", "level": 70},
+          {"species": "Staraptor", "level": 70},
+          {"species": "Altaria", "level": 70},
+          {"species": "Oricorio", "level": 71},
+          {"species": "Flamigo", "level": 73}
+        ],
+        "reward": 1000
+      },
+      {
+        "id": 4, "name": "Hassel", "type": "dragon", "title": "Dragon Artisan",
+        "dialog": {
+          "intro": "I'm Hassel! My dragon Pokemon are as refined as the finest art!",
+          "defeat": "A masterwork of battle! Face the Champion!",
+          "badge": ""
+        },
+        "team": [
+          {"species": "Noivern", "level": 70},
+          {"species": "Haxorus", "level": 71},
+          {"species": "Dragalge", "level": 71},
+          {"species": "Flygon", "level": 72},
+          {"species": "Baxcalibur", "level": 74}
+        ],
+        "reward": 1000
+      }
+    ],
+    "champion": {
+      "name": "Geeta", "type": "normal", "title": "Top Champion",
+      "dialog": {
+        "intro": "I'm Geeta, the Top Champion! Show me what you've learned on your journey!",
+        "defeat": "Your journey has made you truly exceptional! You're the new Top Champion!",
+        "badge": ""
+      },
+      "team": [
+        {"species": "Espathra", "level": 70},
+        {"species": "Gogoat", "level": 70},
+        {"species": "Veluza", "level": 70},
+        {"species": "Avalugg", "level": 71},
+        {"species": "Kingambit", "level": 72},
+        {"species": "Glimmora", "level": 74}
+      ],
+      "reward": 5000
+    }
+  }
+]

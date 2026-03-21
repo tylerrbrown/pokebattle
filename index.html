@@ -957,7 +957,25 @@ input.invalid { border-color: var(--red); }
 .btn-champion:hover { filter:brightness(1.1); }
 .btn-masters { grid-column:1/-1; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a1a2e; font-weight:bold; }
 .btn-masters:hover { filter:brightness(1.1); }
+.btn-travel { background:linear-gradient(135deg,#14b8a6,#0d9488); color:#fff; font-weight:bold; }
+.btn-travel:hover { filter:brightness(1.1); }
 .btn-bug{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-weight:bold}
+
+/* ─── Regions Screen ─────────────────────────── */
+.regions-screen { padding:16px; gap:10px; }
+.regions-header { display:flex; justify-content:space-between; align-items:center; }
+.regions-title { font-size:var(--fs-xl); color:#14b8a6; }
+.region-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; width:100%; max-width:600px; overflow-y:auto; }
+@media (max-width:520px) { .region-grid { grid-template-columns:1fr 1fr; } }
+.region-card { display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px; border-radius:12px; background:var(--bg2); border:2px solid var(--border); cursor:pointer; transition:all 0.2s; text-align:center; position:relative; }
+.region-card:hover { filter:brightness(1.15); transform:translateY(-2px); }
+.region-card.current { border-color:#14b8a6; box-shadow:0 0 12px rgba(20,184,166,0.4); }
+.region-card .region-sprite { width:48px; height:48px; image-rendering:pixelated; }
+.region-card .region-name { font-size:var(--fs-sm); font-weight:bold; color:var(--text); }
+.region-card .region-gen { font-size:var(--fs-2xs); color:var(--text-dim); }
+.region-card .region-desc { font-size:var(--fs-2xs); color:var(--text-dim); line-height:1.2; }
+.region-card .region-badges-info { font-size:var(--fs-2xs); color:var(--yellow); }
+.region-card .region-here { position:absolute; top:4px; right:4px; font-size:var(--fs-2xs); background:#14b8a6; color:#fff; padding:2px 6px; border-radius:6px; font-weight:bold; }
 .btn-bug:hover{filter:brightness(1.1)}
 .bug-report-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center}
 .bug-report-overlay.active{display:flex}
@@ -1313,6 +1331,7 @@ input.invalid { border-color: var(--red); }
     <div class="hub-profile" id="hub-profile"></div>
     <div class="hub-btns">
       <button class="btn btn-wild" onclick="startWildEncounter()">WILD ENCOUNTER</button>
+      <button class="btn btn-travel" onclick="showRegions()">TRAVEL</button>
       <button class="btn btn-gym" onclick="showGyms()">GYM LEADERS</button>
       <button class="btn btn-e4" id="hub-e4-btn" style="display:none" onclick="showEliteFour()">ELITE FOUR</button>
       <button class="btn btn-champion" id="hub-champion-btn" style="display:none" onclick="showChampion()">CHAMPION</button>
@@ -1349,6 +1368,15 @@ input.invalid { border-color: var(--red); }
     <div class="backpack-team" id="backpack-team"></div>
     <div class="backpack-section-label">Storage <span id="backpack-storage-count"></span></div>
     <div class="backpack-storage" id="backpack-storage"></div>
+  </div>
+
+  <!-- REGIONS SCREEN -->
+  <div id="screen-regions" class="screen regions-screen">
+    <div class="regions-header">
+      <span class="regions-title">REGIONS</span>
+      <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
+    </div>
+    <div class="region-grid" id="region-grid"></div>
   </div>
 
   <!-- TRADE MENU SCREEN -->
@@ -1567,7 +1595,7 @@ input.invalid { border-color: var(--red); }
   <!-- GYM LIST SCREEN -->
   <div id="screen-gymlist" class="screen gymlist-screen">
     <div class="gymlist-header">
-      <span class="gymlist-title">GYM LEADERS</span>
+      <span class="gymlist-title" id="gymlist-title">GYM LEADERS</span>
       <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
     </div>
     <div class="gym-list" id="gym-list"></div>
@@ -1588,7 +1616,7 @@ input.invalid { border-color: var(--red); }
   <!-- E4 LIST SCREEN -->
   <div id="screen-e4list" class="screen gymlist-screen">
     <div class="gymlist-header">
-      <span class="gymlist-title" style="color:#f87171">ELITE FOUR</span>
+      <span class="gymlist-title" id="e4list-title" style="color:#f87171">ELITE FOUR</span>
       <button class="btn btn-secondary" style="flex:none;font-size:var(--fs-xs)" onclick="goHome()">BACK</button>
     </div>
     <div class="gym-list" id="e4-list"></div>
@@ -2098,6 +2126,14 @@ function handleMessage(msg) {
         showTrainerDefeat(msg);
       }
       break;
+    case 'regions_list':
+      renderRegions(msg);
+      break;
+    case 'region_changed':
+      if (S.account) S.account.current_region = msg.region_id;
+      showToast('Traveled to ' + msg.region_name + '!');
+      goHome();
+      break;
     case 'shop_data':
       renderShop(msg);
       break;
@@ -2113,6 +2149,8 @@ function handleMessage(msg) {
     case 'progression_data':
       if (S.account) {
         S.account.badges = msg.badges;
+        S.account.badges_by_region = msg.badges_by_region || {};
+        S.account.current_region = msg.current_region || 'kanto';
         S.account.milestones = msg.milestones;
         S.account.currency = msg.currency;
         S.account.pokeballs = msg.pokeballs;
@@ -3873,8 +3911,10 @@ function updateHubProfile() {
   let itemTotal = 0;
   for (const key of Object.keys(HEALING_ITEMS || {})) { itemTotal += (inv[key] || 0); }
   const rareCandyCount = inv['rare_candy'] || 0;
+  const regionName = (a.current_region || 'kanto').charAt(0).toUpperCase() + (a.current_region || 'kanto').slice(1);
   el.innerHTML =
     '<span>Welcome, <span class="stat">' + a.username + '</span>!</span>' +
+    '<span>Region: <span class="stat" style="color:#14b8a6">' + regionName + '</span></span>' +
     '<span>$<span class="stat">' + (a.currency || 0) + '</span></span>' +
     '<span>Balls: <span class="stat">' + (a.pokeballs || 0) + '</span></span>' +
     '<span>Items: <span class="stat">' + itemTotal + '</span></span>' +
@@ -3899,8 +3939,10 @@ function setupJourneyBattle(msg) {
   renderJourneyBattle();
   if (S.encounterType === 'wild') {
     const w = msg.wild_pokemon;
+    const shinyText = w.is_shiny ? ' \u2605 SHINY! \u2605' : '';
+    const regionText = msg.region_name ? ' [' + msg.region_name + ']' : '';
     if (w.rarity === 'legendary') {
-      setBattleText('A legendary ' + w.name + ' appeared!');
+      setBattleText('A legendary ' + w.name + shinyText + ' appeared!' + regionText);
       // Screen shake for legendary encounter
       var arena = document.getElementById('battle-arena');
       if (arena) {
@@ -3909,7 +3951,12 @@ function setupJourneyBattle(msg) {
       }
     } else {
       const rText = w.rarity && w.rarity !== 'common' ? ' (' + w.rarity + ')' : '';
-      setBattleText('A wild ' + w.name + ' Lv.' + w.level + rText + ' appeared!');
+      setBattleText('A wild ' + w.name + ' Lv.' + w.level + rText + shinyText + ' appeared!' + regionText);
+    }
+    // Shiny sparkle effect on opponent sprite
+    if (w.is_shiny) {
+      var oppSprite = document.getElementById('opponent-sprite');
+      if (oppSprite) oppSprite.classList.add('shiny-sprite');
     }
   }
   setTimeout(() => showJourneyMovePanel(), 1500);
@@ -4673,6 +4720,42 @@ function useRareCandy(itemType, pokemonId) {
   playSound('select');
 }
 
+/* ─── Regions ──────────────────────────────────── */
+function showRegions() {
+  showScreen('regions');
+  send({ type: 'get_regions' });
+  document.getElementById('region-grid').innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px;grid-column:1/-1">Loading...</div>';
+}
+
+function renderRegions(data) {
+  var grid = document.getElementById('region-grid');
+  grid.innerHTML = '';
+  var currentRegion = data.current_region || 'kanto';
+  data.regions.forEach(function(r) {
+    var isCurrent = r.id === currentRegion;
+    var card = document.createElement('div');
+    card.className = 'region-card' + (isCurrent ? ' current' : '');
+    card.style.borderColor = r.color;
+    card.innerHTML =
+      (isCurrent ? '<span class="region-here">YOU ARE HERE</span>' : '') +
+      '<img class="region-sprite" src="/sprites/front/' + String(r.icon_dex_id).padStart(3,'0') + '.png" alt="' + r.name + '">' +
+      '<span class="region-name" style="color:' + r.color + '">' + r.name + '</span>' +
+      '<span class="region-gen">Gen ' + r.generation + ' | ' + r.pokemon_count + ' Pokemon</span>' +
+      '<span class="region-desc">' + r.description + '</span>' +
+      '<span class="region-badges-info">' + r.badge_count + '/8 Badges</span>';
+    if (!isCurrent) {
+      (function(regionId) {
+        card.onclick = function() { travelToRegion(regionId); };
+      })(r.id);
+    }
+    grid.appendChild(card);
+  });
+}
+
+function travelToRegion(regionId) {
+  send({ type: 'travel_to_region', region_id: regionId });
+}
+
 /* ─── Gyms ─────────────────────────────────────── */
 function showGyms() {
   showScreen('gymlist');
@@ -4683,6 +4766,8 @@ function showGyms() {
 const GYM_BADGE_COLORS = ['#b8a038','#6890f0','#f8d030','#78c850','#a040a0','#f85888','#f08030','#e0c068'];
 
 function renderGymList(data) {
+  var titleEl = document.getElementById('gymlist-title');
+  if (titleEl && data.region_name) titleEl.textContent = data.region_name.toUpperCase() + ' GYM LEADERS';
   const list = document.getElementById('gym-list');
   list.innerHTML = '';
   data.gyms.forEach((gym, i) => {
@@ -4768,13 +4853,18 @@ function clearBattleBackground() {
 function updateHubProgression() {
   var badges = S.account ? (S.account.badges || []) : [];
   var milestones = S.account ? (S.account.milestones || []) : [];
+  var currentRegion = S.account ? (S.account.current_region || 'kanto') : 'kanto';
+  var prefix = currentRegion !== 'kanto' ? currentRegion + ':' : '';
   var e4Btn = document.getElementById('hub-e4-btn');
   var champBtn = document.getElementById('hub-champion-btn');
   var mastersBtn = document.getElementById('hub-masters-btn');
   if (e4Btn) e4Btn.style.display = badges.length >= 8 ? '' : 'none';
-  var allE4 = ['e4_1','e4_2','e4_3','e4_4'].every(function(id) { return milestones.indexOf(id + '_defeated') >= 0; });
+  var allE4 = ['e4_1','e4_2','e4_3','e4_4'].every(function(id) { return milestones.indexOf(prefix + id + '_defeated') >= 0; });
   if (champBtn) champBtn.style.display = allE4 ? '' : 'none';
-  if (mastersBtn) mastersBtn.style.display = milestones.indexOf('champion_defeated') >= 0 ? '' : 'none';
+  // Masters unlocked by any region's champion defeat
+  var hasChampion = milestones.indexOf('champion_defeated') >= 0 ||
+    milestones.some(function(m) { return m.endsWith(':champion_defeated'); });
+  if (mastersBtn) mastersBtn.style.display = hasChampion ? '' : 'none';
 }
 
 function showEliteFour() {
@@ -4784,6 +4874,8 @@ function showEliteFour() {
 }
 
 function renderE4List(data) {
+  var titleEl = document.getElementById('e4list-title');
+  if (titleEl && data.region_name) titleEl.textContent = data.region_name.toUpperCase() + ' ELITE FOUR';
   var list = document.getElementById('e4-list');
   list.innerHTML = '';
   var E4_COLORS = ['#98d8d8','#c03028','#705898','#7038f8'];

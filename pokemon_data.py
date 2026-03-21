@@ -14,12 +14,14 @@ EVOLUTIONS = {}   # str(dex_id) -> {evolves_to, level, method}
 ZMOVES = {}       # type (str) -> {name, power_mult}
 MEGA_EVOLUTIONS = {}  # str(dex_id) -> mega form data (or list for dual megas)
 DYNAMAX = {}      # dynamax data: max_move_powers, max_move_names, gigantamax
+REGIONS = []      # region data from regions.json
 POKEMON_LIST = [] # ordered list for client
+_NAME_TO_ID = {}  # lowercase name -> dex_id (built during load)
 
 
 def load_data():
     """Load all JSON data files. Call once at startup."""
-    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, ZMOVES, MEGA_EVOLUTIONS, DYNAMAX, POKEMON_LIST
+    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, ZMOVES, MEGA_EVOLUTIONS, DYNAMAX, REGIONS, POKEMON_LIST, _NAME_TO_ID
 
     with open(os.path.join(DATA_DIR, "pokemon.json")) as f:
         pokemon_list = json.load(f)
@@ -55,8 +57,16 @@ def load_data():
         with open(dynamax_path) as f:
             DYNAMAX = json.load(f)
 
+    regions_path = os.path.join(DATA_DIR, "regions.json")
+    if os.path.exists(regions_path):
+        with open(regions_path) as f:
+            REGIONS = json.load(f)
+
     # Index by dex ID
     POKEMON = {p["id"]: p for p in pokemon_list}
+
+    # Build name -> dex_id lookup
+    _NAME_TO_ID = {p["name"].lower(): p["id"] for p in pokemon_list}
 
     # Build client-safe list (no need to hide anything, but ensure structure)
     POKEMON_LIST = []
@@ -210,3 +220,72 @@ def get_starter_moves(dex_id):
 def get_pokemon_list_for_client():
     """Get the full Pokemon list formatted for the client."""
     return POKEMON_LIST
+
+
+# ─── Region Helpers ────────────────────────────────────
+
+def get_all_regions():
+    """Return the full REGIONS list."""
+    return REGIONS
+
+
+def get_region(region_id):
+    """Get region dict by ID (e.g., 'kanto'). Returns None if not found."""
+    for r in REGIONS:
+        if r["id"] == region_id:
+            return r
+    return None
+
+
+def get_region_pokemon_ids(region_id):
+    """Get set of dex IDs in a region's dex range."""
+    region = get_region(region_id)
+    if not region:
+        return set()
+    lo, hi = region["dex_range"]
+    return set(range(lo, hi + 1))
+
+
+def get_region_gyms(region_id):
+    """Get gym list from region data."""
+    region = get_region(region_id)
+    if not region:
+        return []
+    return region.get("gyms", [])
+
+
+def get_region_elite_four(region_id):
+    """Get Elite Four list from region data."""
+    region = get_region(region_id)
+    if not region:
+        return []
+    return region.get("elite_four", [])
+
+
+def get_region_champion(region_id):
+    """Get champion data from region data."""
+    region = get_region(region_id)
+    if not region:
+        return None
+    return region.get("champion")
+
+
+def resolve_species_name(name):
+    """Look up a dex_id from a Pokemon species name (case-insensitive).
+    Handles form names: 'Lycanroc' matches 'Lycanroc-midday', 'Mr. Mime' matches 'Mr-mime', etc.
+    Returns int or None."""
+    lower = name.lower()
+    # Exact match first
+    result = _NAME_TO_ID.get(lower)
+    if result:
+        return result
+    # Try replacing periods and spaces with hyphens (Mr. Mime -> mr-mime)
+    alt = lower.replace(". ", "-").replace(".", "-").replace(" ", "-")
+    result = _NAME_TO_ID.get(alt)
+    if result:
+        return result
+    # Prefix match: 'Lycanroc' matches 'Lycanroc-midday'
+    for db_name, dex_id in _NAME_TO_ID.items():
+        if db_name.startswith(lower + "-") or db_name.startswith(alt + "-"):
+            return dex_id
+    return None

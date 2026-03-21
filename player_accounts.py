@@ -388,7 +388,7 @@ class AccountManager:
         ).fetchone()["cnt"]
 
         badges = conn.execute(
-            "SELECT gym_id FROM player_badges WHERE player_id = ? ORDER BY gym_id",
+            "SELECT gym_id, region FROM player_badges WHERE player_id = ? ORDER BY gym_id",
             (player_id,)
         ).fetchall()
 
@@ -404,6 +404,14 @@ class AccountManager:
 
         conn.close()
 
+        # Build badges_by_region dict
+        badges_by_region = {}
+        for b in badges:
+            region = b["region"] or "kanto"
+            badges_by_region.setdefault(region, []).append(b["gym_id"])
+
+        current_region = dict(row).get("current_region", "kanto")
+
         return {
             "id": row["id"],
             "username": row["username"],
@@ -411,9 +419,11 @@ class AccountManager:
             "starter_dex_id": row["starter_dex_id"],
             "pokeballs": row["pokeballs"],
             "currency": dict(row).get("currency", 500),
+            "current_region": current_region,
             "team": [self._enrich_pokemon_xp(dict(r)) for r in team],
             "total_pokemon": total_pokemon,
-            "badges": [r["gym_id"] for r in badges],
+            "badges": badges_by_region.get(current_region, []),
+            "badges_by_region": badges_by_region,
             "milestones": [r["milestone"] for r in milestones],
             "inventory": {r["item_type"]: r["quantity"] for r in inventory},
         }
@@ -673,13 +683,13 @@ class AccountManager:
 
     # ─── Badges & Progression ─────────────────────────
 
-    def earn_badge(self, player_id, gym_id):
-        """Record badge earned. Returns True on success (False if duplicate)."""
+    def earn_badge(self, player_id, gym_id, region="kanto"):
+        """Record badge earned for a region. Returns True on success (False if duplicate)."""
         conn = self._conn()
         try:
             conn.execute(
-                "INSERT INTO player_badges (player_id, gym_id, earned_at) VALUES (?, ?, ?)",
-                (player_id, gym_id, int(time.time()))
+                "INSERT INTO player_badges (player_id, gym_id, region, earned_at) VALUES (?, ?, ?, ?)",
+                (player_id, gym_id, region, int(time.time()))
             )
             conn.commit()
             conn.close()
@@ -688,14 +698,56 @@ class AccountManager:
             conn.close()
             return False
 
-    def get_badges(self, player_id):
+    def get_badges(self, player_id, region=None):
+        """Get badges. If region is specified, filter by region."""
+        conn = self._conn()
+        if region:
+            rows = conn.execute(
+                "SELECT gym_id FROM player_badges WHERE player_id = ? AND region = ? ORDER BY gym_id",
+                (player_id, region)
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT gym_id FROM player_badges WHERE player_id = ? ORDER BY gym_id",
+                (player_id,)
+            ).fetchall()
+        conn.close()
+        return [r["gym_id"] for r in rows]
+
+    def get_badges_by_region(self, player_id):
+        """Get all badges grouped by region. Returns {region: [gym_ids]}."""
         conn = self._conn()
         rows = conn.execute(
-            "SELECT gym_id FROM player_badges WHERE player_id = ? ORDER BY gym_id",
+            "SELECT gym_id, region FROM player_badges WHERE player_id = ? ORDER BY region, gym_id",
             (player_id,)
         ).fetchall()
         conn.close()
-        return [r["gym_id"] for r in rows]
+        result = {}
+        for r in rows:
+            region = r["region"] or "kanto"
+            result.setdefault(region, []).append(r["gym_id"])
+        return result
+
+    # ─── Region ──────────────────────────────────────
+
+    def get_current_region(self, player_id):
+        """Get the player's current region."""
+        conn = self._conn()
+        row = conn.execute(
+            "SELECT current_region FROM players WHERE id = ?", (player_id,)
+        ).fetchone()
+        conn.close()
+        return row["current_region"] if row else "kanto"
+
+    def set_current_region(self, player_id, region_id):
+        """Update the player's current region."""
+        conn = self._conn()
+        conn.execute(
+            "UPDATE players SET current_region = ? WHERE id = ?",
+            (region_id, player_id)
+        )
+        conn.commit()
+        conn.close()
 
     def record_milestone(self, player_id, milestone):
         conn = self._conn()
