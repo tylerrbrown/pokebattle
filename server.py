@@ -30,6 +30,7 @@ from journey import (
     CURRENCY_ELITE_FOUR_WIN, CURRENCY_CHAMPION_WIN, CURRENCY_MASTERS_WIN,
     CURRENCY_PVP_WIN, CURRENCY_PVP_BOT_WIN,
     get_gym, get_next_gym, get_elite_four_member, get_masters_opponent,
+    get_gym_leaders, get_elite_four, get_champion,
 )
 from battle_engine import PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE
 
@@ -877,7 +878,8 @@ async def handle_message(player, msg, room_mgr):
             return
         avg_level = sum(p["level"] for p in team_data) / len(team_data)
         pity_counter = account_mgr.get_encounter_counter(player.account_id)
-        wild, rarity = generate_wild_pokemon(avg_level, pity_counter=pity_counter)
+        current_region = account_mgr.get_current_region(player.account_id)
+        wild, rarity = generate_wild_pokemon(avg_level, pity_counter=pity_counter, region=current_region)
         # Update pity counter: reset on legendary, increment otherwise
         if rarity == "legendary":
             account_mgr.reset_encounter_counter(player.account_id)
@@ -886,7 +888,9 @@ async def handle_message(player, msg, room_mgr):
         team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
         encounter = WildEncounter(player, team, wild, rarity)
         active_encounters[player.id] = encounter
-        await player.send({"type": "wild_encounter_start", **encounter.serialize_state()})
+        region_data = pokemon_data.get_region(current_region)
+        region_name = region_data["name"] if region_data else "Kanto"
+        await player.send({"type": "wild_encounter_start", "region_name": region_name, **encounter.serialize_state()})
 
     elif msg_type == "start_training":
         if not getattr(player, 'account_id', None):
@@ -928,32 +932,38 @@ async def handle_message(player, msg, room_mgr):
     elif msg_type == "get_gyms":
         if not getattr(player, 'account_id', None):
             return
-        badges = account_mgr.get_badges(player.account_id)
-        next_gym = get_next_gym(badges)
+        current_region = account_mgr.get_current_region(player.account_id)
+        badges = account_mgr.get_badges(player.account_id, region=current_region)
+        leaders = get_gym_leaders(current_region)
+        next_gym = get_next_gym(badges, current_region)
         gyms = []
-        for g in GYM_LEADERS:
+        for g in leaders:
             gyms.append({
                 "id": g["id"], "name": g["name"], "type": g["type"],
                 "badge": g["badge"], "completed": g["id"] in badges,
                 "team_size": len(g["team"]),
-                "max_level": max(t["level"] for t in g["team"]),
+                "max_level": max(t.get("level", 50) for t in g["team"]),
             })
+        region_data = pokemon_data.get_region(current_region)
         await player.send({
             "type": "gym_list",
             "gyms": gyms,
             "next_gym_id": next_gym["id"] if next_gym else None,
             "badges": badges,
+            "region": current_region,
+            "region_name": region_data["name"] if region_data else "Kanto",
         })
 
     elif msg_type == "start_gym":
         if not getattr(player, 'account_id', None):
             return
         gym_id = data.get("gym_id")
-        gym = get_gym(gym_id)
+        current_region = account_mgr.get_current_region(player.account_id)
+        gym = get_gym(gym_id, current_region)
         if not gym:
             await player.send({"type": "error", "message": "Invalid gym."})
             return
-        badges = account_mgr.get_badges(player.account_id)
+        badges = account_mgr.get_badges(player.account_id, region=current_region)
         # Must beat gyms in order
         if gym_id > 1 and (gym_id - 1) not in badges:
             await player.send({"type": "error", "message": "Beat the previous gym first!"})
@@ -961,11 +971,11 @@ async def handle_message(player, msg, room_mgr):
         await player.send({
             "type": "gym_intro",
             "gym": {
-                "id": gym["id"], "name": gym["name"], "title": gym["title"],
+                "id": gym["id"], "name": gym["name"], "title": gym.get("title", "Gym Leader"),
                 "type": gym["type"], "badge": gym["badge"],
                 "dialog_intro": gym["dialog_intro"],
                 "team_size": len(gym["team"]),
-                "max_level": max(t["level"] for t in gym["team"]),
+                "max_level": max(t.get("level", 50) for t in gym["team"]),
             }
         })
 
@@ -973,7 +983,8 @@ async def handle_message(player, msg, room_mgr):
         if not getattr(player, 'account_id', None):
             return
         gym_id = data.get("gym_id")
-        gym = get_gym(gym_id)
+        current_region = account_mgr.get_current_region(player.account_id)
+        gym = get_gym(gym_id, current_region)
         if not gym:
             return
         # Build player team from their caught Pokemon
@@ -991,6 +1002,7 @@ async def handle_message(player, msg, room_mgr):
         encounter.gym_active = 0
         encounter.wild = gym_team[0]
         encounter.is_gym = True
+        encounter.battle_region = current_region
         active_encounters[player.id] = encounter
 
         await player.send({
@@ -1000,36 +1012,88 @@ async def handle_message(player, msg, room_mgr):
             "gym_team_size": len(gym_team),
         })
 
+    # ─── Region Travel ─────────────────────────────
+    elif msg_type == "get_regions":
+        if not getattr(player, 'account_id', None):
+            return
+        current_region = account_mgr.get_current_region(player.account_id)
+        badges_by_region = account_mgr.get_badges_by_region(player.account_id)
+        regions = []
+        for r in pokemon_data.get_all_regions():
+            region_badges = badges_by_region.get(r["id"], [])
+            regions.append({
+                "id": r["id"],
+                "name": r["name"],
+                "generation": r["generation"],
+                "dex_range": r["dex_range"],
+                "description": r["description"],
+                "color": r["color"],
+                "icon_dex_id": r["icon_dex_id"],
+                "pokemon_count": r["dex_range"][1] - r["dex_range"][0] + 1,
+                "badge_count": len(region_badges),
+                "badges": region_badges,
+            })
+        await player.send({
+            "type": "regions_list",
+            "regions": regions,
+            "current_region": current_region,
+        })
+
+    elif msg_type == "travel_to_region":
+        if not getattr(player, 'account_id', None):
+            return
+        region_id = data.get("region_id", "").strip().lower()
+        region = pokemon_data.get_region(region_id)
+        if not region:
+            await player.send({"type": "error", "message": "Unknown region."})
+            return
+        account_mgr.set_current_region(player.account_id, region_id)
+        await player.send({
+            "type": "region_changed",
+            "region_id": region_id,
+            "region_name": region["name"],
+            "region_color": region["color"],
+        })
+
     # ─── Elite Four / Champion / Masters Eight ──────
     elif msg_type == "get_elite_four":
         if not getattr(player, 'account_id', None):
             return
-        badges = account_mgr.get_badges(player.account_id)
+        current_region = account_mgr.get_current_region(player.account_id)
+        badges = account_mgr.get_badges(player.account_id, region=current_region)
         milestones = account_mgr.get_milestones(player.account_id)
         if len(badges) < 8:
             await player.send({"type": "error", "message": "Beat all 8 gym leaders first!"})
             return
+        e4_members = get_elite_four(current_region)
+        # Region-prefixed milestone check
+        prefix = f"{current_region}:" if current_region != "kanto" else ""
         e4_list = []
-        for i, e in enumerate(ELITE_FOUR):
+        for i, e in enumerate(e4_members):
             e4_list.append({
                 "id": e["id"], "name": e["name"], "title": e["title"],
-                "type": e["type"], "completed": f"{e['id']}_defeated" in milestones,
+                "type": e["type"], "completed": f"{prefix}{e['id']}_defeated" in milestones,
                 "team_size": len(e["team"]),
-                "max_level": max(t["level"] for t in e["team"]),
+                "max_level": max(t.get("level", 50) for t in e["team"]),
             })
+        region_data = pokemon_data.get_region(current_region)
         await player.send({
             "type": "e4_list",
             "members": e4_list,
             "milestones": milestones,
+            "region": current_region,
+            "region_name": region_data["name"] if region_data else "Kanto",
         })
 
     elif msg_type == "start_e4":
         if not getattr(player, 'account_id', None):
             return
         e4_id = data.get("e4_id")
+        current_region = account_mgr.get_current_region(player.account_id)
+        e4_members = get_elite_four(current_region)
         member = None
         e4_index = -1
-        for i, e in enumerate(ELITE_FOUR):
+        for i, e in enumerate(e4_members):
             if e["id"] == e4_id:
                 member = e
                 e4_index = i
@@ -1038,11 +1102,12 @@ async def handle_message(player, msg, room_mgr):
             await player.send({"type": "error", "message": "Invalid E4 member."})
             return
         milestones = account_mgr.get_milestones(player.account_id)
+        prefix = f"{current_region}:" if current_region != "kanto" else ""
         # Must beat E4 in order
         if e4_index > 0:
-            prev_id = ELITE_FOUR[e4_index - 1]["id"]
-            if f"{prev_id}_defeated" not in milestones:
-                await player.send({"type": "error", "message": f"Beat {ELITE_FOUR[e4_index-1]['name']} first!"})
+            prev_id = e4_members[e4_index - 1]["id"]
+            if f"{prefix}{prev_id}_defeated" not in milestones:
+                await player.send({"type": "error", "message": f"Beat {e4_members[e4_index-1]['name']} first!"})
                 return
         await player.send({
             "type": "trainer_intro",
@@ -1050,7 +1115,7 @@ async def handle_message(player, msg, room_mgr):
                 "id": member["id"], "name": member["name"], "title": member["title"],
                 "type": member["type"], "dialog_intro": member["dialog_intro"],
                 "team_size": len(member["team"]),
-                "max_level": max(t["level"] for t in member["team"]),
+                "max_level": max(t.get("level", 50) for t in member["team"]),
                 "category": "e4",
             }
         })
@@ -1059,8 +1124,10 @@ async def handle_message(player, msg, room_mgr):
         if not getattr(player, 'account_id', None):
             return
         e4_id = data.get("e4_id")
+        current_region = account_mgr.get_current_region(player.account_id)
+        e4_members = get_elite_four(current_region)
         member = None
-        for e in ELITE_FOUR:
+        for e in e4_members:
             if e["id"] == e4_id:
                 member = e
                 break
@@ -1079,6 +1146,7 @@ async def handle_message(player, msg, room_mgr):
         encounter.wild = trainer_team[0]
         encounter.is_gym = True
         encounter.trainer_category = "e4"
+        encounter.battle_region = current_region
         active_encounters[player.id] = encounter
         await player.send({
             "type": "gym_battle_start",
@@ -1090,20 +1158,24 @@ async def handle_message(player, msg, room_mgr):
     elif msg_type == "get_champion":
         if not getattr(player, 'account_id', None):
             return
+        current_region = account_mgr.get_current_region(player.account_id)
         milestones = account_mgr.get_milestones(player.account_id)
-        # Must beat all E4
-        for e in ELITE_FOUR:
-            if f"{e['id']}_defeated" not in milestones:
+        e4_members = get_elite_four(current_region)
+        prefix = f"{current_region}:" if current_region != "kanto" else ""
+        # Must beat all E4 for this region
+        for e in e4_members:
+            if f"{prefix}{e['id']}_defeated" not in milestones:
                 await player.send({"type": "error", "message": "Beat the entire Elite Four first!"})
                 return
+        champ = get_champion(current_region)
         await player.send({
             "type": "trainer_intro",
             "trainer": {
-                "id": CHAMPION["id"], "name": CHAMPION["name"], "title": CHAMPION["title"],
-                "type": CHAMPION.get("type", "normal"),
-                "dialog_intro": CHAMPION["dialog_intro"],
-                "team_size": len(CHAMPION["team"]),
-                "max_level": max(t["level"] for t in CHAMPION["team"]),
+                "id": champ["id"], "name": champ["name"], "title": champ["title"],
+                "type": champ.get("type", "normal"),
+                "dialog_intro": champ["dialog_intro"],
+                "team_size": len(champ["team"]),
+                "max_level": max(t.get("level", 50) for t in champ["team"]),
                 "category": "champion",
             }
         })
@@ -1111,24 +1183,27 @@ async def handle_message(player, msg, room_mgr):
     elif msg_type == "champion_battle_start":
         if not getattr(player, 'account_id', None):
             return
+        current_region = account_mgr.get_current_region(player.account_id)
+        champ = get_champion(current_region)
         team_data = account_mgr.get_team(player.account_id)
         if not team_data:
             await player.send({"type": "error", "message": "No Pokémon in team."})
             return
         player_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
-        trainer_team = build_trainer_team(CHAMPION["team"])
+        trainer_team = build_trainer_team(champ["team"])
         encounter = WildEncounter(player, player_team, None, None)
-        encounter.gym = CHAMPION
+        encounter.gym = champ
         encounter.gym_team = trainer_team
         encounter.gym_active = 0
         encounter.wild = trainer_team[0]
         encounter.is_gym = True
         encounter.trainer_category = "champion"
+        encounter.battle_region = current_region
         active_encounters[player.id] = encounter
         await player.send({
             "type": "gym_battle_start",
             **encounter.serialize_state(),
-            "gym_name": CHAMPION["name"],
+            "gym_name": champ["name"],
             "gym_team_size": len(trainer_team),
         })
 
@@ -1136,8 +1211,12 @@ async def handle_message(player, msg, room_mgr):
         if not getattr(player, 'account_id', None):
             return
         milestones = account_mgr.get_milestones(player.account_id)
-        if "champion_defeated" not in milestones:
-            await player.send({"type": "error", "message": "Beat the Champion first!"})
+        # Masters unlocked by any region's champion defeat
+        has_champion = "champion_defeated" in milestones or any(
+            f"{r['id']}:champion_defeated" in milestones for r in pokemon_data.get_all_regions()
+        )
+        if not has_champion:
+            await player.send({"type": "error", "message": "Beat a Champion first!"})
             return
         m8_list = []
         for m in MASTERS_EIGHT:
@@ -1490,12 +1569,16 @@ async def handle_message(player, msg, room_mgr):
     elif msg_type == "get_progression":
         if not getattr(player, 'account_id', None):
             return
-        badges = account_mgr.get_badges(player.account_id)
+        current_region = account_mgr.get_current_region(player.account_id)
+        badges = account_mgr.get_badges(player.account_id, region=current_region)
+        badges_by_region = account_mgr.get_badges_by_region(player.account_id)
         milestones = account_mgr.get_milestones(player.account_id)
         profile = account_mgr.get_profile(player.account_id)
         await player.send({
             "type": "progression_data",
             "badges": badges,
+            "badges_by_region": badges_by_region,
+            "current_region": current_region,
             "milestones": milestones,
             "currency": profile.get("currency", 500),
             "pokeballs": profile.get("pokeballs", 10),
@@ -2157,8 +2240,11 @@ async def _handle_wild_action(player, encounter, data):
                     reward = trainer.get("reward_currency", CURRENCY_GYM_WIN)
                     account_mgr.add_currency(player.account_id, reward - CURRENCY_WILD_WIN)
 
+                    battle_region = getattr(encounter, 'battle_region', 'kanto')
+                    milestone_prefix = f"{battle_region}:" if battle_region != "kanto" else ""
+
                     if category == "e4":
-                        account_mgr.record_milestone(player.account_id, f"{trainer['id']}_defeated")
+                        account_mgr.record_milestone(player.account_id, f"{milestone_prefix}{trainer['id']}_defeated")
                         rare_candy = _award_rare_candy(player, "e4")
                         await player.send({
                             "type": "trainer_victory",
@@ -2171,7 +2257,7 @@ async def _handle_wild_action(player, encounter, data):
                             "xp_results": xp_results,
                         })
                     elif category == "champion":
-                        account_mgr.record_milestone(player.account_id, "champion_defeated")
+                        account_mgr.record_milestone(player.account_id, f"{milestone_prefix}champion_defeated")
                         rare_candy = _award_rare_candy(player, "champion")
                         await player.send({
                             "type": "trainer_victory",
@@ -2201,8 +2287,8 @@ async def _handle_wild_action(player, encounter, data):
                             "xp_results": xp_results,
                         })
                     else:
-                        # Regular gym
-                        account_mgr.earn_badge(player.account_id, trainer["id"])
+                        # Regular gym — use region-specific badge tracking
+                        account_mgr.earn_badge(player.account_id, trainer["id"], region=battle_region)
                         rare_candy = _award_rare_candy(player, "gym")
                         await player.send({
                             "type": "gym_victory",

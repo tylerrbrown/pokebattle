@@ -100,11 +100,20 @@ CURRENCY_MASTERS_WIN = 2000
 
 # ─── Wild Encounter ──────────────────────────────────
 
-def generate_wild_pokemon(player_team_avg_level, pity_counter=0):
+def generate_wild_pokemon(player_team_avg_level, pity_counter=0, region=None):
     """Pick a random wild Pokemon based on rarity weights, scaled to player level.
     If pity_counter >= PITY_THRESHOLD, forces a legendary encounter.
+    If region is set, 85% chance to filter to that region's dex range, 15% global.
     """
     pokemon_list = list(pokemon_data.POKEMON.values())
+
+    # Region filtering: 85% regional, 15% global
+    if region and region != "all":
+        region_ids = pokemon_data.get_region_pokemon_ids(region)
+        if region_ids and random.random() < 0.85:
+            regional = [p for p in pokemon_list if p["id"] in region_ids]
+            if regional:
+                pokemon_list = regional
 
     # Group by rarity
     by_rarity = {}
@@ -124,6 +133,14 @@ def generate_wild_pokemon(player_team_avg_level, pity_counter=0):
         )[0]
 
     pool = by_rarity.get(rarity, by_rarity.get("common", []))
+    if not pool:
+        # Fallback to global pool if regional pool has no Pokemon of this rarity
+        all_pokemon = list(pokemon_data.POKEMON.values())
+        global_by_rarity = {}
+        for p in all_pokemon:
+            r = p.get("rarity", "common")
+            global_by_rarity.setdefault(r, []).append(p)
+        pool = global_by_rarity.get(rarity, global_by_rarity.get("common", []))
     species = random.choice(pool)
 
     # Level scales with player's team average
@@ -448,12 +465,18 @@ MASTERS_EIGHT = [
 
 
 def build_trainer_team(team_spec):
-    """Build a team from a gym/E4/champion team spec [{dex_id, level}]."""
+    """Build a team from a gym/E4/champion team spec.
+    Supports both {dex_id, level} and {species, level} formats."""
     team = []
     for entry in team_spec:
-        species = pokemon_data.POKEMON.get(entry["dex_id"])
+        dex_id = entry.get("dex_id")
+        if not dex_id and entry.get("species"):
+            dex_id = pokemon_data.resolve_species_name(entry["species"])
+        if not dex_id:
+            continue
+        species = pokemon_data.POKEMON.get(dex_id)
         if species:
-            moves = pokemon_data.get_moves_at_level(entry["dex_id"], entry["level"])
+            moves = pokemon_data.get_moves_at_level(dex_id, entry["level"])
             if not moves:
                 moves = species["moves"][:4]
             team.append(PokemonInstance(species, pokemon_data.MOVES,
@@ -461,28 +484,120 @@ def build_trainer_team(team_spec):
     return team
 
 
-def get_gym(gym_id):
-    """Get gym leader data by ID (1-8)."""
-    for g in GYM_LEADERS:
+def _normalize_region_gym(region_gym):
+    """Convert a regions.json gym entry into the internal gym dict format."""
+    g = region_gym
+    return {
+        "id": g["id"],
+        "name": g["name"],
+        "title": g.get("title", f"The {g['type'].title()} Gym Leader!"),
+        "type": g["type"],
+        "badge": g["badge"],
+        "team": g["team"],
+        "reward_currency": g.get("reward", 500),
+        "dialog_intro": g.get("dialog", {}).get("intro", f"I'm {g['name']}! Let's battle!"),
+        "dialog_win": g.get("dialog", {}).get("defeat", f"You've earned the {g['badge']}!"),
+        "dialog_lose": g.get("dialog", {}).get("lose", "Better luck next time!"),
+    }
+
+
+def _normalize_region_e4(region_e4, index):
+    """Convert a regions.json E4 entry into the internal E4 dict format."""
+    e = region_e4
+    return {
+        "id": f"e4_{index + 1}",
+        "name": e["name"],
+        "title": e.get("title", f"{e['type'].title()} Expert"),
+        "type": e["type"],
+        "team": e["team"],
+        "reward_currency": e.get("reward", 1000),
+        "dialog_intro": e.get("dialog", {}).get("intro", f"I'm {e['name']} of the Elite Four!"),
+        "dialog_win": e.get("dialog", {}).get("defeat", "You've beaten me! Move on!"),
+        "dialog_lose": e.get("dialog", {}).get("lose", "The Elite Four stands supreme!"),
+    }
+
+
+def _normalize_region_champion(region_champ):
+    """Convert a regions.json champion entry into the internal champion dict format."""
+    c = region_champ
+    return {
+        "id": "champion",
+        "name": c["name"],
+        "title": c.get("title", "Pokemon Champion"),
+        "type": c.get("type", "normal"),
+        "team": c["team"],
+        "reward_currency": c.get("reward", 5000),
+        "dialog_intro": c.get("dialog", {}).get("intro", f"I'm {c['name']}, the Champion!"),
+        "dialog_win": c.get("dialog", {}).get("defeat", "You are the new Champion!"),
+        "dialog_lose": c.get("dialog", {}).get("lose", "The Champion stands supreme!"),
+    }
+
+
+def get_gym_leaders(region="kanto"):
+    """Get all gym leaders for a region. Falls back to hardcoded Kanto for backward compat."""
+    if region == "kanto" or not region:
+        # Check regions.json first, fall back to hardcoded
+        region_gyms = pokemon_data.get_region_gyms("kanto")
+        if region_gyms:
+            return [_normalize_region_gym(g) for g in region_gyms]
+        return GYM_LEADERS
+    region_gyms = pokemon_data.get_region_gyms(region)
+    if region_gyms:
+        return [_normalize_region_gym(g) for g in region_gyms]
+    return GYM_LEADERS
+
+
+def get_gym(gym_id, region="kanto"):
+    """Get gym leader data by ID (1-8) for a region."""
+    leaders = get_gym_leaders(region)
+    for g in leaders:
         if g["id"] == gym_id:
             return g
     return None
 
 
-def get_next_gym(badges):
-    """Get the next gym to challenge based on earned badges."""
+def get_next_gym(badges, region="kanto"):
+    """Get the next gym to challenge based on earned badges for a region."""
+    leaders = get_gym_leaders(region)
     earned = set(badges)
-    for g in GYM_LEADERS:
+    for g in leaders:
         if g["id"] not in earned:
             return g
     return None  # All badges earned
 
 
-def get_elite_four_member(index):
-    """Get Elite Four member by index (0-3)."""
-    if 0 <= index < len(ELITE_FOUR):
-        return ELITE_FOUR[index]
+def get_elite_four(region="kanto"):
+    """Get Elite Four list for a region."""
+    if region == "kanto" or not region:
+        region_e4 = pokemon_data.get_region_elite_four("kanto")
+        if region_e4:
+            return [_normalize_region_e4(e, i) for i, e in enumerate(region_e4)]
+        return ELITE_FOUR
+    region_e4 = pokemon_data.get_region_elite_four(region)
+    if region_e4:
+        return [_normalize_region_e4(e, i) for i, e in enumerate(region_e4)]
+    return ELITE_FOUR
+
+
+def get_elite_four_member(index, region="kanto"):
+    """Get Elite Four member by index (0-3) for a region."""
+    e4 = get_elite_four(region)
+    if 0 <= index < len(e4):
+        return e4[index]
     return None
+
+
+def get_champion(region="kanto"):
+    """Get champion data for a region."""
+    if region == "kanto" or not region:
+        region_champ = pokemon_data.get_region_champion("kanto")
+        if region_champ:
+            return _normalize_region_champion(region_champ)
+        return CHAMPION
+    region_champ = pokemon_data.get_region_champion(region)
+    if region_champ:
+        return _normalize_region_champion(region_champ)
+    return CHAMPION
 
 
 def get_masters_opponent(opponent_id):
