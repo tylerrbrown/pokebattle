@@ -948,6 +948,14 @@ input.invalid { border-color: var(--red); }
   100% { transform:translate(0,0) rotate(var(--vfx-rot)); opacity:0; }
 }
 
+.vfx-fairy { width:8px; height:8px; border-radius:50%; background:var(--type-fairy); box-shadow:0 0 6px rgba(238,153,172,0.7); }
+@keyframes vfx-fairy {
+  0% { transform:scale(0) translate(var(--vfx-dx),var(--vfx-dy)); opacity:0; }
+  30% { transform:scale(1.3) translate(0,0); opacity:1; }
+  60% { transform:scale(0.8); opacity:0.8; }
+  100% { transform:scale(0) translate(calc(var(--vfx-dx) * -1),calc(var(--vfx-dy) * -1)); opacity:0; }
+}
+
 /* ─── Scrollbar ─────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -3068,7 +3076,7 @@ function screenFlash() {
 function playMoveEffect(moveType, isAttackerPlayer) {
   var layer = document.getElementById('battle-vfx-layer');
   if (!layer) return;
-  var counts = {fire:8, water:8, electric:6, grass:7, ice:6, fighting:5, poison:6, ground:8, flying:6, psychic:6, bug:7, rock:5, ghost:5, dragon:6, dark:6, steel:6, normal:5};
+  var counts = {fire:8, water:8, electric:6, grass:7, ice:6, fighting:5, poison:6, ground:8, flying:6, psychic:6, bug:7, rock:5, ghost:5, dragon:6, dark:6, steel:6, fairy:6, normal:5};
   var count = counts[moveType] || 5;
   var spread = 40;
   // Target is opponent sprite area if player attacks, player sprite area if opponent attacks
