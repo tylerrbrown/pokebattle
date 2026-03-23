@@ -4376,6 +4376,20 @@ function setupJourneyBattle(msg) {
       setTimeout(() => playShinySparkle('opp-sprite'), 500);
     }
   }
+  // Pity hint: atmospheric message when close to legendary pity threshold
+  if (msg.pity_hint && S.encounterType === 'wild') {
+    var hintEl = document.createElement('div');
+    hintEl.textContent = msg.pity_hint;
+    hintEl.style.cssText = 'position:absolute;top:8px;left:50%;transform:translateX(-50%);color:#e8d44d;font-style:italic;font-size:13px;text-shadow:0 0 8px rgba(232,212,77,0.6);opacity:0;transition:opacity 1.5s;z-index:10;pointer-events:none;white-space:nowrap;';
+    var arena = document.getElementById('battle-arena');
+    if (arena) {
+      arena.style.position = 'relative';
+      arena.appendChild(hintEl);
+      setTimeout(function() { hintEl.style.opacity = '1'; }, 200);
+      setTimeout(function() { hintEl.style.opacity = '0'; }, 4000);
+      setTimeout(function() { if (hintEl.parentNode) hintEl.parentNode.removeChild(hintEl); }, 5500);
+    }
+  }
   setTimeout(() => showJourneyMovePanel(), 1500);
 }
 
