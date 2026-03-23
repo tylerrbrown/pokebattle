@@ -202,6 +202,15 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **Cleanup**: trade rooms auto-cleaned on disconnect; separate from battle room namespace
 - **Frontend screens**: `screen-trademenu` (create/join), `screen-tradewait` (waiting for partner), `screen-trade` (active trade with offer/confirm)
 
+## Legendary Pity System
+
+- **Threshold**: Every 50 non-legendary wild encounters guarantees a legendary
+- **Counter**: `encounters_since_legendary` column in `players` table, managed by `get_encounter_counter()`, `increment_encounter_counter()`, `reset_encounter_counter()` in `player_accounts.py`
+- **Logic**: `generate_wild_pokemon()` in `journey.py` accepts `pity_counter` param; forces `rarity = "legendary"` when `>= PITY_THRESHOLD` (50)
+- **Server wiring**: `server.py` reads counter before encounter, passes to generator, resets on legendary (natural or pity), increments otherwise
+- **Atmospheric hints**: At 40+ encounters, `wild_encounter_start` includes `pity_hint` text ("You sense something powerful nearby..." at 40+, "The air crackles with strange energy..." at 45+); frontend shows as a fading golden italic overlay on the battle arena
+- **Natural legendaries also reset**: If RNG rolls legendary before hitting 50, counter resets too
+
 ## Tests
 
 ```bash
@@ -240,7 +249,7 @@ python tests/test_battle_engine.py
 
 ### Feature Requests (3/21/2026 — from Liam)
 - **Shiny Pokemon**: Sparkle effect at battle start, ~10% encounter rate
-- **Legendary pity system**: Guaranteed legendary encounter every 50 wild encounters
+- ~~**Legendary pity system**: Guaranteed legendary encounter every 50 wild encounters~~ (DONE 3/23/2026)
 - **Decrease legendary random rate**: Lower the base random chance of finding legendaries
 
 ### Implemented in "Liam's Feature Pack" (3/19/2026)
