@@ -1487,6 +1487,7 @@ input.invalid { border-color: var(--red); }
       <button class="pokedex-filter-btn" data-filter="caught" onclick="setPokedexFilter(this,'caught')">Caught</button>
       <button class="pokedex-filter-btn" data-filter="seen" onclick="setPokedexFilter(this,'seen')">Seen</button>
       <button class="pokedex-filter-btn" data-filter="unseen" onclick="setPokedexFilter(this,'unseen')">Unseen</button>
+      <button class="pokedex-filter-btn" data-filter="shiny" onclick="setPokedexFilter(this,'shiny')" style="color:#ffd700">\u2605 Shiny</button>
       <select class="pokedex-type-select" id="pokedex-type-filter" onchange="filterPokedex()">
         <option value="">All Types</option>
       </select>
@@ -4101,6 +4102,7 @@ function renderPokedexGrid() {
     if (statusFilter === 'caught' && !e.caught) return false;
     if (statusFilter === 'seen' && !e.seen) return false;
     if (statusFilter === 'unseen' && (e.seen || e.caught)) return false;
+    if (statusFilter === 'shiny' && !e.has_shiny) return false;
     // Search by name or dex number
     if (searchVal) {
       var num = '#' + String(e.dex_id).padStart(3, '0');
@@ -4120,10 +4122,12 @@ function renderPokedexGrid() {
     var name = (e.caught || e.seen) ? e.name : '???';
     var clickAttr = (e.seen || e.caught) ? ' onclick="showPokedexDetail(' + e.dex_id + ')"' : '';
     if (e.caught || e.seen) {
+      var shinyBadge = e.has_shiny ? ' <span class="shiny-star">\u2605</span>' : '';
+      var shinyImgCls = e.has_shiny ? ' class="shiny-sprite"' : '';
       html += '<div class="pokedex-entry ' + cls + '"' + clickAttr + '>' +
-        '<img src="sprites/front/' + e.dex_id + '.png" loading="lazy" alt="' + name + '">' +
+        '<img src="sprites/front/' + e.dex_id + '.png" loading="lazy" alt="' + name + '"' + shinyImgCls + '>' +
         '<span class="dex-num">' + num + '</span>' +
-        '<span class="dex-name">' + name + '</span></div>';
+        '<span class="dex-name">' + name + shinyBadge + '</span></div>';
     } else {
       html += '<div class="pokedex-entry unseen">' +
         '<div style="width:48px;height:48px;background:var(--bg3);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:var(--fs-lg)">?</div>' +
@@ -4192,10 +4196,12 @@ function showPokedexDetail(dexId) {
   var prevId = curIdx > 0 ? allDexIds[curIdx - 1] : null;
   var nextId = curIdx < allDexIds.length - 1 ? allDexIds[curIdx + 1] : null;
 
+  var shinyDetailCls = entry.has_shiny ? ' shiny-sprite' : '';
+  var shinyDetailBadge = entry.has_shiny ? ' <span class="shiny-star">\u2605</span>' : '';
   var html = '<div class="pokedex-detail-top">' +
-    '<img class="pokedex-detail-sprite' + spriteCls + '" src="sprites/front/' + dexId + '.png" alt="' + entry.name + '">' +
+    '<img class="pokedex-detail-sprite' + spriteCls + shinyDetailCls + '" src="sprites/front/' + dexId + '.png" alt="' + entry.name + '">' +
     '<div class="pokedex-detail-info">' +
-    '<div class="pokedex-detail-name">' + ((isCaught || isSeen) ? entry.name : '???') + '</div>' +
+    '<div class="pokedex-detail-name">' + ((isCaught || isSeen) ? entry.name : '???') + shinyDetailBadge + '</div>' +
     '<div class="pokedex-detail-dexnum">' + num + '</div>' +
     '<div class="pokedex-detail-types">' + typesHtml + '</div>' +
     '<span class="pokedex-detail-status ' + statusCls + '">' + statusText + '</span>' +
@@ -4301,8 +4307,9 @@ function setupJourneyBattle(msg) {
     }
     // Shiny sparkle effect on opponent sprite
     if (w.is_shiny) {
-      var oppSprite = document.getElementById('opponent-sprite');
+      var oppSprite = document.getElementById('opp-sprite');
       if (oppSprite) oppSprite.classList.add('shiny-sprite');
+      setTimeout(() => playShinySparkle('opp-sprite'), 500);
     }
   }
   setTimeout(() => showJourneyMovePanel(), 1500);

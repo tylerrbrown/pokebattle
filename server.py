@@ -40,9 +40,15 @@ APP_DIR = pathlib.Path(__file__).parent
 
 
 def _get_current_moves(poke_row):
-    """Get a Pokemon's current move list, falling back to learnset + species defaults if DB is NULL."""
+    """Get a Pokemon's current move list, falling back to learnset + species defaults if DB is NULL.
+    Filters out invalid moves (not in moves.json) to prevent move lock."""
     if poke_row.get("moves"):
-        return json.loads(poke_row["moves"])
+        raw = json.loads(poke_row["moves"])
+        # Filter out moves that don't exist in moves.json
+        valid = [m for m in raw if m in pokemon_data.MOVES]
+        if valid:
+            return valid
+        # All moves were invalid, fall through to regenerate
     return pokemon_data.get_initial_moves(poke_row["dex_id"], poke_row.get("level", 5))
 
 DB_PATH = APP_DIR / "pokebattle.db"
@@ -1691,6 +1697,7 @@ async def handle_message(player, msg, room_mgr):
             if count > 0:
                 pokedex = account_mgr.get_pokedex(player.account_id)
         counts = account_mgr.get_pokedex_counts(player.account_id)
+        shiny_ids = account_mgr.get_shiny_dex_ids(player.account_id)
         total = len(pokemon_data.POKEMON)
         entries = []
         for dex_id in sorted(pokemon_data.POKEMON.keys()):
@@ -1703,6 +1710,7 @@ async def handle_message(player, msg, room_mgr):
                 "base_stats": poke.get("base_stats", {}),
                 "seen": entry.get("seen", False),
                 "caught": entry.get("caught", False),
+                "has_shiny": dex_id in shiny_ids,
             })
         await player.send({
             "type": "pokedex_data",
