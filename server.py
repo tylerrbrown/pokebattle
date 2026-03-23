@@ -936,10 +936,10 @@ async def handle_message(player, msg, room_mgr):
             data["type"] = data.pop("action_type", data.get("type"))
             await room.handle_action(player, data)
 
-    elif msg_type == "tap_result":
+    elif msg_type == "dodge_result":
         room = room_mgr.get_room(player)
         if room:
-            await room.handle_tap_result(player, data)
+            await room.handle_dodge_result(player, data)
 
     elif msg_type == "force_switch":
         room = room_mgr.get_room(player)
@@ -2436,9 +2436,10 @@ async def _handle_wild_action(player, encounter, data):
         else:
             wild_move = STRUGGLE
 
-        # Use tap score from data or default
-        tap_score = data.get("tap_score", 0.5)
-        wild_tap = random.uniform(0.3, 0.7)
+        # Dodge: player dodges wild's attack, wild doesn't dodge player's attack
+        player_dodged = data.get("dodged", False)
+        player_dodge_mult = 0.8 if player_dodged else 1.0
+        wild_dodge_mult = 1.0  # Wild Pokemon don't dodge
 
         events = []
 
@@ -2448,13 +2449,13 @@ async def _handle_wild_action(player, encounter, data):
         player_first = player_speed > wild_speed or (player_speed == wild_speed and random.random() < 0.5)
 
         if player_first:
-            events += _resolve_single_move(my_poke, wild, player_move, tap_score, "player")
+            events += _resolve_single_move(my_poke, wild, player_move, wild_dodge_mult, "player")
             if not wild.is_fainted:
-                events += _resolve_single_move(wild, my_poke, wild_move, wild_tap, "wild")
+                events += _resolve_single_move(wild, my_poke, wild_move, player_dodge_mult, "wild")
         else:
-            events += _resolve_single_move(wild, my_poke, wild_move, wild_tap, "wild")
+            events += _resolve_single_move(wild, my_poke, wild_move, player_dodge_mult, "wild")
             if not my_poke.is_fainted:
-                events += _resolve_single_move(my_poke, wild, player_move, tap_score, "player")
+                events += _resolve_single_move(my_poke, wild, player_move, wild_dodge_mult, "player")
 
         encounter.turn_count += 1
 
@@ -2689,16 +2690,18 @@ async def _handle_wild_action(player, encounter, data):
     await player.send({"type": "error", "message": f"Unknown wild action: {action}"})
 
 
-def _resolve_single_move(attacker, defender, move, tap_score, side):
+def _resolve_single_move(attacker, defender, move, dodge_mult, side):
     """Resolve one side's move in a wild battle. Returns events list.
 
+    dodge_mult: 1.0 = no dodge (full damage), 0.8 = dodged (20% reduction).
     side: "player" or "wild" — indicates who the attacker is.
     Events on the defender get the opposite side (defender_side).
     """
     defender_side = "wild" if side == "player" else "player"
     events = []
     events.append({"type": "move_use", "side": side, "pokemon": attacker.name, "move": move["name"],
-                   "move_type": move.get("type", "normal"), "is_damage_move": move.get("power", 0) > 0})
+                   "move_type": move.get("type", "normal"), "is_damage_move": move.get("power", 0) > 0,
+                   "dodged": dodge_mult < 1.0})
 
     power = move.get("power", 0)
     if power == 0:
@@ -2727,9 +2730,8 @@ def _resolve_single_move(attacker, defender, move, tap_score, side):
         events.append({"type": "miss", "side": side, "pokemon": attacker.name})
         return events
 
-    # Tap multiplier: 0.85 - 1.15
-    tap_mult = 0.85 + (tap_score * 0.30)
-    damage, effectiveness, is_crit = calculate_damage(attacker, defender, move, tap_mult)
+    # Dodge multiplier: 1.0 = full damage, 0.8 = dodged
+    damage, effectiveness, is_crit = calculate_damage(attacker, defender, move, dodge_mult)
 
     if is_crit:
         events.append({"type": "critical_hit"})
@@ -2769,8 +2771,8 @@ def _wild_attacks(encounter):
     else:
         wild_move = STRUGGLE
 
-    tap = random.uniform(0.3, 0.7)
-    return _resolve_single_move(wild, target, wild_move, tap, "wild")
+    dodge_mult = 1.0  # No dodge for wild attacks outside battle turns
+    return _resolve_single_move(wild, target, wild_move, dodge_mult, "wild")
 
 
 def _award_rare_candy(player, battle_type, tournament_round=None):
@@ -2946,8 +2948,9 @@ async def main():
     account_mgr = AccountManager(DB_PATH)
     print(f"Database initialized at {DB_PATH}")
 
-    # Fix Pokemon with missing or sparse moves
+    # Fix Pokemon with missing, invalid, or sparse moves
     account_mgr.fix_null_moves(pokemon_data)
+    account_mgr.fix_invalid_moves(pokemon_data)
     account_mgr.fix_sparse_moves(pokemon_data)
 
     # Start cleanup task

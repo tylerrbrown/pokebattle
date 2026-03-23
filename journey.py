@@ -20,7 +20,7 @@ from ai_player import BotPlayer
 
 # ─── Constants ────────────────────────────────────────
 
-RARITY_WEIGHTS = {"common": 60, "uncommon": 25, "rare": 13, "legendary": 1}
+RARITY_WEIGHTS = {"common": 60, "uncommon": 25, "rare": 14, "legendary": 0.25}
 PITY_THRESHOLD = 50
 
 BALL_MODIFIERS = {

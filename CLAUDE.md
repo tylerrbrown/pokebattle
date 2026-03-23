@@ -113,6 +113,8 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **Query strings in static serving**: `request.path` in websockets includes query string; must strip `?...` before file path resolution or `admin.html?k=SECRET` returns 404
 - **websockets version**: EC2 system apt has v9.1 (incompatible API); must use `pip3 install 'websockets>=14'`
 - **Never use `cd` in Bash commands** — `Bash(cd *)` permission patterns don't match chained commands (`cd path && python ...`). Always use absolute paths so commands start with the Python executable and match `Bash("/c/Users/..." *)`. Example: `"/c/.../python.exe" $CLAUDE_HOME/apps/pokebattle/tests/test_battle_engine.py` instead of `cd "$CLAUDE_HOME/apps/pokebattle" && python tests/test_battle_engine.py`
+- **Learnset invalid moves**: 274 moves in `data/learnsets.json` don't exist in `data/moves.json` (e.g., `force-palm`, `close-combat`, `crabhammer`). All move-loading code must filter against `pokemon_data.MOVES`. Startup migration `fix_invalid_moves` cleans these from the DB. The `_get_current_moves()` helper in `server.py` also filters at runtime.
+- **12 Pokemon have genuinely <4 moves** (e.g., Beldum, Silcoon, Cosmog) - this is accurate to the real games and is NOT a bug. The move management screen correctly shows "No learnable moves" for these.
 
 ## Move Learning & Management
 
@@ -234,9 +236,9 @@ python tests/test_battle_engine.py
 - ~~**Faint/switch freeze**: `wild_force_switch` was missing encounter state; fixed 3/19/2026~~
 - ~~**Only active Pokemon earned XP**: added EXP Share (100% active, 50% bench); fixed 3/19/2026~~
 - **PvP forces team pick**: "When I battle somebody I expect to use my Pokémon, not click on Pokémon" — PvP should use saved journey team, not re-pick (OPEN)
-- **Learn Move doesn't apply**: Clicking to learn a move doesn't actually add it to the moveset (reported by Liam x2, Tyler x1 — 3/20-3/21/2026) (OPEN)
-- **Faint animation plays on wrong Pokemon**: When you defeat the opponent's Pokemon, it looks like YOUR Pokemon faints instead (reported by Makoo — 3/20/2026) (OPEN)
-- **Pokemon stuck with <4 moves ("move lock")**: Some Pokemon only have 2-3 moves and cannot learn any new moves from the learn screen (reported by Makoo 3/20, Liam 3/21 — Liam calls it "move lock") (OPEN)
+- ~~**Learn Move doesn't apply**: Root cause was invalid learnset moves (274 moves in learnsets.json not in moves.json) stored in DB, causing move count mismatch between frontend (filtered) and backend (unfiltered). Fixed 3/23/2026~~
+- **Faint animation plays on wrong Pokemon**: When you defeat the opponent's Pokemon, it looks like YOUR Pokemon faints instead (reported by Makoo - 3/20/2026) (OPEN)
+- ~~**Pokemon stuck with <4 moves ("move lock")**: Same root cause as learn move bug. `_get_current_moves` now filters invalid moves; `get_moves_at_level` filters and deduplicates; startup migration `fix_invalid_moves` cleans DB; level-up overlay shows "LEARN" button when <4 moves. Fixed 3/23/2026~~
 
 ### Feature Requests (3/21/2026 — from Liam)
 - **Shiny Pokemon**: Sparkle effect at battle start, ~10% encounter rate

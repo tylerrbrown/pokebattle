@@ -500,28 +500,40 @@ input.invalid { border-color: var(--red); }
   min-height: 20px;
 }
 
-/* Move panel */
+/* Move panel - diamond layout */
 .move-panel {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 4px;
+  padding: 8px 12px;
   background: var(--bg2);
   border-top: 2px solid var(--border);
+  justify-items: center;
+  align-items: center;
 }
+.move-panel .move-btn { width: 100%; max-width: 180px; }
+.move-panel .move-btn:nth-child(1) { grid-column: 2; grid-row: 1; } /* top */
+.move-panel .move-btn:nth-child(2) { grid-column: 1; grid-row: 2; } /* left */
+.move-panel .move-btn:nth-child(3) { grid-column: 3; grid-row: 2; } /* right */
+.move-panel .move-btn:nth-child(4) { grid-column: 2; grid-row: 3; } /* bottom */
+/* Fallback: if only 1-3 moves, center them */
+.move-panel .move-btn:only-child { grid-column: 2; grid-row: 2; }
 .move-btn {
   padding: 10px 8px;
-  border-radius: 6px;
-  text-align: left;
+  border-radius: 8px;
+  text-align: center;
   background: var(--bg3);
   border: 2px solid var(--border);
   color: var(--text);
   transition: all 0.15s;
+  min-height: 54px;
 }
-.move-btn:hover:not(:disabled) { border-color: var(--blue); }
+.move-btn:hover:not(:disabled) { border-color: var(--blue); transform: scale(1.05); }
+.move-btn:active:not(:disabled) { transform: scale(0.95); }
 .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .move-btn .move-name { font-size: var(--fs-sm); display: block; }
-.move-btn .move-meta { font-size: var(--fs-xs); color: var(--text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
+.move-btn .move-meta { font-size: var(--fs-xs); color: var(--text-dim); margin-top: 3px; display: flex; justify-content: center; gap: 8px; }
 .move-type-badge {
   display: inline-block;
   padding: 1px 5px;
@@ -567,8 +579,8 @@ input.invalid { border-color: var(--red); }
 .switch-btn .sw-name { font-size: var(--fs-xs); display: block; margin-top: 2px; }
 .switch-btn .sw-hp { font-size: var(--fs-xs); color: var(--text-dim); }
 
-/* ─── Tap Phase Overlay ─────────────────────────── */
-.tap-overlay {
+/* ─── Dodge Phase Overlay ──────────────────────── */
+.dodge-overlay {
   display: none;
   position: absolute;
   inset: 0;
@@ -579,37 +591,39 @@ input.invalid { border-color: var(--red); }
   justify-content: center;
   gap: 16px;
 }
-.tap-overlay.active { display: flex; }
-.tap-move-name { font-size: var(--fs-base); color: var(--accent); }
-.tap-timer { font-size: var(--fs-3xl); color: var(--yellow); }
-.tap-meter-container {
-  width: 60px;
-  height: 200px;
-  background: var(--bg);
-  border: 3px solid var(--border);
-  border-radius: 8px;
-  position: relative;
-  overflow: hidden;
+.dodge-overlay.active { display: flex; }
+.dodge-prompt-text { font-size: var(--fs-base); color: var(--accent); text-align: center; }
+.dodge-timer { font-size: var(--fs-3xl); color: var(--yellow); }
+.dodge-buttons {
+  display: flex;
+  gap: 24px;
+  align-items: center;
 }
-.tap-meter-fill {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background: linear-gradient(to top, var(--green), var(--yellow), var(--red));
-  transition: height 0.05s;
-  border-radius: 0 0 5px 5px;
-}
-.tap-prompt {
-  font-size: var(--fs-xl);
-  color: #fff;
-  animation: pulse 0.3s infinite alternate;
-}
-.tap-multiplier { font-size: var(--fs-lg); color: var(--green); }
-.tap-area {
-  position: absolute;
-  inset: 0;
-  z-index: 101;
+.dodge-btn {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 3px solid var(--blue);
+  color: var(--text);
+  font-size: var(--fs-3xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.dodge-btn:active { transform: scale(0.85); background: var(--blue); color: #fff; }
+.dodge-btn:hover { border-color: var(--accent); }
+.dodge-result-text { font-size: var(--fs-lg); font-weight: bold; min-height: 24px; }
+.dodge-result-text.dodged { color: var(--green); }
+.dodge-result-text.missed { color: var(--red); }
+.dodge-or-text { font-size: var(--fs-base); color: var(--text-dim); }
+@keyframes dodge-flash {
+  0% { background: rgba(74,158,255,0.3); }
+  100% { background: transparent; }
 }
 @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
 
@@ -1676,16 +1690,16 @@ input.invalid { border-color: var(--red); }
     <div id="battle-controls">
       <!-- Dynamic: move panel, switch panel, or waiting -->
     </div>
-    <!-- Tap overlay -->
-    <div class="tap-overlay" id="tap-overlay">
-      <div class="tap-area" id="tap-area"></div>
-      <div class="tap-move-name" id="tap-move-name"></div>
-      <div class="tap-meter-container">
-        <div class="tap-meter-fill" id="tap-meter-fill"></div>
+    <!-- Dodge overlay -->
+    <div class="dodge-overlay" id="dodge-overlay">
+      <div class="dodge-prompt-text" id="dodge-prompt-text">Incoming attack!</div>
+      <div class="dodge-timer" id="dodge-timer">1.5</div>
+      <div class="dodge-buttons">
+        <button class="dodge-btn" id="dodge-left" onclick="doDodge('left')">&larr;</button>
+        <span class="dodge-or-text">DODGE!</span>
+        <button class="dodge-btn" id="dodge-right" onclick="doDodge('right')">&rarr;</button>
       </div>
-      <div class="tap-timer" id="tap-timer">3.0</div>
-      <div class="tap-prompt">TAP!</div>
-      <div class="tap-multiplier" id="tap-multiplier"></div>
+      <div class="dodge-result-text" id="dodge-result-text"></div>
     </div>
   </div>
 
@@ -2072,8 +2086,8 @@ function handleMessage(msg) {
     case 'opponent_action_locked':
       // Optional: show indicator
       break;
-    case 'tap_phase':
-      startTapPhase(msg.duration_ms, msg.move_name);
+    case 'dodge_phase':
+      startDodgePhase(msg.duration_ms, msg.opponent_move);
       break;
     case 'turn_result':
       clearTimer();
@@ -2933,6 +2947,10 @@ async function playTurnEvents(events) {
           playMoveEffect(evt.move_type, isMeMove);
         }
         await delay(800);
+        if (evt.dodged) {
+          setBattleText('Dodged! Damage reduced!');
+          await delay(600);
+        }
         break;
       case 'effectiveness':
         setBattleText(evt.text);
@@ -3079,58 +3097,86 @@ function delay(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-/* ─── Tap Phase ─────────────────────────────────── */
-function startTapPhase(durationMs, moveName) {
-  const overlay = document.getElementById('tap-overlay');
-  const area = document.getElementById('tap-area');
-  const fill = document.getElementById('tap-meter-fill');
-  const timerEl = document.getElementById('tap-timer');
-  const nameEl = document.getElementById('tap-move-name');
-  const multEl = document.getElementById('tap-multiplier');
+/* ─── Dodge Phase (PvP) ────────────────────────── */
+function startDodgePhase(durationMs, opponentMove) {
+  const overlay = document.getElementById('dodge-overlay');
+  const timerEl = document.getElementById('dodge-timer');
+  const promptEl = document.getElementById('dodge-prompt-text');
+  const resultEl = document.getElementById('dodge-result-text');
 
   overlay.classList.add('active');
-  nameEl.textContent = moveName;
-  multEl.textContent = '';
+  promptEl.textContent = (opponentMove || 'Attack') + ' incoming!';
+  resultEl.textContent = '';
+  resultEl.className = 'dodge-result-text';
 
-  let tapCount = 0;
-  const maxTaps = 20;
   const duration = durationMs / 1000;
   let timeLeft = duration;
-  let active = true;
+  let dodged = false;
+  let resolved = false;
 
-  fill.style.height = '0%';
+  // Pick a random required direction
+  const requiredDir = Math.random() < 0.5 ? 'left' : 'right';
+  document.getElementById('dodge-left').style.borderColor = '';
+  document.getElementById('dodge-right').style.borderColor = '';
 
-  function onTap(e) {
-    e.preventDefault();
-    if (!active) return;
-    tapCount++;
-    const pct = Math.min(tapCount / maxTaps * 100, 100);
-    fill.style.height = pct + '%';
-    playSound('tap');
-  }
+  // Brief flash hint for which direction to dodge
+  document.getElementById('dodge-' + requiredDir).style.borderColor = 'var(--yellow)';
 
-  area.addEventListener('pointerdown', onTap);
-  area.addEventListener('touchstart', onTap, { passive: false });
+  window._dodgeState = { requiredDir, resolved: false };
 
   const interval = setInterval(() => {
     timeLeft -= 0.1;
     timerEl.textContent = Math.max(0, timeLeft).toFixed(1);
     if (timeLeft <= 0) {
       clearInterval(interval);
-      active = false;
-      area.removeEventListener('pointerdown', onTap);
-      area.removeEventListener('touchstart', onTap);
-
-      const score = Math.min(tapCount / maxTaps, 1.0);
-      const mult = (0.85 + score * 0.30).toFixed(2);
-      multEl.textContent = mult + 'x';
-
-      setTimeout(() => {
-        overlay.classList.remove('active');
-        send({ type: 'tap_result', score });
-      }, 800);
+      if (!window._dodgeState.resolved) {
+        // Time ran out, no dodge
+        window._dodgeState.resolved = true;
+        resultEl.textContent = 'NO DODGE!';
+        resultEl.className = 'dodge-result-text missed';
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          send({ type: 'dodge_result', dodged: false });
+        }, 600);
+      }
     }
   }, 100);
+}
+
+function doDodge(direction) {
+  if (!window._dodgeState || window._dodgeState.resolved) return;
+  window._dodgeState.resolved = true;
+
+  var overlay = document.getElementById('dodge-overlay');
+  var resultEl = document.getElementById('dodge-result-text');
+  var success = direction === window._dodgeState.requiredDir;
+
+  playSound(success ? 'select' : 'hit');
+
+  if (success) {
+    resultEl.textContent = 'DODGED! -20% DMG';
+    resultEl.className = 'dodge-result-text dodged';
+  } else {
+    resultEl.textContent = 'WRONG WAY!';
+    resultEl.className = 'dodge-result-text missed';
+  }
+
+  // Journey mode: send the pending move message with dodge result
+  if (window._dodgeState.pendingMsg) {
+    var pendingMsg = window._dodgeState.pendingMsg;
+    setTimeout(function() {
+      overlay.classList.remove('active');
+      pendingMsg.dodged = success;
+      send(pendingMsg);
+      showWaiting('');
+    }, 500);
+  } else {
+    // PvP mode: send dodge result to server
+    setTimeout(function() {
+      overlay.classList.remove('active');
+      send({ type: 'dodge_result', dodged: success });
+    }, 600);
+  }
 }
 
 /* ─── Game Over ─────────────────────────────────── */
@@ -4012,22 +4058,34 @@ function processLearnMoveQueue() {
     if (pk.moves) pk.moves.forEach(function(m) { if (!allMovesLookup[m.id]) allMovesLookup[m.id] = m; });
   });
 
-  item.current_moves.forEach(function(mid) {
-    var mdata = allMovesLookup[mid] || {};
-    var mName = mdata.name || mid;
-    var mType = mdata.type || 'normal';
-    var div = document.createElement('div');
-    div.className = 'learnmove-current-move';
-    div.innerHTML =
-      '<span class="move-type-badge" style="background:var(--type-' + mType + ')">' + mType.toUpperCase() + '</span> ' +
-      '<span class="lm-name">' + mName + '</span>' +
-      '<span class="lm-stats">' +
-        (mdata.power > 0 ? 'Pow ' + mdata.power : 'Status') +
-        ' | PP ' + (mdata.pp || '?') +
-      '</span>';
-    div.onclick = function() { confirmLearnMoveReplace(mid); };
-    listEl.appendChild(div);
-  });
+  // If fewer than 4 moves, show a "Learn it!" button instead of replacement list
+  if (item.current_moves.length < 4) {
+    document.querySelector('.learnmove-current-title').textContent = item.current_moves.length + '/4 move slots used';
+    var learnBtn = document.createElement('button');
+    learnBtn.className = 'btn';
+    learnBtn.style.cssText = 'background:var(--green);color:#1a1a2e;font-weight:bold;padding:12px 24px;font-size:var(--fs-md);margin:8px 0;width:100%';
+    learnBtn.textContent = 'LEARN ' + moveName + '!';
+    learnBtn.onclick = function() { confirmLearnMoveReplace('__add__'); };
+    listEl.appendChild(learnBtn);
+  } else {
+    document.querySelector('.learnmove-current-title').textContent = 'Replace which move?';
+    item.current_moves.forEach(function(mid) {
+      var mdata = allMovesLookup[mid] || {};
+      var mName = mdata.name || mid;
+      var mType = mdata.type || 'normal';
+      var div = document.createElement('div');
+      div.className = 'learnmove-current-move';
+      div.innerHTML =
+        '<span class="move-type-badge" style="background:var(--type-' + mType + ')">' + mType.toUpperCase() + '</span> ' +
+        '<span class="lm-name">' + mName + '</span>' +
+        '<span class="lm-stats">' +
+          (mdata.power > 0 ? 'Pow ' + mdata.power : 'Status') +
+          ' | PP ' + (mdata.pp || '?') +
+        '</span>';
+      div.onclick = function() { confirmLearnMoveReplace(mid); };
+      listEl.appendChild(div);
+    });
+  }
 
   overlay.classList.add('active');
 }
@@ -4041,10 +4099,16 @@ function confirmLearnMoveReplace(replaceMoveId) {
     new_move: item.move_id,
     replace_move: replaceMoveId,
   });
+  // Update remaining queue items' current_moves to reflect the change
   S.learnMoveQueue.forEach(function(qi) {
     if (qi.pokemon_id === item.pokemon_id) {
-      var idx = qi.current_moves.indexOf(replaceMoveId);
-      if (idx >= 0) qi.current_moves[idx] = item.move_id;
+      if (replaceMoveId === '__add__') {
+        // Move was added to an empty slot
+        qi.current_moves.push(item.move_id);
+      } else {
+        var idx = qi.current_moves.indexOf(replaceMoveId);
+        if (idx >= 0) qi.current_moves[idx] = item.move_id;
+      }
     }
   });
 }
@@ -4524,10 +4588,56 @@ function showCatchWindowPanel() {
 }
 
 function journeyMove(i) {
-  var msg = {type:'wild_action',action_type:'move',move_index:i,tap_score:0.5};
+  playSound('select');
+  var msg = {type:'wild_action',action_type:'move',move_index:i};
   if (S._zMoveActive) { msg.z_move = true; S._zMoveActive = false; }
-  send(msg); showWaiting(''); playSound('select');
+  // Show dodge mini-game before sending
+  startJourneyDodge(msg);
 }
+
+function startJourneyDodge(pendingMsg) {
+  var overlay = document.getElementById('dodge-overlay');
+  var timerEl = document.getElementById('dodge-timer');
+  var promptEl = document.getElementById('dodge-prompt-text');
+  var resultEl = document.getElementById('dodge-result-text');
+
+  overlay.classList.add('active');
+  promptEl.textContent = 'Dodge the attack!';
+  resultEl.textContent = '';
+  resultEl.className = 'dodge-result-text';
+
+  var duration = 1.5;
+  var timeLeft = duration;
+  timerEl.textContent = duration.toFixed(1);
+
+  // Pick random required direction
+  var requiredDir = Math.random() < 0.5 ? 'left' : 'right';
+  document.getElementById('dodge-left').style.borderColor = '';
+  document.getElementById('dodge-right').style.borderColor = '';
+  document.getElementById('dodge-' + requiredDir).style.borderColor = 'var(--yellow)';
+
+  window._dodgeState = { requiredDir: requiredDir, resolved: false, pendingMsg: pendingMsg };
+
+  var interval = setInterval(function() {
+    timeLeft -= 0.1;
+    timerEl.textContent = Math.max(0, timeLeft).toFixed(1);
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      if (!window._dodgeState.resolved) {
+        window._dodgeState.resolved = true;
+        resultEl.textContent = 'NO DODGE!';
+        resultEl.className = 'dodge-result-text missed';
+        setTimeout(function() {
+          overlay.classList.remove('active');
+          pendingMsg.dodged = false;
+          send(pendingMsg);
+          showWaiting('');
+        }, 500);
+      }
+    }
+  }, 100);
+}
+
 function toggleZMove() { S._zMoveActive = !S._zMoveActive; showJourneyMovePanel(); }
 function activateMega() {
   var myPoke = S.myTeam[S.myActive];
@@ -4649,6 +4759,10 @@ async function playJourneyEvents(events) {
           playMoveEffect(evt.move_type, evt.side === 'player');
         }
         await delay(800);
+        if (evt.dodged) {
+          setBattleText('Dodged! Damage reduced!');
+          await delay(600);
+        }
         break;
       case 'critical_hit':
         setBattleText('A critical hit!');

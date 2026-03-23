@@ -160,10 +160,16 @@ def get_item_evolution(dex_id, item_id):
 
 def get_moves_at_level(dex_id, level):
     """Get the moves a Pokemon should know at a given level.
-    Returns the last 4 moves learned at or below the given level.
+    Returns the last 4 unique moves learned at or below the given level.
+    Only includes moves that exist in MOVES (filters out invalid learnset entries).
     """
     learnset = get_learnset(dex_id)
-    available = [m["move"] for m in learnset if m["level"] <= level]
+    seen = set()
+    available = []
+    for m in learnset:
+        if m["level"] <= level and m["move"] in MOVES and m["move"] not in seen:
+            seen.add(m["move"])
+            available.append(m["move"])
     # Take the last 4 (most recent moves)
     return available[-4:] if len(available) > 4 else available
 

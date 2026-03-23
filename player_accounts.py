@@ -1065,6 +1065,34 @@ class AccountManager:
         conn.close()
         print(f"[migration] Fixed {count} Pokemon with NULL moves")
 
+    def fix_invalid_moves(self, pokemon_data_module):
+        """Remove moves that don't exist in moves.json and supplement to 4 from learnset + defaults."""
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT id, dex_id, level, moves FROM player_pokemon WHERE moves IS NOT NULL"
+        ).fetchall()
+        count = 0
+        for row in rows:
+            original = json.loads(row["moves"])
+            # Strip out moves not in moves.json
+            valid = [m for m in original if m in pokemon_data_module.MOVES]
+            if len(valid) < len(original):
+                # Some moves were invalid - supplement from learnset + defaults
+                full = pokemon_data_module.get_initial_moves(row["dex_id"], row["level"])
+                for mid in full:
+                    if mid not in valid:
+                        valid.append(mid)
+                        if len(valid) >= 4:
+                            break
+                conn.execute(
+                    "UPDATE player_pokemon SET moves = ? WHERE id = ?",
+                    (json.dumps(valid), row["id"])
+                )
+                count += 1
+        conn.commit()
+        conn.close()
+        print(f"[migration] Fixed {count} Pokemon with invalid moves")
+
     def fix_sparse_moves(self, pokemon_data_module):
         """Supplement Pokemon with fewer than 4 moves from learnset + defaults."""
         conn = self._conn()
