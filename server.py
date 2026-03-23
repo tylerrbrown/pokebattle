@@ -720,6 +720,18 @@ async def handle_message(player, msg, room_mgr):
             await player.send({"type": "error", "message": "Invalid starter choice."})
         return
 
+    if msg_type == "delete_account":
+        if not getattr(player, 'account_id', None):
+            await player.send({"type": "error", "message": "Not logged in."})
+            return
+        ok = account_mgr.delete_incomplete_account(player.account_id)
+        if ok:
+            player.account_id = None
+            await player.send({"type": "account_deleted"})
+        else:
+            await player.send({"type": "error", "message": "Cannot delete account after choosing starter."})
+        return
+
     if msg_type == "get_profile":
         if not getattr(player, 'account_id', None):
             await player.send({"type": "error", "message": "Not logged in."})
@@ -2565,7 +2577,9 @@ async def _handle_wild_action(player, encounter, data):
                         })
                     else:
                         # Regular gym — use region-specific badge tracking
-                        account_mgr.earn_badge(player.account_id, trainer["id"], region=battle_region)
+                        badge_ok = account_mgr.earn_badge(player.account_id, trainer["id"], region=battle_region)
+                        if not badge_ok:
+                            print(f"[WARN] Badge not awarded for player {player.account_id}, gym {trainer['id']}, region {battle_region}")
                         rare_candy = _award_rare_candy(player, "gym")
                         await player.send({
                             "type": "gym_victory",

@@ -72,6 +72,14 @@ backend web-pokebattle
     server pokebattle 127.0.0.1:5060 check fall 3 rise 1
 ```
 
+### EC2 git authentication
+The server needs an authenticated remote URL to push. Generate it locally using the git credential manager:
+```bash
+TOKEN=$(echo -e "protocol=https\nhost=github.com\n" | git credential fill | grep "^password=" | cut -d= -f2)
+git remote set-url origin "https://tylerrbrown:${TOKEN}@github.com/tylerrbrown/pokebattle.git"
+```
+Run those on the EC2 server, then `git push` works. The token comes from Tyler's local Windows git credential manager - if it expires, regenerate the same way.
+
 ### Deploy updates
 ```bash
 cd /opt/pokebattle && git pull && systemctl restart pokebattle
@@ -104,7 +112,7 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 - **Module init order**: In `server.py`, `room_manager = RoomManager(...)` must come AFTER all functions it references (e.g., `record_game`) are defined — Python executes top-level statements in order
 - **Query strings in static serving**: `request.path` in websockets includes query string; must strip `?...` before file path resolution or `admin.html?k=SECRET` returns 404
 - **websockets version**: EC2 system apt has v9.1 (incompatible API); must use `pip3 install 'websockets>=14'`
-- **Never use `cd` in Bash commands** — `Bash(cd *)` permission patterns don't match chained commands (`cd path && python ...`). Always use absolute paths so commands start with the Python executable and match `Bash("/c/Users/..." *)`. Example: `"/c/.../python.exe" C:/Claude/apps/pokebattle/tests/test_battle_engine.py` instead of `cd "C:/Claude/apps/pokebattle" && python tests/test_battle_engine.py`
+- **Never use `cd` in Bash commands** — `Bash(cd *)` permission patterns don't match chained commands (`cd path && python ...`). Always use absolute paths so commands start with the Python executable and match `Bash("/c/Users/..." *)`. Example: `"/c/.../python.exe" $CLAUDE_HOME/apps/pokebattle/tests/test_battle_engine.py` instead of `cd "$CLAUDE_HOME/apps/pokebattle" && python tests/test_battle_engine.py`
 
 ## Move Learning & Management
 

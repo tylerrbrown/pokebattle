@@ -420,7 +420,7 @@ input.invalid { border-color: var(--red); }
   image-rendering: pixelated;
   transition: opacity 0.5s, transform 0.5s;
 }
-.opponent-sprite.faint { animation: faint-anim 0.8s forwards; }
+.opponent-sprite.faint { animation: faint-anim-opponent 0.8s forwards; }
 
 /* Player (bottom-left) */
 .player-side {
@@ -438,7 +438,7 @@ input.invalid { border-color: var(--red); }
   image-rendering: pixelated;
   transition: opacity 0.5s, transform 0.5s;
 }
-.player-sprite.faint { animation: faint-anim 0.8s forwards; }
+.player-sprite.faint { animation: faint-anim-player 0.8s forwards; }
 
 .poke-name { font-size: var(--fs-base); margin-bottom: 4px; }
 .poke-status-badge {
@@ -752,7 +752,11 @@ input.invalid { border-color: var(--red); }
 .gameover-btns { display: flex; gap: 10px; }
 
 /* ─── Animations ────────────────────────────────── */
-@keyframes faint-anim {
+@keyframes faint-anim-opponent {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+@keyframes faint-anim-player {
   0% { transform: translateY(0); opacity: 1; }
   100% { transform: translateY(50px); opacity: 0; }
 }
@@ -1379,6 +1383,7 @@ input.invalid { border-color: var(--red); }
   <div id="screen-starter" class="screen starter-screen">
     <div class="starter-title">Choose Your Starter!</div>
     <div class="starter-subtitle">This will be your first Pokemon</div>
+    <button class="btn btn-secondary" style="margin-bottom:10px;font-size:var(--fs-xs)" onclick="starterLogout()">LOG OUT</button>
     <div class="starter-grid">
       <div class="starter-card" onclick="chooseStar(1)">
         <img src="/sprites/front/001.png" alt="Bulbasaur">
@@ -2479,6 +2484,23 @@ function logout() {
   S._pinUsername = null;
   S._pinIsNewUser = false;
   // Reset login screen visibility
+  var loginFormEl = document.querySelector('#screen-login .login-form:not(#pin-setup):not(#pin-verify)');
+  if (loginFormEl) loginFormEl.style.display = '';
+  document.getElementById('pin-setup').style.display = 'none';
+  document.getElementById('pin-verify').style.display = 'none';
+  showScreen('login');
+}
+
+function starterLogout() {
+  // Delete the incomplete account (no starter chosen yet)
+  send({ type: 'delete_account' });
+  localStorage.removeItem('pb_token');
+  localStorage.removeItem('pb_username');
+  S.account = null;
+  S.playerName = null;
+  S._pinMode = null;
+  S._pinUsername = null;
+  S._pinIsNewUser = false;
   var loginFormEl = document.querySelector('#screen-login .login-form:not(#pin-setup):not(#pin-verify)');
   if (loginFormEl) loginFormEl.style.display = '';
   document.getElementById('pin-setup').style.display = 'none';
