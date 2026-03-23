@@ -163,14 +163,55 @@ class AccountManager:
             conn.execute("ALTER TABLE player_pokemon ADD COLUMN moves TEXT")
         if "is_shiny" not in cols:
             conn.execute("ALTER TABLE player_pokemon ADD COLUMN is_shiny INTEGER DEFAULT 0")
-        # Add region column to player_badges
+        # Add region column to player_badges and fix UNIQUE constraint
         badge_cols = {row[1] for row in conn.execute("PRAGMA table_info(player_badges)").fetchall()}
         if "region" not in badge_cols:
-            conn.execute("ALTER TABLE player_badges ADD COLUMN region TEXT DEFAULT 'kanto'")
-            try:
-                conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_badge_region ON player_badges(player_id, gym_id, region)")
-            except Exception:
-                pass
+            # Must recreate table: SQLite can't drop old UNIQUE(player_id, gym_id)
+            conn.execute("ALTER TABLE player_badges RENAME TO player_badges_old")
+            conn.execute("""
+                CREATE TABLE player_badges (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    player_id INTEGER NOT NULL,
+                    gym_id INTEGER NOT NULL,
+                    region TEXT DEFAULT 'kanto',
+                    earned_at INTEGER NOT NULL,
+                    FOREIGN KEY (player_id) REFERENCES players(id),
+                    UNIQUE(player_id, gym_id, region)
+                )
+            """)
+            conn.execute("""
+                INSERT INTO player_badges (id, player_id, gym_id, region, earned_at)
+                SELECT id, player_id, gym_id, 'kanto', earned_at FROM player_badges_old
+            """)
+            conn.execute("DROP TABLE player_badges_old")
+        else:
+            # Region column exists but may still have old UNIQUE(player_id, gym_id) constraint
+            indices = conn.execute("PRAGMA index_list(player_badges)").fetchall()
+            has_old_constraint = False
+            for idx in indices:
+                idx_info = conn.execute(f"PRAGMA index_info({idx[1]})").fetchall()
+                col_names = [row[2] for row in idx_info]
+                if col_names == ['player_id', 'gym_id'] and idx[2]:
+                    has_old_constraint = True
+                    break
+            if has_old_constraint:
+                conn.execute("ALTER TABLE player_badges RENAME TO player_badges_old")
+                conn.execute("""
+                    CREATE TABLE player_badges (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        player_id INTEGER NOT NULL,
+                        gym_id INTEGER NOT NULL,
+                        region TEXT DEFAULT 'kanto',
+                        earned_at INTEGER NOT NULL,
+                        FOREIGN KEY (player_id) REFERENCES players(id),
+                        UNIQUE(player_id, gym_id, region)
+                    )
+                """)
+                conn.execute("""
+                    INSERT INTO player_badges (id, player_id, gym_id, region, earned_at)
+                    SELECT id, player_id, gym_id, COALESCE(region, 'kanto'), earned_at FROM player_badges_old
+                """)
+                conn.execute("DROP TABLE player_badges_old")
 
     def register(self, username, pin=None):
         """Register a new player. Returns (player_dict, error_string)."""
@@ -705,6 +746,25 @@ class AccountManager:
         conn.commit()
         conn.close()
 
+    # ─── Account Cleanup ─────────────────────────────
+
+    def delete_incomplete_account(self, player_id):
+        """Delete an account that hasn't chosen a starter yet. Returns True on success."""
+        conn = self._conn()
+        row = conn.execute("SELECT starter_dex_id FROM players WHERE id = ?", (player_id,)).fetchone()
+        if not row or row[0] is not None:
+            conn.close()
+            return False
+        conn.execute("DELETE FROM player_pokemon WHERE player_id = ?", (player_id,))
+        conn.execute("DELETE FROM player_badges WHERE player_id = ?", (player_id,))
+        conn.execute("DELETE FROM player_progression WHERE player_id = ?", (player_id,))
+        conn.execute("DELETE FROM player_inventory WHERE player_id = ?", (player_id,))
+        conn.execute("DELETE FROM player_pokedex WHERE player_id = ?", (player_id,))
+        conn.execute("DELETE FROM players WHERE id = ?", (player_id,))
+        conn.commit()
+        conn.close()
+        return True
+
     # ─── Badges & Progression ─────────────────────────
 
     def earn_badge(self, player_id, gym_id, region="kanto"):
@@ -718,7 +778,8 @@ class AccountManager:
             conn.commit()
             conn.close()
             return True
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            print(f"[WARN] Badge award failed: player={player_id} gym={gym_id} region={region}: {e}")
             conn.close()
             return False
 
