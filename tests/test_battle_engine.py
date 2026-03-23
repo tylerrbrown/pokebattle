@@ -213,7 +213,7 @@ def test_turn_resolution():
     p1_action = {"type": "move", "move_index": 1}  # Thunder Shock
     p2_action = {"type": "move", "move_index": 1}  # Tackle
 
-    events, switches = resolve_turn(pikachu, bulbasaur, p1_action, p2_action, 0.5, 0.5)
+    events, switches = resolve_turn(pikachu, bulbasaur, p1_action, p2_action, 1.0, 1.0)
 
     test("Turn produces events", len(events) > 0)
     test("Turn ends with turn_end event", events[-1]["event"] == "turn_end")
@@ -224,8 +224,8 @@ def test_turn_resolution():
          pikachu.current_hp < pikachu.max_hp or bulbasaur.current_hp < bulbasaur.max_hp)
 
 
-def test_tap_multiplier():
-    print("\n=== Tap Multiplier ===")
+def test_dodge_multiplier():
+    print("\n=== Dodge Multiplier ===")
 
     random.seed(42)
 
@@ -234,22 +234,22 @@ def test_tap_multiplier():
 
     ember = next(m for m in attacker.moves if m["id"] == "ember")
 
-    # Max tap (1.0) -> 1.15x
-    damages_max = []
+    # No dodge (1.0) -> full damage
+    damages_full = []
     for _ in range(200):
         dmg, _, _ = calculate_damage(attacker, defender, ember, 1.0)
-        damages_max.append(dmg)
+        damages_full.append(dmg)
 
-    # Min tap (0.0) -> 0.85x
-    damages_min = []
+    # Successful dodge (0.8) -> 80% damage
+    damages_dodged = []
     for _ in range(200):
-        dmg, _, _ = calculate_damage(attacker, defender, ember, 0.0)
-        damages_min.append(dmg)
+        dmg, _, _ = calculate_damage(attacker, defender, ember, 0.8)
+        damages_dodged.append(dmg)
 
-    avg_max = sum(damages_max) / len(damages_max)
-    avg_min = sum(damages_min) / len(damages_min)
-    ratio = avg_max / max(1, avg_min)
-    test("Max tap does ~35% more than min tap", 1.2 < ratio < 1.5, f"ratio={ratio:.2f}")
+    avg_full = sum(damages_full) / len(damages_full)
+    avg_dodged = sum(damages_dodged) / len(damages_dodged)
+    ratio = avg_full / max(1, avg_dodged)
+    test("Dodge reduces damage by ~20%", 1.15 < ratio < 1.35, f"ratio={ratio:.2f}")
 
 
 def test_speed_priority():
@@ -264,7 +264,7 @@ def test_speed_priority():
             jolteon, snorlax,
             {"type": "move", "move_index": 0},
             {"type": "move", "move_index": 0},
-            0.5, 0.5
+            1.0, 1.0
         )
         # Find first move_use event
         for e in events:
@@ -351,7 +351,7 @@ def main():
     test_stab()
     test_status_effects()
     test_turn_resolution()
-    test_tap_multiplier()
+    test_dodge_multiplier()
     test_speed_priority()
     test_pp_depletion()
     test_build_team()

@@ -136,11 +136,30 @@ cd /opt/pokebattle && git pull && systemctl restart pokebattle
 
 - Faithful Gen 1: damage formula, STAB, type chart, status effects
 - All Pokemon at Level 50
-- Quick-time tapping: 0.85x–1.15x damage multiplier
+- **Dodge mechanic** replaces old tap-to-power system (see below)
+- **Diamond move selector** - 4 moves arranged in a diamond/cross pattern (top/left/right/bottom)
 - Speed determines move order
 - PP tracking with Struggle fallback
-- **EXP Share**: All alive team Pokemon earn XP from defeats — active gets 100%, bench gets 50%, fainted get 0%
+- **EXP Share**: All alive team Pokemon earn XP from defeats - active gets 100%, bench gets 50%, fainted get 0%
 - `_award_encounter_xp()` loops all `encounter.team`; frontend `processAllXpResults()` chains level-up overlays for multiple Pokemon
+
+## Dodge Mechanic
+
+Replaces the old tap-to-power system. Instead of tapping to fill a meter, players dodge incoming attacks.
+
+- **Journey mode**: After picking a move, a 1.5-second dodge window appears with left/right arrow buttons. One direction is highlighted (correct). Tap the correct direction to dodge, reducing incoming damage by 20% (0.8x multiplier). Wrong direction or timeout = full damage (1.0x).
+- **PvP mode**: Server sends `dodge_phase` message with opponent's move name. Each player who is being attacked by a damage move gets the dodge prompt. Dodge result (`dodge_result` message with `dodged: true/false`) sent back before turn resolves.
+- **Bot AI**: Bots have a difficulty-scaled dodge chance (15%-45% based on difficulty level)
+- **Backend**: `calculate_damage()` takes `dodge_multiplier` param (1.0 = full damage, 0.8 = dodged). `resolve_turn()` maps defender dodge mult to incoming attacks.
+- **Frontend**: Shared `doDodge()` function handles both PvP and journey contexts via `window._dodgeState`. Journey sets `pendingMsg` in state; PvP sends `dodge_result` directly.
+
+## Diamond Move Selector
+
+Moves displayed in a diamond/cross layout instead of a 2-column grid:
+- CSS grid: 3 columns x 3 rows, moves placed at top-center, left, right, bottom-center
+- Works for 1-4 moves (fewer moves center naturally)
+- Same onclick behavior, just different visual arrangement
+- Touch-friendly: 8px border-radius, min-height 54px, scale on hover/active
 
 ## XP Bar System
 
