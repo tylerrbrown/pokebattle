@@ -924,6 +924,16 @@ class AccountManager:
         conn.close()
         return {"seen": seen, "caught": caught}
 
+    def get_shiny_dex_ids(self, player_id):
+        """Get set of dex_ids for which the player owns at least one shiny."""
+        conn = self._conn()
+        rows = conn.execute(
+            "SELECT DISTINCT dex_id FROM player_pokemon WHERE player_id = ? AND is_shiny = 1",
+            (player_id,)
+        ).fetchall()
+        conn.close()
+        return {r["dex_id"] for r in rows}
+
     def backfill_pokedex(self, player_id):
         """Backfill Pokedex for existing players: mark all owned Pokemon as caught."""
         conn = self._conn()
