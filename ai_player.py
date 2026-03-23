@@ -25,10 +25,10 @@ class BotPlayer:
 
     # Difficulty presets per tournament round (also usable elsewhere)
     DIFFICULTY_PRESETS = {
-        0.4: {"noise_lo": 0.80, "noise_hi": 1.20, "switch_pct": 0.25, "tap_lo": 0.3, "tap_hi": 0.7},
-        0.6: {"noise_lo": 0.88, "noise_hi": 1.12, "switch_pct": 0.35, "tap_lo": 0.4, "tap_hi": 0.8},
-        0.8: {"noise_lo": 0.92, "noise_hi": 1.08, "switch_pct": 0.45, "tap_lo": 0.5, "tap_hi": 0.85},
-        1.0: {"noise_lo": 0.95, "noise_hi": 1.05, "switch_pct": 0.55, "tap_lo": 0.6, "tap_hi": 0.9},
+        0.4: {"noise_lo": 0.80, "noise_hi": 1.20, "switch_pct": 0.25, "dodge_chance": 0.15},
+        0.6: {"noise_lo": 0.88, "noise_hi": 1.12, "switch_pct": 0.35, "dodge_chance": 0.25},
+        0.8: {"noise_lo": 0.92, "noise_hi": 1.08, "switch_pct": 0.45, "dodge_chance": 0.35},
+        1.0: {"noise_lo": 0.95, "noise_hi": 1.05, "switch_pct": 0.55, "dodge_chance": 0.45},
     }
 
     def __init__(self, name=None, difficulty=0.5):
@@ -43,7 +43,7 @@ class BotPlayer:
         self.ready = False
         self.active_pokemon = 0
         self.chosen_action = None
-        self.tap_score = 0.5
+        self.dodge_mult = 1.0
         self.reconnect_token = None
         self.is_bot = True
 
@@ -52,15 +52,14 @@ class BotPlayer:
         self._noise_lo = 0.85
         self._noise_hi = 1.15
         self._switch_threshold = 0.30  # chance to switch on bad matchup
-        self._tap_lo = 0.3
-        self._tap_hi = 0.8
+        self._dodge_chance = 0.20      # probability of successful dodge
         if difficulty != 0.5:
             self.set_difficulty(difficulty)
 
     def set_difficulty(self, level):
         """Set AI difficulty level (0.0 to 1.0).
 
-        Higher = smarter: less move randomness, more switching, better taps.
+        Higher = smarter: less move randomness, more switching, better dodge chance.
         Uses preset lookup for exact matches, interpolates otherwise.
         """
         self._difficulty = level
@@ -82,8 +81,7 @@ class BotPlayer:
         self._noise_lo = p["noise_lo"]
         self._noise_hi = p["noise_hi"]
         self._switch_threshold = p["switch_pct"]
-        self._tap_lo = p["tap_lo"]
-        self._tap_hi = p["tap_hi"]
+        self._dodge_chance = p["dodge_chance"]
 
     async def send(self, msg):
         """No-op — bot has no WebSocket."""
@@ -160,9 +158,11 @@ class BotPlayer:
             return 0
         return self._find_best_switch_from(available, opp_pokemon)
 
-    def get_tap_score(self):
-        """Random tap score — difficulty-scaled range."""
-        return random.uniform(self._tap_lo, self._tap_hi)
+    def get_dodge_mult(self):
+        """Return dodge multiplier based on difficulty-scaled dodge chance."""
+        if random.random() < self._dodge_chance:
+            return 0.8  # Successful dodge
+        return 1.0  # No dodge
 
     # ─── Internal ─────────────────────────────────────
 

@@ -274,8 +274,10 @@ STRUGGLE = {
 }
 
 
-def calculate_damage(attacker, defender, move, tap_multiplier=0.5):
+def calculate_damage(attacker, defender, move, dodge_multiplier=1.0):
     """Calculate damage using Gen 1 formula.
+
+    dodge_multiplier: 1.0 = no dodge (full damage), 0.8 = successful dodge (20% reduction).
 
     Returns: (damage, effectiveness, is_critical)
     """
@@ -341,10 +343,10 @@ def calculate_damage(attacker, defender, move, tap_multiplier=0.5):
     # Random factor (Gen 1: 217-255 / 255)
     rand_factor = random.randint(217, 255) / 255.0
 
-    # Tap multiplier: score 0.0-1.0 maps to 0.85x-1.15x
-    tap_mult = 0.85 + (tap_multiplier * 0.30)
+    # Dodge multiplier: 1.0 = full damage, 0.8 = dodged (20% reduction)
+    dodge_mult = dodge_multiplier
 
-    damage = int(base * stab * effectiveness * rand_factor * tap_mult)
+    damage = int(base * stab * effectiveness * rand_factor * dodge_mult)
 
     if effectiveness == 0:
         damage = 0
@@ -605,10 +607,11 @@ def _tag_move_events(events, start_idx, attacker, defender, attacker_idx, defend
         del defender._faint_tagged
 
 
-def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events,
+def resolve_move(attacker_pokemon, defender_pokemon, move, dodge_mult, events,
                   attacker_idx=None, defender_idx=None):
     """Resolve a single move execution.
 
+    dodge_mult: 1.0 = no dodge (full damage), 0.8 = successful dodge.
     attacker_idx/defender_idx: player indices (0 or 1) for PvP event tagging.
     When provided, every event gets a "player_index" field indicating which
     player the event pertains to.
@@ -625,7 +628,7 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events,
         "move": move["name"],
         "move_type": move["type"],
         "is_damage_move": move["power"] > 0,
-        "tap_multiplier": tap_score,
+        "dodged": dodge_mult < 1.0,
     })
 
     # Deduct PP (not for Struggle)
@@ -742,7 +745,7 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events,
 
     # Calculate damage
     damage, effectiveness, is_critical = calculate_damage(
-        attacker_pokemon, defender_pokemon, move, tap_score
+        attacker_pokemon, defender_pokemon, move, dodge_mult
     )
 
     # Type effectiveness message
@@ -831,14 +834,15 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, tap_score, events,
     _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
 
 
-def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
+def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_dodge, p2_dodge):
     """Resolve a full battle turn.
 
     Args:
         p1_pokemon, p2_pokemon: Active PokemonInstance for each player
         p1_action: {"type": "move", "move_index": 0} or {"type": "switch", ...}
         p2_action: Same format
-        p1_tap, p2_tap: Tap scores (0.0-1.0)
+        p1_dodge, p2_dodge: Dodge multipliers (1.0 = no dodge, 0.8 = dodged).
+            Each value is applied to damage RECEIVED by that player (defender dodge).
 
     Returns: list of events, list of fainted player indices needing switch
     """
@@ -849,7 +853,10 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
     # Switches always go first
     movers = []
 
-    for pid, (pokemon, action, tap) in enumerate([(p1_pokemon, p1_action, p1_tap), (p2_pokemon, p2_action, p2_tap)]):
+    # Map each player to their dodge mult (applied when they are DEFENDING)
+    dodge_mults = {0: p1_dodge, 1: p2_dodge}
+
+    for pid, (pokemon, action) in enumerate([(p1_pokemon, p1_action), (p2_pokemon, p2_action)]):
         if action["type"] == "move":
             move_idx = action.get("move_index", 0)
             if pokemon.has_usable_moves() and move_idx < len(pokemon.moves) and pokemon.moves[move_idx]["current_pp"] > 0:
@@ -859,7 +866,7 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
                 move = next(m for m in pokemon.moves if m["current_pp"] > 0)
             else:
                 move = STRUGGLE
-            movers.append((pid, pokemon, move, tap))
+            movers.append((pid, pokemon, move))
 
     # Sort movers by speed (faster goes first)
     if len(movers) == 2:
@@ -869,7 +876,7 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
             movers.reverse()
 
     # Execute moves
-    for pid, atk_pokemon, move, tap in movers:
+    for pid, atk_pokemon, move in movers:
         def_pid = 1 if pid == 0 else 0
         def_pokemon = p2_pokemon if pid == 0 else p1_pokemon
 
@@ -889,7 +896,10 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_tap, p2_tap):
         if def_pokemon.is_fainted:
             continue
 
-        resolve_move(atk_pokemon, def_pokemon, move, tap, events,
+        # Defender's dodge multiplier applies to incoming damage
+        def_dodge = dodge_mults[def_pid]
+
+        resolve_move(atk_pokemon, def_pokemon, move, def_dodge, events,
                      attacker_idx=pid, defender_idx=def_pid)
 
     # End-of-turn: burn and poison damage

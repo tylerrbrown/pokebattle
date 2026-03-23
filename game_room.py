@@ -1,7 +1,7 @@
 """Game room management and state machine for PokeBattle.
 
 States: LOBBY -> TEAM_SELECT -> BATTLE -> GAME_OVER
-Battle sub-states: ACTION_SELECT -> TAP_PHASE -> TURN_RESOLVE -> FORCE_SWITCH
+Battle sub-states: ACTION_SELECT -> DODGE_PHASE -> TURN_RESOLVE -> FORCE_SWITCH
 """
 
 import asyncio
@@ -28,7 +28,7 @@ class Player:
         self.ready = False         # Team selection locked in
         self.active_pokemon = 0    # Index into team
         self.chosen_action = None  # {"type": "move"/"switch", "move_index"/"pokemon_index": int}
-        self.tap_score = 0.5       # Default tap score
+        self.dodge_mult = 1.0      # 1.0 = no dodge, 0.8 = successful dodge
         self.reconnect_token = None
         self.is_bot = False
 
@@ -71,8 +71,8 @@ class GameRoom:
     # Timeouts
     TEAM_SELECT_TIMEOUT = 90   # seconds
     ACTION_SELECT_TIMEOUT = 30
-    TAP_PHASE_DURATION = 3
-    TAP_PHASE_TIMEOUT = 5      # grace period for tap result
+    DODGE_PHASE_DURATION = 1.5   # seconds for dodge window
+    DODGE_PHASE_TIMEOUT = 3      # grace period for dodge result
     FORCE_SWITCH_TIMEOUT = 15
 
     def __init__(self, code):
@@ -87,7 +87,7 @@ class GameRoom:
 
         # Async event coordination
         self._action_events = [None, None]
-        self._tap_events = [None, None]
+        self._dodge_events = [None, None]
         self._switch_events = [None, None]
         self._timeout_task = None
 
@@ -381,90 +381,94 @@ class GameRoom:
         self._action_events[idx].set()
 
     async def _process_actions(self):
-        """After both actions received, run tap phase or resolve turn."""
+        """After both actions received, run dodge phase or resolve turn."""
         p1 = self.players[0]
         p2 = self.players[1]
 
-        # Determine if either player used a damage-dealing move (needs tap phase)
-        needs_tap = False
+        # Determine if either player used a damage-dealing move (opponent needs dodge)
+        needs_dodge = False
         for p in [p1, p2]:
             if p.chosen_action and p.chosen_action["type"] == "move":
                 active = p.get_active_pokemon()
                 if active:
                     mi = p.chosen_action["move_index"]
                     if mi < len(active.moves) and active.moves[mi]["power"] > 0:
-                        needs_tap = True
+                        needs_dodge = True
                     elif not active.has_usable_moves():
-                        needs_tap = True  # Struggle
+                        needs_dodge = True  # Struggle
 
-        if needs_tap:
-            await self._start_tap_phase()
+        if needs_dodge:
+            await self._start_dodge_phase()
         else:
-            # No damage moves, skip tap phase
-            p1.tap_score = 0.5
-            p2.tap_score = 0.5
+            # No damage moves, skip dodge phase
+            p1.dodge_mult = 1.0
+            p2.dodge_mult = 1.0
             await self._resolve_turn()
 
-    async def _start_tap_phase(self):
-        """Start the quick-time tapping phase."""
-        self._tap_events = [asyncio.Event(), asyncio.Event()]
+    async def _start_dodge_phase(self):
+        """Start the dodge phase - each player who is being attacked gets a dodge window."""
+        self._dodge_events = [asyncio.Event(), asyncio.Event()]
 
-        for p in self.players:
-            p.tap_score = 0.5  # Default if they don't tap
+        for i, p in enumerate(self.players):
+            p.dodge_mult = 1.0  # Default: no dodge (full damage)
 
-            # Only send tap phase to players who used a damage move
-            if p.chosen_action and p.chosen_action["type"] == "move":
-                active = p.get_active_pokemon()
-                mi = p.chosen_action["move_index"]
-                move_name = "Struggle"
-                if active and mi < len(active.moves):
-                    move_name = active.moves[mi]["name"]
-                elif active and not active.has_usable_moves():
-                    move_name = "Struggle"
+            # A player needs to dodge if their OPPONENT used a damage move
+            opp = self.players[1 - i]
+            opp_is_attacking = False
+            opp_move_name = None
+            if opp and opp.chosen_action and opp.chosen_action["type"] == "move":
+                opp_active = opp.get_active_pokemon()
+                if opp_active:
+                    mi = opp.chosen_action["move_index"]
+                    if mi < len(opp_active.moves) and opp_active.moves[mi]["power"] > 0:
+                        opp_is_attacking = True
+                        opp_move_name = opp_active.moves[mi]["name"]
+                    elif not opp_active.has_usable_moves():
+                        opp_is_attacking = True
+                        opp_move_name = "Struggle"
 
+            if opp_is_attacking:
                 await p.send({
-                    "type": "tap_phase",
-                    "duration_ms": self.TAP_PHASE_DURATION * 1000,
-                    "move_name": move_name,
+                    "type": "dodge_phase",
+                    "duration_ms": int(self.DODGE_PHASE_DURATION * 1000),
+                    "opponent_move": opp_move_name,
                 })
             else:
-                # Player switching, no tap needed
-                idx = self.get_player_index(p)
-                self._tap_events[idx].set()
+                # Opponent isn't attacking, no dodge needed
+                self._dodge_events[i].set()
 
-        # Bot auto-taps
+        # Bot auto-dodges
         for i, p in enumerate(self.players):
-            if p and p.is_bot and not self._tap_events[i].is_set():
-                p.tap_score = p.get_tap_score()
-                self._tap_events[i].set()
+            if p and p.is_bot and not self._dodge_events[i].is_set():
+                p.dodge_mult = p.get_dodge_mult()
+                self._dodge_events[i].set()
 
-        # Wait for tap results
+        # Wait for dodge results
         try:
             await asyncio.wait_for(
                 asyncio.gather(
-                    self._tap_events[0].wait(),
-                    self._tap_events[1].wait()
+                    self._dodge_events[0].wait(),
+                    self._dodge_events[1].wait()
                 ),
-                timeout=self.TAP_PHASE_TIMEOUT
+                timeout=self.DODGE_PHASE_TIMEOUT
             )
         except asyncio.TimeoutError:
-            # Use default 0.5 for anyone who didn't respond
-            for i, evt in enumerate(self._tap_events):
+            # Default: no dodge for anyone who didn't respond
+            for i, evt in enumerate(self._dodge_events):
                 if not evt.is_set():
-                    self._tap_events[i].set()
+                    self._dodge_events[i].set()
 
         await self._resolve_turn()
 
-    async def handle_tap_result(self, player, data):
-        """Handle tap result from a player."""
+    async def handle_dodge_result(self, player, data):
+        """Handle dodge result from a player."""
         idx = self.get_player_index(player)
         if idx == -1:
             return
 
-        score = data.get("score", 0.5)
-        score = max(0.0, min(1.0, float(score)))
-        player.tap_score = score
-        self._tap_events[idx].set()
+        dodged = data.get("dodged", False)
+        player.dodge_mult = 0.8 if dodged else 1.0
+        self._dodge_events[idx].set()
 
     async def _resolve_turn(self):
         """Resolve the turn and send results."""
@@ -498,11 +502,11 @@ class GameRoom:
         p2_action = p2.chosen_action or {"type": "move", "move_index": 0}
 
         if p1_action["type"] == "move" and p2_action["type"] == "move":
-            # Both attacking — resolve_turn tags events with player_index internally
+            # Both attacking — dodge_mult is applied to damage RECEIVED
             move_events, switches_needed = resolve_turn(
                 p1_active, p2_active,
                 p1_action, p2_action,
-                p1.tap_score, p2.tap_score
+                p1.dodge_mult, p2.dodge_mult
             )
             events.extend(move_events)
 
@@ -511,7 +515,7 @@ class GameRoom:
             move_events, _ = resolve_turn(
                 p1_active, p2.get_active_pokemon(),
                 p1_action, {"type": "move", "move_index": -1},  # dummy
-                p1.tap_score, 0.5
+                p1.dodge_mult, 1.0
             )
             events.extend(move_events)
 
@@ -521,7 +525,7 @@ class GameRoom:
                 p1.get_active_pokemon(), p2_active,
                 {"type": "move", "move_index": -1},
                 p2_action,
-                0.5, p2.tap_score
+                1.0, p2.dodge_mult
             )
             events.extend(move_events)
 
@@ -710,7 +714,7 @@ class GameRoom:
         player.team_dex_ids = None
         player.active_pokemon = 0
         player.chosen_action = None
-        player.tap_score = 0.5
+        player.dodge_mult = 1.0
 
         opponent = self.get_opponent(player)
 
@@ -722,7 +726,7 @@ class GameRoom:
             opponent.team_dex_ids = None
             opponent.active_pokemon = 0
             opponent.chosen_action = None
-            opponent.tap_score = 0.5
+            opponent.dodge_mult = 1.0
             for p in self.players:
                 p.ready = False
                 await p.send({"type": "rematch_start"})
