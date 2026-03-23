@@ -975,15 +975,22 @@ async def handle_message(player, msg, room_mgr):
         # Update pity counter: reset on legendary, increment otherwise
         if rarity == "legendary":
             account_mgr.reset_encounter_counter(player.account_id)
+            new_counter = 0
         else:
-            account_mgr.increment_encounter_counter(player.account_id)
+            new_counter = account_mgr.increment_encounter_counter(player.account_id)
         team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
         encounter = WildEncounter(player, team, wild, rarity)
         active_encounters[player.id] = encounter
         account_mgr.mark_seen(player.account_id, wild.dex_id)
         region_data = pokemon_data.get_region(current_region)
         region_name = region_data["name"] if region_data else "Kanto"
-        await player.send({"type": "wild_encounter_start", "region_name": region_name, **encounter.serialize_state()})
+        # Pity hint: subtle atmospheric message when close to guaranteed legendary
+        pity_hint = None
+        if new_counter >= 45:
+            pity_hint = "The air crackles with strange energy..."
+        elif new_counter >= 40:
+            pity_hint = "You sense something powerful nearby..."
+        await player.send({"type": "wild_encounter_start", "region_name": region_name, "pity_hint": pity_hint, **encounter.serialize_state()})
 
     elif msg_type == "start_training":
         if not getattr(player, 'account_id', None):
