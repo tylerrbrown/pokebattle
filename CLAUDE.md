@@ -153,12 +153,12 @@ Replaces the old tap-to-power system. Instead of tapping to fill a meter, player
 - **Backend**: `calculate_damage()` takes `dodge_multiplier` param (1.0 = full damage, 0.8 = dodged). `resolve_turn()` maps defender dodge mult to incoming attacks.
 - **Frontend**: Shared `doDodge()` function handles both PvP and journey contexts via `window._dodgeState`. Journey sets `pendingMsg` in state; PvP sends `dodge_result` directly.
 
-## Diamond Move Selector
+## Move Selector (2x2 Grid)
 
-Moves displayed in a diamond/cross layout instead of a 2-column grid:
-- CSS grid: 3 columns x 3 rows, moves placed at top-center, left, right, bottom-center
-- Works for 1-4 moves (fewer moves center naturally)
-- Same onclick behavior, just different visual arrangement
+Moves displayed in a standard 2x2 grid layout (mobile-friendly):
+- CSS grid: 2 columns, auto-flow rows - moves fill naturally left-to-right, top-to-bottom
+- Works for 1-4 moves (single move centered across both columns)
+- Same onclick behavior, just grid layout
 - Touch-friendly: 8px border-radius, min-height 54px, scale on hover/active
 
 ## XP Bar System
