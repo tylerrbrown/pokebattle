@@ -271,6 +271,7 @@ python tests/test_battle_engine.py
 - ~~**Force-switch freeze on failed catch**: When active Pokemon faints from wild counter-attack after a failed Poke Ball throw, game got stuck showing move panel instead of switch panel. Root cause: the failed-catch path in `_handle_wild_action` checked `all_fainted()` but never checked if the active Pokemon fainted (unlike the move and item-use paths which both had this check). Fixed 3/24/2026~~
 
 ### Feature Requests (3/21/2026 — from Liam)
+- ~~**Shiny Pokemon sprite misplacement**: `playShinySparkle()` checked `parent.style.position` (inline only) instead of `getComputedStyle(parent).position`, so it overwrote the CSS `position: absolute` on `.player-side`/`.opponent-side` with `relative`, making shiny Pokemon appear near the opponent. Reported by Makoo. Fixed 3/24/2026~~
 - **Shiny Pokemon**: Sparkle effect at battle start, ~10% encounter rate
 - ~~**Legendary pity system**: Guaranteed legendary encounter every 50 wild encounters~~ (DONE 3/23/2026)
 - **Decrease legendary random rate**: Lower the base random chance of finding legendaries
