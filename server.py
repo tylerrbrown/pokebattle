@@ -2302,6 +2302,15 @@ async def _handle_wild_action(player, encounter, data):
             if encounter.all_fainted():
                 del active_encounters[player.id]
                 await player.send({"type": "wild_blackout", "events": events})
+            elif encounter.get_active().is_fainted:
+                # Active fainted but others alive — force switch
+                alive = encounter.alive_indices()
+                await player.send({
+                    "type": "wild_force_switch",
+                    "events": events,
+                    "available": alive,
+                    **encounter.serialize_state(),
+                })
             else:
                 await player.send({
                     "type": "wild_turn_result",
