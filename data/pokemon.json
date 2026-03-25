@@ -3554,7 +3554,7 @@
       "synthesis"
     ],
     "base_experience": 64,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3577,7 +3577,7 @@
       "growl"
     ],
     "base_experience": 142,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3600,7 +3600,7 @@
       "synthesis"
     ],
     "base_experience": 236,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3623,7 +3623,7 @@
       "smokescreen"
     ],
     "base_experience": 62,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3646,7 +3646,7 @@
       "leer"
     ],
     "base_experience": 142,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3669,7 +3669,7 @@
       "swift"
     ],
     "base_experience": 240,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3692,7 +3692,7 @@
       "bite"
     ],
     "base_experience": 63,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3715,7 +3715,7 @@
       "scary-face"
     ],
     "base_experience": 142,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3738,7 +3738,7 @@
       "scary-face"
     ],
     "base_experience": 239,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -3952,7 +3952,7 @@
       "swift"
     ],
     "base_experience": 241,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 90
   },
   {
@@ -4116,7 +4116,7 @@
       "sweet-kiss"
     ],
     "base_experience": 142,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 75
   },
   {
@@ -4233,7 +4233,7 @@
       "swift"
     ],
     "base_experience": 230,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -4348,7 +4348,7 @@
       "rain-dance"
     ],
     "base_experience": 225,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -4584,7 +4584,7 @@
       "morning-sun"
     ],
     "base_experience": 184,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -4607,7 +4607,7 @@
       "moonlight"
     ],
     "base_experience": 184,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -4655,7 +4655,7 @@
       "headbutt"
     ],
     "base_experience": 172,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 70
   },
   {
@@ -4678,7 +4678,7 @@
       "mean-look"
     ],
     "base_experience": 87,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -4701,7 +4701,7 @@
       "hidden-power"
     ],
     "base_experience": 118,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 225
   },
   {
@@ -4795,7 +4795,7 @@
       "rock-throw"
     ],
     "base_experience": 163,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 75
   },
   {
@@ -4866,7 +4866,7 @@
       "bind"
     ],
     "base_experience": 179,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 25
   },
   {
@@ -4960,7 +4960,7 @@
       "quick-attack"
     ],
     "base_experience": 175,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 25
   },
   {
@@ -5008,7 +5008,7 @@
       "reversal"
     ],
     "base_experience": 175,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 45
   },
   {
@@ -5078,7 +5078,7 @@
       "scary-face"
     ],
     "base_experience": 175,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 60
   },
   {
@@ -5173,7 +5173,7 @@
       "fury-attack"
     ],
     "base_experience": 158,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 75
   },
   {
@@ -5243,7 +5243,7 @@
       "psybeam"
     ],
     "base_experience": 168,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 75
   },
   {
@@ -5315,7 +5315,7 @@
       "agility"
     ],
     "base_experience": 163,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 25
   },
   {
@@ -5363,7 +5363,7 @@
       "smog"
     ],
     "base_experience": 175,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -5387,7 +5387,7 @@
       "smokescreen"
     ],
     "base_experience": 243,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 45
   },
   {
@@ -5433,7 +5433,7 @@
       "fury-attack"
     ],
     "base_experience": 175,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 60
   },
   {
@@ -5456,7 +5456,7 @@
       "thunderbolt"
     ],
     "base_experience": 180,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 45
   },
   {
@@ -5479,7 +5479,7 @@
       "take-down"
     ],
     "base_experience": 163,
-    "rarity": "common",
+    "rarity": "uncommon",
     "catch_rate": 45
   },
   {
@@ -5641,7 +5641,7 @@
       "rollout"
     ],
     "base_experience": 172,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 45
   },
   {
@@ -5664,7 +5664,7 @@
       "body-slam"
     ],
     "base_experience": 608,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 30
   },
   {
@@ -5687,7 +5687,7 @@
       "roar"
     ],
     "base_experience": 261,
-    "rarity": "common",
+    "rarity": "legendary",
     "catch_rate": 3
   },
   {
@@ -5710,7 +5710,7 @@
       "roar"
     ],
     "base_experience": 261,
-    "rarity": "common",
+    "rarity": "legendary",
     "catch_rate": 3
   },
   {
@@ -5733,7 +5733,7 @@
       "roar"
     ],
     "base_experience": 261,
-    "rarity": "common",
+    "rarity": "legendary",
     "catch_rate": 3
   },
   {
@@ -5757,7 +5757,7 @@
       "screech"
     ],
     "base_experience": 60,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 45
   },
   {
@@ -5781,7 +5781,7 @@
       "scary-face"
     ],
     "base_experience": 144,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 45
   },
   {
@@ -5805,7 +5805,7 @@
       "thrash"
     ],
     "base_experience": 270,
-    "rarity": "common",
+    "rarity": "rare",
     "catch_rate": 45
   },
   {
@@ -5829,7 +5829,7 @@
       "swift"
     ],
     "base_experience": 306,
-    "rarity": "common",
+    "rarity": "legendary",
     "catch_rate": 3
   },
   {
@@ -5853,7 +5853,7 @@
       "recover"
     ],
     "base_experience": 306,
-    "rarity": "common",
+    "rarity": "legendary",
     "catch_rate": 3
   },
   {
@@ -5877,7 +5877,7 @@
       "recover"
     ],
     "base_experience": 270,
-    "rarity": "common",
+    "rarity": "legendary",
     "catch_rate": 45
   },
   {
