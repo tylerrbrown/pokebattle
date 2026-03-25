@@ -3250,8 +3250,8 @@ function playShinySparkle(spriteId) {
   if (!sprite) return;
   const parent = sprite.parentElement;
   if (!parent) return;
-  const origPos = parent.style.position;
-  if (!origPos || origPos === 'static') parent.style.position = 'relative';
+  const computedPos = getComputedStyle(parent).position;
+  if (!computedPos || computedPos === 'static') parent.style.position = 'relative';
   const rect = sprite.getBoundingClientRect();
   const parentRect = parent.getBoundingClientRect();
   const cx = rect.left - parentRect.left + rect.width / 2;
