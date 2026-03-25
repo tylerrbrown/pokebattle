@@ -267,6 +267,7 @@ python tests/test_battle_engine.py
 - ~~**Learn Move doesn't apply**: Root cause was invalid learnset moves (274 moves in learnsets.json not in moves.json) stored in DB, causing move count mismatch between frontend (filtered) and backend (unfiltered). Fixed 3/23/2026~~
 - **Faint animation plays on wrong Pokemon**: When you defeat the opponent's Pokemon, it looks like YOUR Pokemon faints instead (reported by Makoo - 3/20/2026) (OPEN)
 - ~~**Pokemon stuck with <4 moves ("move lock")**: Same root cause as learn move bug. `_get_current_moves` now filters invalid moves; `get_moves_at_level` filters and deduplicates; startup migration `fix_invalid_moves` cleans DB; level-up overlay shows "LEARN" button when <4 moves. Fixed 3/23/2026~~
+- ~~**Force-switch freeze on failed catch**: When active Pokemon faints from wild counter-attack after a failed Poke Ball throw, game got stuck showing move panel instead of switch panel. Root cause: the failed-catch path in `_handle_wild_action` checked `all_fainted()` but never checked if the active Pokemon fainted (unlike the move and item-use paths which both had this check). Fixed 3/24/2026~~
 
 ### Feature Requests (3/21/2026 — from Liam)
 - **Shiny Pokemon**: Sparkle effect at battle start, ~10% encounter rate
