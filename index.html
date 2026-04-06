@@ -5145,6 +5145,22 @@ function renderShop(data) {
     items.appendChild(label);
     evoItems.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
   }
+  const zCrystals = data.items.filter(i => i.category === 'z-crystal');
+  if (zCrystals.length) {
+    const label = document.createElement('div');
+    label.className = 'shop-section-label';
+    label.textContent = 'Z-CRYSTALS';
+    items.appendChild(label);
+    zCrystals.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
+  }
+  const megaStones = data.items.filter(i => i.category === 'mega-stone');
+  if (megaStones.length) {
+    const label = document.createElement('div');
+    label.className = 'shop-section-label';
+    label.textContent = 'MEGA STONES';
+    items.appendChild(label);
+    megaStones.forEach(item => items.appendChild(_buildShopItem(item, data.currency)));
+  }
 }
 
 function _buildShopItem(item, currency) {
