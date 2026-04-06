@@ -218,6 +218,152 @@ def generate_random_trainer(player_avg_level, badge_count=0, region=None):
     }
 
 
+# ─── Rival System ────────────────────────────────────
+
+# Rival's starter is type-advantage to the player's starter
+RIVAL_STARTER_MAP = {
+    1: 4, 4: 7, 7: 1,           # Gen 1: Bulb->Char, Char->Squirt, Squirt->Bulb
+    152: 155, 155: 158, 158: 152,  # Gen 2: Chiko->Cynda, Cynda->Toto, Toto->Chiko
+}
+
+# Evolution chains for rival starters (base -> mid -> final)
+RIVAL_STARTER_EVOS = {
+    1: [1, 2, 3], 4: [4, 5, 6], 7: [7, 8, 9],
+    152: [152, 153, 154], 155: [155, 156, 157], 158: [158, 159, 160],
+}
+
+# Supporting cast for the rival (same across all matchups)
+# Each encounter adds more from this pool
+RIVAL_SUPPORT_POKEMON = [
+    {"dex_id": 17, "evo": 18},   # Pidgeotto -> Pidgeot
+    {"dex_id": 64, "evo": 65},   # Kadabra -> Alakazam
+    {"dex_id": 130, "evo": 130}, # Gyarados stays
+    {"dex_id": 103, "evo": 103}, # Exeggutor stays
+    {"dex_id": 59, "evo": 59},   # Arcanine stays
+]
+
+RIVAL_ENCOUNTERS = [
+    {
+        "id": "rival_1", "trigger_badges": 2, "trigger_milestone": None,
+        "blocks": "gym", "team_size": 2, "starter_stage": 1,  # mid evo
+        "support_count": 1, "support_evolved": False,
+        "level_range": (18, 20),
+        "title": "Rival Trainer", "reward_currency": 600,
+        "dialog_intro": "Hey! I've been looking for you! Let's see whose Pokemon are stronger!",
+        "dialog_win": "Tch... You got lucky! I'll be stronger next time!",
+        "dialog_lose": "Ha! I knew I was the better trainer! See you around, loser!",
+    },
+    {
+        "id": "rival_2", "trigger_badges": 4, "trigger_milestone": None,
+        "blocks": "gym", "team_size": 3, "starter_stage": 1,
+        "support_count": 2, "support_evolved": False,
+        "level_range": (30, 33),
+        "title": "Rising Star", "reward_currency": 800,
+        "dialog_intro": "You again! I've been training non-stop. This time I won't lose!",
+        "dialog_win": "What?! How do you keep getting stronger so fast?!",
+        "dialog_lose": "Told you! My training regimen is unbeatable!",
+    },
+    {
+        "id": "rival_3", "trigger_badges": 6, "trigger_milestone": None,
+        "blocks": "gym", "team_size": 4, "starter_stage": 2,  # final evo
+        "support_count": 3, "support_evolved": True,
+        "level_range": (42, 47),
+        "title": "Fierce Rival", "reward_currency": 1000,
+        "dialog_intro": "I've come a long way since our first battle. My Pokemon have fully evolved!",
+        "dialog_win": "I can't believe it... But I refuse to give up!",
+        "dialog_lose": "This is what real training looks like! Take notes!",
+    },
+    {
+        "id": "rival_4", "trigger_badges": 8, "trigger_milestone": None,
+        "blocks": "e4", "team_size": 5, "starter_stage": 2,
+        "support_count": 4, "support_evolved": True,
+        "level_range": (55, 60),
+        "title": "Elite Rival", "reward_currency": 1500,
+        "dialog_intro": "Before you challenge the Elite Four, you have to get through me!",
+        "dialog_win": "Fine! Go challenge the Elite Four. But I'll be Champion before you!",
+        "dialog_lose": "You're not ready for the Elite Four if you can't even beat me!",
+    },
+    {
+        "id": "rival_5", "trigger_badges": 8, "trigger_milestone": "champion_defeated",
+        "blocks": "masters", "team_size": 6, "starter_stage": 2,
+        "support_count": 5, "support_evolved": True,
+        "level_range": (65, 70),
+        "title": "Champion's Rival", "reward_currency": 3000,
+        "dialog_intro": "So you beat the Champion, huh? Well, I've been training for this moment!",
+        "dialog_win": "I... I still can't beat you. But watch out - I'm coming for that title!",
+        "dialog_lose": "The Champion title should have been mine! And now it is... in spirit!",
+    },
+    {
+        "id": "rival_6", "trigger_badges": 8, "trigger_milestone": "rival_5_defeated",
+        "blocks": None, "team_size": 6, "starter_stage": 2,
+        "support_count": 5, "support_evolved": True,
+        "level_range": (78, 82),
+        "title": "Ultimate Rival", "reward_currency": 2500,
+        "dialog_intro": "One last battle between us. Let's give it everything we've got!",
+        "dialog_win": "That was the best battle of my life. I'm glad my rival was you.",
+        "dialog_lose": "I finally did it! I'm the stronger trainer now!",
+    },
+]
+
+
+def _build_rival_team(encounter, player_starter_dex_id):
+    """Build the rival's team spec for a given encounter."""
+    rival_starter_base = RIVAL_STARTER_MAP.get(player_starter_dex_id)
+    if not rival_starter_base:
+        rival_starter_base = 4  # Default to Charmander line
+
+    evo_chain = RIVAL_STARTER_EVOS.get(rival_starter_base, [rival_starter_base])
+    stage = min(encounter["starter_stage"], len(evo_chain) - 1)
+    starter_dex = evo_chain[stage]
+
+    lo, hi = encounter["level_range"]
+    team = [{"dex_id": starter_dex, "level": hi}]  # Starter is highest level
+
+    # Add support Pokemon
+    support_count = encounter["support_count"]
+    evolved = encounter["support_evolved"]
+    for i in range(min(support_count, len(RIVAL_SUPPORT_POKEMON))):
+        sp = RIVAL_SUPPORT_POKEMON[i]
+        dex_id = sp["evo"] if evolved else sp["dex_id"]
+        level = random.randint(lo, hi - 1)
+        team.append({"dex_id": dex_id, "level": level})
+
+    return team
+
+
+def get_pending_rival_encounter(badge_count, milestones, player_starter_dex_id):
+    """Find the first undefeated rival encounter whose trigger conditions are met.
+    Returns the encounter dict with team built, or None."""
+    milestone_set = set(milestones) if milestones else set()
+    for enc in RIVAL_ENCOUNTERS:
+        enc_milestone = f"{enc['id']}_defeated"
+        if enc_milestone in milestone_set:
+            continue  # Already beaten
+        # Check trigger conditions
+        if badge_count < enc["trigger_badges"]:
+            continue
+        if enc["trigger_milestone"] and enc["trigger_milestone"] not in milestone_set:
+            continue
+        # This encounter is pending
+        team = _build_rival_team(enc, player_starter_dex_id)
+        return {
+            **enc,
+            "name": "Blue",
+            "team": team,
+            "type": "normal",
+            "category": "rival",
+        }
+    return None
+
+
+def is_rival_blocking(badge_count, milestones, player_starter_dex_id, block_type):
+    """Check if a pending rival encounter blocks the given progression type."""
+    pending = get_pending_rival_encounter(badge_count, milestones, player_starter_dex_id)
+    if not pending:
+        return False
+    return pending.get("blocks") == block_type
+
+
 # ─── Wild Encounter ──────────────────────────────────
 
 def generate_wild_pokemon(player_team_avg_level, pity_counter=0, region=None):

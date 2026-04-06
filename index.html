@@ -973,6 +973,9 @@ input.invalid { border-color: var(--red); }
 .btn-home:hover { border-color:var(--green); }
 .btn-backpack { background:linear-gradient(135deg,#8b5cf6,#6d28d9); color:#fff; }
 .btn-backpack:hover { filter:brightness(1.1); }
+.btn-rival { background:linear-gradient(135deg,#dc2626,#f97316); color:#fff; border:2px solid #fbbf24; animation:rival-pulse 2s ease-in-out infinite; grid-column:1/-1; }
+.btn-rival:hover { filter:brightness(1.1); }
+@keyframes rival-pulse { 0%,100%{box-shadow:0 0 5px rgba(220,38,38,0.5)} 50%{box-shadow:0 0 20px rgba(249,115,22,0.8)} }
 .btn-e4 { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
 .btn-e4:hover { filter:brightness(1.1); }
 .btn-champion { background:linear-gradient(135deg,#f59e0b,#d97706); color:#1a1a2e; font-weight:bold; }
@@ -1442,6 +1445,7 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-wild" onclick="startWildEncounter()">WILD ENCOUNTER</button>
       <button class="btn btn-travel" onclick="showRegions()">TRAVEL</button>
       <button class="btn btn-gym" onclick="showGyms()">GYM LEADERS</button>
+      <button class="btn btn-rival" id="hub-rival-btn" style="display:none" onclick="startRivalEncounter()">RIVAL CHALLENGE!</button>
       <button class="btn btn-e4" id="hub-e4-btn" style="display:none" onclick="showEliteFour()">ELITE FOUR</button>
       <button class="btn btn-champion" id="hub-champion-btn" style="display:none" onclick="showChampion()">CHAMPION</button>
       <button class="btn btn-masters" id="hub-masters-btn" style="display:none" onclick="showMastersEight()">MASTERS 8</button>
@@ -2310,6 +2314,8 @@ function handleMessage(msg) {
         S.account.currency = msg.currency;
         S.account.pokeballs = msg.pokeballs;
         S.account.total_pokemon = msg.total_pokemon;
+        S.account.rival_pending = msg.rival_pending || false;
+        S.account.rival_name = msg.rival_name || null;
       }
       updateHubProgression();
       break;
@@ -5351,6 +5357,15 @@ function updateHubProgression() {
     milestones.some(function(m) { return m.endsWith(':champion_defeated'); });
   if (mastersBtn) mastersBtn.style.display = hasChampion ? '' : 'none';
   if (tournamentBtn) tournamentBtn.style.display = hasChampion ? '' : 'none';
+  // Rival button
+  var rivalBtn = document.getElementById('hub-rival-btn');
+  var rivalPending = S.account && S.account.rival_pending;
+  if (rivalBtn) {
+    rivalBtn.style.display = rivalPending ? '' : 'none';
+    if (rivalPending && S.account.rival_name) {
+      rivalBtn.textContent = 'RIVAL: ' + S.account.rival_name.toUpperCase() + '!';
+    }
+  }
 }
 
 function showEliteFour() {
@@ -5560,6 +5575,9 @@ function showTrainerIntro(trainer) {
   } else if (trainer.category === 'random_trainer') {
     battleBtn.onclick = function() { send({type:'random_trainer_battle_start'}); };
     backBtn.style.display = 'none';  // Can't back out of random trainer battles
+  } else if (trainer.category === 'rival') {
+    battleBtn.onclick = function() { send({type:'rival_battle_start'}); };
+    backBtn.onclick = function() { goHome(); };
   }
 }
 
@@ -5572,6 +5590,7 @@ function showTrainerVictory(msg) {
   if (msg.category === 'e4') badge = msg.trainer_name + ' defeated!';
   else if (msg.category === 'champion') { title = 'CHAMPION!'; badge = 'You are the new Pokemon Champion!'; }
   else if (msg.category === 'random_trainer') { title = 'TRAINER DEFEATED!'; badge = msg.trainer_name + ' was defeated!'; }
+  else if (msg.category === 'rival') { title = 'RIVAL DEFEATED!'; badge = 'You defeated your rival ' + msg.trainer_name + '!'; }
   else if (msg.category === 'masters') {
     badge = msg.trainer_name + ' defeated!';
     if (msg.all_masters_beaten) { title = 'WORLD CHAMPION!'; badge = 'You defeated all Masters Eight! You are the World Champion!'; }
@@ -5616,6 +5635,8 @@ function showTrainerDefeat(msg) {
     S._tournamentComplete = false;
   } else if (msg.category === 'random_trainer') {
     badge = 'Better luck next time!';
+  } else if (msg.category === 'rival') {
+    badge = 'Your rival proved too strong this time...';
   }
   document.getElementById('gym-result-title').textContent = title;
   document.getElementById('gym-result-title').className = 'gameover-title lose';
@@ -5682,6 +5703,7 @@ function dismissGymResult() {
 }
 
 function startWildEncounter() { send({type:'wild_encounter'}); }
+function startRivalEncounter() { send({type:'start_rival'}); }
 
 /* ─── Training ─────────────────────────────────── */
 var _trainingSelectedDexId = null;

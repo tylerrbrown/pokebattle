@@ -855,6 +855,14 @@ class AccountManager:
         conn.close()
         return [r["milestone"] for r in rows]
 
+    def get_starter_dex_id(self, player_id):
+        conn = self._conn()
+        row = conn.execute(
+            "SELECT starter_dex_id FROM players WHERE id = ?", (player_id,)
+        ).fetchone()
+        conn.close()
+        return row["starter_dex_id"] if row else None
+
     # ─── Pokedex ─────────────────────────────────────
 
     def mark_seen(self, player_id, dex_id):

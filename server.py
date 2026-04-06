@@ -34,6 +34,7 @@ from journey import (
     generate_tournament_bracket, CURRENCY_TOURNAMENT, RARE_CANDY_TOURNAMENT,
     TOURNAMENT_ROUND_NAMES,
     generate_random_trainer, TRAINER_BATTLE_CHANCE,
+    get_pending_rival_encounter, is_rival_blocking,
 )
 from battle_engine import PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE
 
@@ -154,6 +155,7 @@ trade_rooms = {}  # code -> TradeRoom
 player_trade_rooms = {}  # player.id -> code
 active_tournaments = {}  # player.account_id -> TournamentState
 pending_random_trainers = {}  # player.id -> trainer dict
+pending_rival_encounters = {}  # player.id -> rival encounter dict
 
 
 class TournamentState:
@@ -1091,6 +1093,12 @@ async def handle_message(player, msg, room_mgr):
         if gym_id > 1 and (gym_id - 1) not in badges:
             await player.send({"type": "error", "message": "Beat the previous gym first!"})
             return
+        # Rival blocking check
+        milestones = account_mgr.get_milestones(player.account_id)
+        starter = account_mgr.get_starter_dex_id(player.account_id)
+        if starter and is_rival_blocking(len(badges), milestones, starter, "gym"):
+            await player.send({"type": "error", "message": "Your rival Blue is waiting to battle you! Defeat them first!"})
+            return
         await player.send({
             "type": "gym_intro",
             "gym": {
@@ -1165,6 +1173,81 @@ async def handle_message(player, msg, room_mgr):
             **encounter.serialize_state(),
             "gym_name": trainer["name"],
             "gym_team_size": len(trainer_team),
+        })
+
+    # ─── Rival System ──────────────────────────────
+    elif msg_type == "get_rival_status":
+        if not getattr(player, 'account_id', None):
+            return
+        current_region = account_mgr.get_current_region(player.account_id)
+        badges = account_mgr.get_badges(player.account_id, region=current_region)
+        milestones = account_mgr.get_milestones(player.account_id)
+        starter = account_mgr.get_starter_dex_id(player.account_id)
+        pending = get_pending_rival_encounter(len(badges), milestones, starter)
+        await player.send({
+            "type": "rival_status",
+            "pending": pending is not None,
+            "encounter": {
+                "id": pending["id"],
+                "name": pending["name"],
+                "title": pending["title"],
+            } if pending else None,
+        })
+
+    elif msg_type == "start_rival":
+        if not getattr(player, 'account_id', None):
+            return
+        current_region = account_mgr.get_current_region(player.account_id)
+        badges = account_mgr.get_badges(player.account_id, region=current_region)
+        milestones = account_mgr.get_milestones(player.account_id)
+        starter = account_mgr.get_starter_dex_id(player.account_id)
+        pending = get_pending_rival_encounter(len(badges), milestones, starter)
+        if not pending:
+            await player.send({"type": "error", "message": "No rival encounter pending."})
+            return
+        pending_rival_encounters[player.id] = pending
+        await player.send({
+            "type": "trainer_intro",
+            "trainer": {
+                "id": pending["id"],
+                "name": pending["name"],
+                "title": pending["title"],
+                "type": pending["type"],
+                "dialog_intro": pending["dialog_intro"],
+                "team_size": len(pending["team"]),
+                "max_level": max(t.get("level", 50) for t in pending["team"]),
+                "category": "rival",
+            }
+        })
+
+    elif msg_type == "rival_battle_start":
+        if not getattr(player, 'account_id', None):
+            return
+        rival = pending_rival_encounters.pop(player.id, None)
+        if not rival:
+            await player.send({"type": "error", "message": "No pending rival battle."})
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokemon in team."})
+            return
+        player_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        rival_team = build_trainer_team(rival["team"])
+        encounter = WildEncounter(player, player_team, None, None)
+        encounter.gym = rival
+        encounter.gym_team = rival_team
+        encounter.gym_active = 0
+        encounter.wild = rival_team[0]
+        encounter.is_gym = True
+        encounter.trainer_category = "rival"
+        encounter.battle_region = account_mgr.get_current_region(player.account_id)
+        active_encounters[player.id] = encounter
+        account_mgr.mark_seen_batch(player.account_id, [p.dex_id for p in rival_team])
+        await player.send({
+            "type": "gym_battle_start",
+            **encounter.serialize_state(),
+            "gym_name": "Blue",
+            "gym_team_size": len(rival_team),
         })
 
     # ─── Region Travel ─────────────────────────────
@@ -1258,6 +1341,13 @@ async def handle_message(player, msg, room_mgr):
             return
         milestones = account_mgr.get_milestones(player.account_id)
         prefix = f"{current_region}:" if current_region != "kanto" else ""
+        # Rival blocking check (before first E4 member only)
+        if e4_index == 0:
+            badges = account_mgr.get_badges(player.account_id, region=current_region)
+            starter = account_mgr.get_starter_dex_id(player.account_id)
+            if starter and is_rival_blocking(len(badges), milestones, starter, "e4"):
+                await player.send({"type": "error", "message": "Your rival Blue is waiting to battle you! Defeat them first!"})
+                return
         # Must beat E4 in order
         if e4_index > 0:
             prev_id = e4_members[e4_index - 1]["id"]
@@ -1391,6 +1481,14 @@ async def handle_message(player, msg, room_mgr):
 
     elif msg_type == "start_masters":
         if not getattr(player, 'account_id', None):
+            return
+        # Rival blocking check for Masters
+        current_region = account_mgr.get_current_region(player.account_id)
+        badges = account_mgr.get_badges(player.account_id, region=current_region)
+        milestones = account_mgr.get_milestones(player.account_id)
+        starter = account_mgr.get_starter_dex_id(player.account_id)
+        if starter and is_rival_blocking(len(badges), milestones, starter, "masters"):
+            await player.send({"type": "error", "message": "Your rival Blue is waiting to battle you! Defeat them first!"})
             return
         m8_id = data.get("m8_id")
         member = get_masters_opponent(m8_id)
@@ -1734,6 +1832,9 @@ async def handle_message(player, msg, room_mgr):
         badges_by_region = account_mgr.get_badges_by_region(player.account_id)
         milestones = account_mgr.get_milestones(player.account_id)
         profile = account_mgr.get_profile(player.account_id)
+        # Rival status
+        starter = account_mgr.get_starter_dex_id(player.account_id)
+        pending_rival = get_pending_rival_encounter(len(badges), milestones, starter) if starter else None
         await player.send({
             "type": "progression_data",
             "badges": badges,
@@ -1743,6 +1844,8 @@ async def handle_message(player, msg, room_mgr):
             "currency": profile.get("currency", 500),
             "pokeballs": profile.get("pokeballs", 10),
             "total_pokemon": profile.get("total_pokemon", 0),
+            "rival_pending": pending_rival is not None,
+            "rival_name": pending_rival["title"] if pending_rival else None,
         })
 
     # ─── Pokedex Messages ────────────────────────────
@@ -2665,6 +2768,21 @@ async def _handle_wild_action(player, encounter, data):
                             "category": "random_trainer",
                             "xp_results": xp_results,
                         })
+                    elif category == "rival":
+                        encounter_id = trainer.get("id", "rival_1")
+                        account_mgr.record_milestone(player.account_id, f"{encounter_id}_defeated")
+                        rare_candy = _award_rare_candy(player, "rival")
+                        await player.send({
+                            "type": "trainer_victory",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_win": trainer["dialog_win"],
+                            "currency_gained": reward,
+                            "rare_candy_gained": rare_candy,
+                            "category": "rival",
+                            "encounter_id": encounter_id,
+                            "xp_results": xp_results,
+                        })
                     else:
                         # Regular gym — use region-specific badge tracking
                         badge_ok = account_mgr.earn_badge(player.account_id, trainer["id"], region=battle_region)
@@ -2734,7 +2852,7 @@ async def _handle_wild_action(player, encounter, data):
                         # Clean up tournament state
                         if ts and player.account_id in active_tournaments:
                             del active_tournaments[player.account_id]
-                    elif category in ("e4", "champion", "masters", "random_trainer"):
+                    elif category in ("e4", "champion", "masters", "random_trainer", "rival"):
                         await player.send({
                             "type": "trainer_defeat",
                             "events": events,
@@ -2876,6 +2994,8 @@ def _award_rare_candy(player, battle_type, tournament_round=None):
             qty = 1
         else:
             return 0
+    elif battle_type == "rival":
+        qty = 2  # Same tier as E4
     elif battle_type == "tournament":
         # Determine round from active tournament state
         ts = active_tournaments.get(player.account_id)
@@ -3004,8 +3124,9 @@ async def handler(websocket):
                 if opp:
                     await opp.send({"type": "trade_cancelled", "message": f"{player.name} disconnected."})
             _cleanup_trade_room(trade_code)
-        # Clean up pending random trainer and tournament state on disconnect
+        # Clean up pending encounters on disconnect
         pending_random_trainers.pop(player.id, None)
+        pending_rival_encounters.pop(player.id, None)
         acct_id = getattr(player, 'account_id', None)
         if acct_id and acct_id in active_tournaments:
             del active_tournaments[acct_id]
