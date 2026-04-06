@@ -5544,6 +5544,7 @@ function showTrainerIntro(trainer) {
   document.getElementById('trainerintro-info').innerHTML = infoHtml;
   var battleBtn = document.getElementById('trainerintro-battle-btn');
   var backBtn = document.getElementById('trainerintro-back-btn');
+  backBtn.style.display = '';  // Reset visibility (may have been hidden by random_trainer)
   if (trainer.category === 'e4') {
     battleBtn.onclick = function() { send({type:'e4_battle_start', e4_id: trainer.id}); };
     backBtn.onclick = function() { showEliteFour(); };
@@ -5556,6 +5557,9 @@ function showTrainerIntro(trainer) {
   } else if (trainer.category === 'tournament') {
     battleBtn.onclick = function() { send({type:'tournament_battle_start'}); };
     backBtn.onclick = function() { showTournament(); };
+  } else if (trainer.category === 'random_trainer') {
+    battleBtn.onclick = function() { send({type:'random_trainer_battle_start'}); };
+    backBtn.style.display = 'none';  // Can't back out of random trainer battles
   }
 }
 
@@ -5567,6 +5571,7 @@ function showTrainerVictory(msg) {
   var badge = '';
   if (msg.category === 'e4') badge = msg.trainer_name + ' defeated!';
   else if (msg.category === 'champion') { title = 'CHAMPION!'; badge = 'You are the new Pokemon Champion!'; }
+  else if (msg.category === 'random_trainer') { title = 'TRAINER DEFEATED!'; badge = msg.trainer_name + ' was defeated!'; }
   else if (msg.category === 'masters') {
     badge = msg.trainer_name + ' defeated!';
     if (msg.all_masters_beaten) { title = 'WORLD CHAMPION!'; badge = 'You defeated all Masters Eight! You are the World Champion!'; }
@@ -5609,6 +5614,8 @@ function showTrainerDefeat(msg) {
     badge = 'Tournament over at the ' + (msg.tournament_round_name || 'Quarterfinal') + '.';
     S._tournamentState = null;
     S._tournamentComplete = false;
+  } else if (msg.category === 'random_trainer') {
+    badge = 'Better luck next time!';
   }
   document.getElementById('gym-result-title').textContent = title;
   document.getElementById('gym-result-title').className = 'gameover-title lose';

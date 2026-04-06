@@ -96,6 +96,126 @@ CURRENCY_CHAMPION_WIN = 5000
 CURRENCY_PVP_WIN = 500
 CURRENCY_PVP_BOT_WIN = 300
 CURRENCY_MASTERS_WIN = 2000
+CURRENCY_RANDOM_TRAINER_BASE = 200
+
+# ─── Random Trainer Battles ─────────────────────────
+
+TRAINER_BATTLE_CHANCE = 0.18  # 18% chance when clicking wild encounter
+
+RANDOM_TRAINER_NAMES = [
+    "Youngster Joey", "Lass Jenny", "Hiker Miles", "Beauty Naomi",
+    "Bug Catcher Kent", "Swimmer Lisa", "Ace Trainer Marcus",
+    "Blackbelt Hitoshi", "Cooltrainer Rachel", "Fisherman Dale",
+    "Bird Keeper Toby", "Psychic Fiona", "Biker Chain",
+    "Gentleman Arthur", "Tamer Brock", "Scientist Ada",
+    "Super Nerd Jiro", "Channeler Paula", "Juggler Dalton",
+    "Sailor Drake", "Rocker Frank", "Lass Penny",
+    "Youngster Ben", "Hiker Clark", "Beauty Selene",
+]
+
+RANDOM_TRAINER_TITLES = [
+    "Traveling Trainer", "Aspiring Champion", "Battle Enthusiast",
+    "Type Specialist", "Pokemon Collector", "Wandering Battler",
+    "Eager Challenger", "Seasoned Veteran",
+]
+
+RANDOM_TRAINER_INTROS = [
+    "Hey! Our eyes met, so we have to battle!",
+    "I've been training hard and I want to test my team!",
+    "You look tough! Let's have a battle!",
+    "I challenge you to a Pokemon battle!",
+    "A real trainer never turns down a challenge!",
+    "My Pokemon are itching for a fight!",
+    "Wait! You're a trainer too? Let's go!",
+    "I won't let you pass without a battle!",
+]
+
+RANDOM_TRAINER_WIN_DIALOG = [
+    "Wow, you're strong! Here, take this as a reward!",
+    "I can't believe I lost! You earned this.",
+    "Great battle! You deserved that win!",
+    "I need to train harder... Take your prize!",
+    "No way! I thought I had you! Well fought!",
+]
+
+RANDOM_TRAINER_LOSE_DIALOG = [
+    "Ha! Looks like I'm the better trainer!",
+    "Train harder and maybe you'll beat me next time!",
+    "My Pokemon and I are unstoppable!",
+    "Better luck next time, kid!",
+]
+
+
+def generate_random_trainer(player_avg_level, badge_count=0, region=None):
+    """Generate a random trainer for a surprise battle during wild encounters.
+
+    Difficulty scales with badge count and player team level.
+    Returns a trainer dict matching gym/E4/champion format.
+    """
+    name = random.choice(RANDOM_TRAINER_NAMES)
+    title = random.choice(RANDOM_TRAINER_TITLES)
+
+    # Team size: 2 with 0-2 badges, 3 with 3-5, 4 with 6+
+    team_size = min(2 + badge_count // 3, 4)
+
+    # Level scaling: near player average, slightly randomized
+    base_level = max(5, int(player_avg_level) + random.randint(-2, 3))
+
+    # Type theming: 60% chance of a type-themed team
+    themed = random.random() < 0.60
+    if themed:
+        chosen_type = random.choice(list(TOURNAMENT_TYPE_POOLS.keys()))
+        type_pool = TOURNAMENT_TYPE_POOLS[chosen_type]
+        # Region filter: 70% chance to prefer regional Pokemon
+        if region and region != "all":
+            region_ids = set(pokemon_data.get_region_pokemon_ids(region) or [])
+            regional_pool = [d for d in type_pool if d in region_ids]
+            if len(regional_pool) >= team_size and random.random() < 0.70:
+                type_pool = regional_pool
+        if len(type_pool) >= team_size:
+            chosen_ids = random.sample(type_pool, team_size)
+        else:
+            chosen_ids = list(type_pool)
+            supplement = [d for d in TOURNAMENT_TIER1 + TOURNAMENT_TIER2 if d not in chosen_ids]
+            chosen_ids += random.sample(supplement, min(team_size - len(chosen_ids), len(supplement)))
+        team_type = chosen_type
+    else:
+        # Mixed team from tier 1 + tier 2 based on badge progression
+        if badge_count <= 3:
+            pool = TOURNAMENT_TIER1
+        elif badge_count <= 6:
+            pool = TOURNAMENT_TIER1 + TOURNAMENT_TIER2
+        else:
+            pool = TOURNAMENT_TIER2 + TOURNAMENT_TIER3
+        # Region filter
+        if region and region != "all":
+            region_ids = set(pokemon_data.get_region_pokemon_ids(region) or [])
+            regional_pool = [d for d in pool if d in region_ids]
+            if len(regional_pool) >= team_size and random.random() < 0.70:
+                pool = regional_pool
+        chosen_ids = random.sample(pool, min(team_size, len(pool)))
+        team_type = "normal"
+
+    # Build team spec with level variation
+    team_spec = []
+    for dex_id in chosen_ids:
+        level = max(5, min(100, base_level + random.randint(-2, 2)))
+        team_spec.append({"dex_id": dex_id, "level": level})
+
+    # Currency reward: scales with badges
+    reward = CURRENCY_RANDOM_TRAINER_BASE + (badge_count * 25)
+
+    return {
+        "id": "random_trainer",
+        "name": name,
+        "title": title,
+        "type": team_type,
+        "team": team_spec,
+        "reward_currency": reward,
+        "dialog_intro": random.choice(RANDOM_TRAINER_INTROS),
+        "dialog_win": random.choice(RANDOM_TRAINER_WIN_DIALOG),
+        "dialog_lose": random.choice(RANDOM_TRAINER_LOSE_DIALOG),
+    }
 
 
 # ─── Wild Encounter ──────────────────────────────────

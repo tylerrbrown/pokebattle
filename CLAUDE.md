@@ -276,6 +276,15 @@ python tests/test_battle_engine.py
 - ~~**Legendary pity system**: Guaranteed legendary encounter every 50 wild encounters~~ (DONE 3/23/2026)
 - **Decrease legendary random rate**: Lower the base random chance of finding legendaries
 
+### Feature Requests (4/6/2026 - from Liam, "Round 5")
+- **Shop-gated Mega/Dynamax/Z-Moves**: Mega, Dynamax, and Z-Moves should cost money in the shop to unlock (currently free)
+- **Pokemon abilities**: Every Pokemon gets a passive ability (Blaze, Overgrow, Intimidate, etc.)
+- **Rival system**: Recurring rival NPC you battle throughout the entire game
+- **Random trainer battles**: Occasionally when clicking wild encounter, a trainer battle triggers instead (can't run)
+- **Eviolite/Everstone**: Items to prevent evolution or boost unevolved Pokemon
+- **TMs**: Technical Machines to teach specific moves to compatible Pokemon
+- **Double battles**: 2v2 battles with two Pokemon out at once
+
 ### Implemented in "Liam's Feature Pack" (3/19/2026)
 - Backpack/PC Storage UI (swap Pokemon between team and storage)
 - Elite Four → Champion → Masters Eight progression path

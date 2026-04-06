@@ -33,6 +33,7 @@ from journey import (
     get_gym_leaders, get_elite_four, get_champion,
     generate_tournament_bracket, CURRENCY_TOURNAMENT, RARE_CANDY_TOURNAMENT,
     TOURNAMENT_ROUND_NAMES,
+    generate_random_trainer, TRAINER_BATTLE_CHANCE,
 )
 from battle_engine import PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE
 
@@ -152,6 +153,7 @@ active_encounters = {}  # player.id -> WildEncounter
 trade_rooms = {}  # code -> TradeRoom
 player_trade_rooms = {}  # player.id -> code
 active_tournaments = {}  # player.account_id -> TournamentState
+pending_random_trainers = {}  # player.id -> trainer dict
 
 
 class TournamentState:
@@ -969,8 +971,29 @@ async def handle_message(player, msg, room_mgr):
             await player.send({"type": "error", "message": "No Pokémon in team."})
             return
         avg_level = sum(p["level"] for p in team_data) / len(team_data)
-        pity_counter = account_mgr.get_encounter_counter(player.account_id)
         current_region = account_mgr.get_current_region(player.account_id)
+
+        # Random trainer battle check (18% chance)
+        if player.id not in pending_random_trainers and random.random() < TRAINER_BATTLE_CHANCE:
+            badge_count = len(account_mgr.get_badges(player.account_id, region=current_region))
+            trainer = generate_random_trainer(avg_level, badge_count, region=current_region)
+            pending_random_trainers[player.id] = trainer
+            await player.send({
+                "type": "trainer_intro",
+                "trainer": {
+                    "id": trainer["id"],
+                    "name": trainer["name"],
+                    "title": trainer["title"],
+                    "type": trainer["type"],
+                    "dialog_intro": trainer["dialog_intro"],
+                    "team_size": len(trainer["team"]),
+                    "max_level": max(t.get("level", 50) for t in trainer["team"]),
+                    "category": "random_trainer",
+                }
+            })
+            return
+
+        pity_counter = account_mgr.get_encounter_counter(player.account_id)
         wild, rarity = generate_wild_pokemon(avg_level, pity_counter=pity_counter, region=current_region)
         # Update pity counter: reset on legendary, increment otherwise
         if rarity == "legendary":
@@ -1112,6 +1135,36 @@ async def handle_message(player, msg, room_mgr):
             **encounter.serialize_state(),
             "gym_name": gym["name"],
             "gym_team_size": len(gym_team),
+        })
+
+    elif msg_type == "random_trainer_battle_start":
+        if not getattr(player, 'account_id', None):
+            return
+        trainer = pending_random_trainers.pop(player.id, None)
+        if not trainer:
+            await player.send({"type": "error", "message": "No pending trainer battle."})
+            return
+        team_data = account_mgr.get_team(player.account_id)
+        if not team_data:
+            await player.send({"type": "error", "message": "No Pokemon in team."})
+            return
+        player_team = build_journey_team(team_data, pokemon_data.POKEMON, pokemon_data.MOVES)
+        trainer_team = build_trainer_team(trainer["team"])
+        encounter = WildEncounter(player, player_team, None, None)
+        encounter.gym = trainer
+        encounter.gym_team = trainer_team
+        encounter.gym_active = 0
+        encounter.wild = trainer_team[0]
+        encounter.is_gym = True
+        encounter.trainer_category = "random_trainer"
+        encounter.battle_region = account_mgr.get_current_region(player.account_id)
+        active_encounters[player.id] = encounter
+        account_mgr.mark_seen_batch(player.account_id, [p.dex_id for p in trainer_team])
+        await player.send({
+            "type": "gym_battle_start",
+            **encounter.serialize_state(),
+            "gym_name": trainer["name"],
+            "gym_team_size": len(trainer_team),
         })
 
     # ─── Region Travel ─────────────────────────────
@@ -2600,6 +2653,18 @@ async def _handle_wild_action(player, encounter, data):
                             "tournament_state": ts.serialize() if ts else None,
                             "xp_results": xp_results,
                         })
+                    elif category == "random_trainer":
+                        rare_candy = _award_rare_candy(player, "random_trainer")
+                        await player.send({
+                            "type": "trainer_victory",
+                            "events": events,
+                            "trainer_name": trainer["name"],
+                            "dialog_win": trainer["dialog_win"],
+                            "currency_gained": reward,
+                            "rare_candy_gained": rare_candy,
+                            "category": "random_trainer",
+                            "xp_results": xp_results,
+                        })
                     else:
                         # Regular gym — use region-specific badge tracking
                         badge_ok = account_mgr.earn_badge(player.account_id, trainer["id"], region=battle_region)
@@ -2669,7 +2734,7 @@ async def _handle_wild_action(player, encounter, data):
                         # Clean up tournament state
                         if ts and player.account_id in active_tournaments:
                             del active_tournaments[player.account_id]
-                    elif category in ("e4", "champion", "masters"):
+                    elif category in ("e4", "champion", "masters", "random_trainer"):
                         await player.send({
                             "type": "trainer_defeat",
                             "events": events,
@@ -2806,6 +2871,11 @@ def _award_rare_candy(player, battle_type, tournament_round=None):
         qty = 2
     elif battle_type in ("champion", "masters"):
         qty = 3
+    elif battle_type == "random_trainer":
+        if random.random() < 0.25:
+            qty = 1
+        else:
+            return 0
     elif battle_type == "tournament":
         # Determine round from active tournament state
         ts = active_tournaments.get(player.account_id)
@@ -2934,7 +3004,8 @@ async def handler(websocket):
                 if opp:
                     await opp.send({"type": "trade_cancelled", "message": f"{player.name} disconnected."})
             _cleanup_trade_room(trade_code)
-        # Clean up tournament state on disconnect
+        # Clean up pending random trainer and tournament state on disconnect
+        pending_random_trainers.pop(player.id, None)
         acct_id = getattr(player, 'account_id', None)
         if acct_id and acct_id in active_tournaments:
             del active_tournaments[acct_id]
