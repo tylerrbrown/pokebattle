@@ -956,14 +956,15 @@ input.invalid { border-color: var(--red); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 /* ─── Hub Screen ───────────────────────────────── */
-.hub-screen { align-items:center; justify-content:center; gap:16px; padding:20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); }
-.hub-profile { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:var(--fs-xs); color:var(--text-dim); background:var(--bg2); padding:8px 14px; border-radius:8px; border:1px solid var(--border); width:360px; max-width:95%; }
+.hub-screen { align-items:center; justify-content:flex-start; gap:8px; padding:10px 20px; background:radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%); overflow-y:auto; }
+.hub-profile { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; font-size:var(--fs-xs); color:var(--text-dim); background:var(--bg2); padding:6px 12px; border-radius:8px; border:1px solid var(--border); width:360px; max-width:95%; }
 .hub-profile .stat { color:var(--yellow); }
 .hub-badges { display:flex; gap:4px; align-items:center; }
 .hub-badge { width:14px; height:14px; border-radius:50%; background:var(--bg); border:1px solid var(--border); }
 .hub-badge.earned { border:2px solid var(--yellow); }
-.hub-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:320px; max-width:95%; }
-.btn-wild { grid-column:1/-1; background:linear-gradient(135deg,var(--green),#22c55e); color:#1a1a2e; font-size:var(--fs-md); font-weight:bold; padding:16px; }
+.hub-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:320px; max-width:95%; }
+.hub-version { font-size:10px; color:var(--text-dim); opacity:0.5; margin-top:4px; }
+.btn-wild { grid-column:1/-1; background:linear-gradient(135deg,var(--green),#22c55e); color:#1a1a2e; font-size:var(--fs-md); font-weight:bold; padding:10px; }
 .btn-wild:hover { filter:brightness(1.1); }
 .btn-gym { background:linear-gradient(135deg,#7038f8,#a890f0); color:#fff; }
 .btn-gym:hover { filter:brightness(1.1); }
@@ -1439,7 +1440,7 @@ input.invalid { border-color: var(--red); }
 
   <!-- HUB SCREEN (Journey Mode main menu) -->
   <div id="screen-hub" class="screen hub-screen">
-    <div class="title-logo" style="font-size:var(--fs-3xl)">POKE<br>BATTLE</div>
+    <div class="title-logo" style="font-size:var(--fs-2xl);margin:0">POKEBATTLE</div>
     <div class="hub-profile" id="hub-profile"></div>
     <div class="hub-btns">
       <button class="btn btn-wild" onclick="startWildEncounter()">WILD ENCOUNTER</button>
@@ -1461,6 +1462,7 @@ input.invalid { border-color: var(--red); }
       <button class="btn btn-secondary" style="font-size:var(--fs-xs)" onclick="logout()">LOG OUT</button>
       <button class="btn btn-bug" style="grid-column:1/-1;font-size:var(--fs-xs)" onclick="showBugReport()">REPORT BUG</button>
     </div>
+    <div class="hub-version">v1.5.0</div>
   </div>
 
   <!-- MY TEAM SCREEN -->
