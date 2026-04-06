@@ -277,10 +277,10 @@ python tests/test_battle_engine.py
 - **Decrease legendary random rate**: Lower the base random chance of finding legendaries
 
 ### Feature Requests (4/6/2026 - from Liam, "Round 5")
-- **Shop-gated Mega/Dynamax/Z-Moves**: Mega, Dynamax, and Z-Moves should cost money in the shop to unlock (currently free)
+- ~~**Shop-gated Mega/Dynamax/Z-Moves**: Z-Crystals ($5K) and Mega Stones ($10K) were already shop-gated; added Dynamax Band ($8K) to gate Dynamax. All three mechanics now require shop purchases.~~ (DONE 4/6/2026)
 - **Pokemon abilities**: Every Pokemon gets a passive ability (Blaze, Overgrow, Intimidate, etc.)
-- **Rival system**: Recurring rival NPC you battle throughout the entire game
-- **Random trainer battles**: Occasionally when clicking wild encounter, a trainer battle triggers instead (can't run)
+- ~~**Rival system**: Blue appears at 6 scripted points (after badges 2/4/6/8, post-Champion, Masters). Blocks progression until defeated. Team counters player's starter.~~ (DONE 4/6/2026)
+- ~~**Random trainer battles**: 18% chance on wild encounter. Can't run. Scales with badges (2-4 Pokemon). $200-400 reward, 25% rare candy drop.~~ (DONE 4/6/2026)
 - **Eviolite/Everstone**: Items to prevent evolution or boost unevolved Pokemon
 - **TMs**: Technical Machines to teach specific moves to compatible Pokemon
 - **Double battles**: 2v2 battles with two Pokemon out at once

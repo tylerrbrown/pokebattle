@@ -85,6 +85,7 @@ SHOP_ITEMS = {
     "tyranitarite":    {"name": "Tyranitarite",     "price": 10000, "category": "mega-stone", "mega_for": 248},
     # Held Items
     "lucky-egg":       {"name": "Lucky Egg",        "price": 1500, "category": "held"},
+    "dynamax-band":    {"name": "Dynamax Band",     "price": 8000, "category": "held"},
 }
 
 # Currency awards

@@ -4512,7 +4512,8 @@ function showJourneyMovePanel() {
   var hasZCrystal = !zUsed && !dynamaxUsed && !isDynamaxed && myPoke.moves.some(function(m) { return m.power > 0 && inv['z-' + m.type] > 0; });
   var megaData = S._megaData || {};
   var hasMega = !megaUsed && !dynamaxUsed && !isDynamaxed && !myPoke.is_mega && megaData[String(myPoke.dex_id)];
-  var canDynamax = !dynamaxUsed && !megaUsed && !zUsed && !myPoke.is_mega && !isDynamaxed;
+  var hasDynamaxBand = inv['dynamax-band'] > 0;
+  var canDynamax = hasDynamaxBand && !dynamaxUsed && !megaUsed && !zUsed && !myPoke.is_mega && !isDynamaxed;
   if (hasZCrystal || hasMega || canDynamax) {
     html += '<div style="display:flex;gap:6px;margin-bottom:6px;justify-content:center;flex-wrap:wrap">';
     if (hasZCrystal) {

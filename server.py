@@ -2532,6 +2532,12 @@ async def _handle_wild_action(player, encounter, data):
 
     if action == "dynamax":
         my_poke = encounter.get_active()
+        # Require Dynamax Band from inventory
+        if getattr(player, 'account_id', None):
+            inv = account_mgr.get_inventory(player.account_id)
+            if not inv.get('dynamax-band', 0):
+                await player.send({"type": "error", "message": "You need a Dynamax Band! Buy one from the shop."})
+                return
         if getattr(encounter, '_dynamax_used', False):
             await player.send({"type": "error", "message": "Already used Dynamax this battle!"})
             return
