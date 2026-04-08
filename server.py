@@ -36,7 +36,10 @@ from journey import (
     generate_random_trainer, TRAINER_BATTLE_CHANCE,
     get_pending_rival_encounter, is_rival_blocking,
 )
-from battle_engine import PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE
+from battle_engine import (
+    PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE,
+    apply_switch_in_ability, apply_switch_out_ability,
+)
 
 APP_DIR = pathlib.Path(__file__).parent
 
@@ -630,6 +633,7 @@ async def handle_message(player, msg, room_mgr):
                 "evolutions": pokemon_data.EVOLUTIONS,
                 "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
                 "dynamax": pokemon_data.DYNAMAX,
+                "abilities": pokemon_data.ABILITIES,
             })
         return
 
@@ -687,6 +691,7 @@ async def handle_message(player, msg, room_mgr):
                 "evolutions": pokemon_data.EVOLUTIONS,
                 "mega_evolutions": pokemon_data.MEGA_EVOLUTIONS,
                 "dynamax": pokemon_data.DYNAMAX,
+                "abilities": pokemon_data.ABILITIES,
             })
         else:
             await player.send({"type": "pin_error", "message": "Wrong PIN. Try again."})
@@ -1015,7 +1020,11 @@ async def handle_message(player, msg, room_mgr):
             pity_hint = "The air crackles with strange energy..."
         elif new_counter >= 40:
             pity_hint = "You sense something powerful nearby..."
-        await player.send({"type": "wild_encounter_start", "region_name": region_name, "pity_hint": pity_hint, **encounter.serialize_state()})
+        # Switch-in abilities at encounter start
+        ability_events = []
+        apply_switch_in_ability(encounter.get_active(), wild, ability_events)
+        apply_switch_in_ability(wild, encounter.get_active(), ability_events)
+        await player.send({"type": "wild_encounter_start", "region_name": region_name, "pity_hint": pity_hint, "ability_events": ability_events, **encounter.serialize_state()})
 
     elif msg_type == "start_training":
         if not getattr(player, 'account_id', None):
@@ -2481,9 +2490,16 @@ async def _handle_wild_action(player, encounter, data):
         if idx not in alive or idx == encounter.active_idx:
             await player.send({"type": "error", "message": "Invalid switch."})
             return
+        # Switch-out ability (Regenerator)
+        old_active = encounter.get_active()
+        apply_switch_out_ability(old_active)
         encounter.active_idx = idx
+        # Switch-in ability (Intimidate)
+        ability_events = []
+        apply_switch_in_ability(encounter.get_active(), encounter.wild, ability_events)
         # Wild Pokemon attacks
         events = _wild_attacks(encounter)
+        events = ability_events + events
         if encounter.all_fainted():
             del active_encounters[player.id]
             await player.send({"type": "wild_blackout", "events": events})

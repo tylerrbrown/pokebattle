@@ -510,6 +510,8 @@ class WildEncounter:
                 "rarity": self.wild_rarity,
                 "is_mega": getattr(self.wild, 'is_mega', False),
                 "is_shiny": getattr(self.wild, 'is_shiny', False),
+                "ability": getattr(self.wild, 'ability', None),
+                "ability_name": pokemon_data.ABILITIES.get(getattr(self.wild, 'ability', '') or '', {}).get("name", ""),
             },
             "your_pokemon": active.serialize_full(),
             "your_team": [p.serialize_full() for p in self.team],

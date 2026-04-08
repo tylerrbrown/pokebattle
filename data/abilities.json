@@ -1,0 +1,147 @@
+{
+  "blaze": {
+    "name": "Blaze",
+    "description": "Powers up Fire moves when HP is low.",
+    "trigger": "damage_calc_attacker"
+  },
+  "torrent": {
+    "name": "Torrent",
+    "description": "Powers up Water moves when HP is low.",
+    "trigger": "damage_calc_attacker"
+  },
+  "overgrow": {
+    "name": "Overgrow",
+    "description": "Powers up Grass moves when HP is low.",
+    "trigger": "damage_calc_attacker"
+  },
+  "swarm": {
+    "name": "Swarm",
+    "description": "Powers up Bug moves when HP is low.",
+    "trigger": "damage_calc_attacker"
+  },
+  "huge_power": {
+    "name": "Huge Power",
+    "description": "Doubles physical Attack power.",
+    "trigger": "damage_calc_attacker"
+  },
+  "guts": {
+    "name": "Guts",
+    "description": "Boosts Attack when affected by a status condition.",
+    "trigger": "damage_calc_attacker"
+  },
+  "thick_fat": {
+    "name": "Thick Fat",
+    "description": "Reduces Fire and Ice damage taken by half.",
+    "trigger": "damage_calc_defender"
+  },
+  "levitate": {
+    "name": "Levitate",
+    "description": "Immune to Ground-type moves.",
+    "trigger": "damage_calc_defender"
+  },
+  "flash_fire": {
+    "name": "Flash Fire",
+    "description": "Absorbs Fire moves to power up own Fire attacks.",
+    "trigger": "damage_calc_defender"
+  },
+  "sturdy": {
+    "name": "Sturdy",
+    "description": "Survives any hit with 1 HP if at full health.",
+    "trigger": "damage_calc_defender"
+  },
+  "multiscale": {
+    "name": "Multiscale",
+    "description": "Halves damage taken when at full HP.",
+    "trigger": "damage_calc_defender"
+  },
+  "immunity": {
+    "name": "Immunity",
+    "description": "Cannot be poisoned.",
+    "trigger": "on_status_apply"
+  },
+  "water_veil": {
+    "name": "Water Veil",
+    "description": "Cannot be burned.",
+    "trigger": "on_status_apply"
+  },
+  "limber": {
+    "name": "Limber",
+    "description": "Cannot be paralyzed.",
+    "trigger": "on_status_apply"
+  },
+  "insomnia": {
+    "name": "Insomnia",
+    "description": "Cannot be put to sleep.",
+    "trigger": "on_status_apply"
+  },
+  "intimidate": {
+    "name": "Intimidate",
+    "description": "Lowers the foe's Attack when entering battle.",
+    "trigger": "on_switch_in"
+  },
+  "speed_boost": {
+    "name": "Speed Boost",
+    "description": "Speed increases each turn.",
+    "trigger": "end_of_turn"
+  },
+  "poison_heal": {
+    "name": "Poison Heal",
+    "description": "Heals HP instead of taking poison damage.",
+    "trigger": "end_of_turn"
+  },
+  "regenerator": {
+    "name": "Regenerator",
+    "description": "Heals 1/3 HP when switching out.",
+    "trigger": "on_switch_out"
+  },
+  "static": {
+    "name": "Static",
+    "description": "May paralyze attackers on contact.",
+    "trigger": "on_hit_received"
+  },
+  "flame_body": {
+    "name": "Flame Body",
+    "description": "May burn attackers on contact.",
+    "trigger": "on_hit_received"
+  },
+  "mold_breaker": {
+    "name": "Mold Breaker",
+    "description": "Moves ignore the foe's abilities.",
+    "trigger": "none"
+  },
+  "keen_eye": {
+    "name": "Keen Eye",
+    "description": "Accuracy cannot be lowered.",
+    "trigger": "none"
+  },
+  "pressure": {
+    "name": "Pressure",
+    "description": "The foe uses more PP for moves.",
+    "trigger": "none"
+  },
+  "shed_skin": {
+    "name": "Shed Skin",
+    "description": "May heal status conditions over time.",
+    "trigger": "none"
+  },
+  "run_away": {
+    "name": "Run Away",
+    "description": "Can always flee from wild Pokemon.",
+    "trigger": "none"
+  },
+  "natural_cure": {
+    "name": "Natural Cure",
+    "description": "Status conditions heal on switch-out.",
+    "trigger": "none"
+  },
+  "synchronize": {
+    "name": "Synchronize",
+    "description": "Passes status conditions to the foe.",
+    "trigger": "none"
+  },
+  "adaptability": {
+    "name": "Adaptability",
+    "description": "Boosts same-type attack bonus.",
+    "trigger": "damage_calc_attacker"
+  }
+}

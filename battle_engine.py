@@ -12,6 +12,7 @@ Faithful implementation of Generation I battle mechanics:
 
 import json
 import random
+import pokemon_data
 from pokemon_data import get_type_effectiveness, MOVES
 
 # Gen 1: Physical types use Attack/Defense, Special types use Special/Special
@@ -75,6 +76,10 @@ class PokemonInstance:
 
         # Shiny (persisted)
         self.is_shiny = False
+
+        # Ability (derived from species, not persisted)
+        self.ability = species_data.get("ability")
+        self._flash_fire_active = False
 
         # Dynamax (per-battle)
         self.is_dynamaxed = False
@@ -186,6 +191,8 @@ class PokemonInstance:
             "is_dynamaxed": self.is_dynamaxed,
             "dynamax_turns_left": self.dynamax_turns_left,
             "is_shiny": self.is_shiny,
+            "ability": self.ability,
+            "ability_name": pokemon_data.ABILITIES.get(self.ability, {}).get("name", "") if self.ability else None,
             "moves": [
                 {
                     "id": m["id"],
@@ -221,6 +228,8 @@ class PokemonInstance:
             "is_dynamaxed": self.is_dynamaxed,
             "dynamax_turns_left": self.dynamax_turns_left,
             "is_shiny": self.is_shiny,
+            "ability": self.ability,
+            "ability_name": pokemon_data.ABILITIES.get(self.ability, {}).get("name", "") if self.ability else None,
             "moves": [
                 {"id": m["id"], "name": m["name"], "type": m["type"]}
                 for m in self.moves
@@ -274,7 +283,136 @@ STRUGGLE = {
 }
 
 
-def calculate_damage(attacker, defender, move, dodge_multiplier=1.0):
+# ─── Ability System ──────────────────────────────────
+
+# Abilities that map to a type boost at low HP
+_LOW_HP_TYPE_ABILITIES = {
+    "blaze": "fire", "torrent": "water", "overgrow": "grass", "swarm": "bug",
+}
+
+# Status immunities granted by abilities
+_STATUS_IMMUNITY = {
+    "immunity": "poison", "water_veil": "burn", "limber": "paralyze", "insomnia": "sleep",
+}
+
+
+def check_ability(trigger, pokemon, context=None):
+    """Central ability dispatch. Returns dict of modifiers/events or None."""
+    if not pokemon or not pokemon.ability:
+        return None
+    ability = pokemon.ability
+    ctx = context or {}
+
+    if trigger == "damage_calc_attacker":
+        move = ctx.get("move", {})
+        move_type = move.get("type", "")
+        # Blaze / Torrent / Overgrow / Swarm
+        if ability in _LOW_HP_TYPE_ABILITIES:
+            if move_type == _LOW_HP_TYPE_ABILITIES[ability] and pokemon.current_hp <= pokemon.max_hp * 0.33:
+                return {"damage_mult": 1.5, "text": f"{pokemon.name}'s {pokemon_data.ABILITIES.get(ability, {}).get('name', ability)} powers up the move!"}
+        # Adaptability: STAB becomes 2.0x instead of 1.5x
+        if ability == "adaptability" and move_type in pokemon.types:
+            return {"stab_override": 2.0}
+        # Huge Power: 2x physical attack
+        if ability == "huge_power" and move_type in PHYSICAL_TYPES:
+            return {"atk_mult": 2.0}
+        # Guts: 1.5x attack when statused, ignore burn penalty
+        if ability == "guts" and pokemon.status:
+            return {"atk_mult": 1.5, "ignore_burn": True}
+        # Flash Fire: 1.5x fire damage if activated
+        if ability == "flash_fire" and pokemon._flash_fire_active and move_type == "fire":
+            return {"damage_mult": 1.5, "text": f"{pokemon.name}'s Flash Fire powers up the move!"}
+        return None
+
+    if trigger == "damage_calc_defender":
+        move = ctx.get("move", {})
+        move_type = move.get("type", "")
+        attacker = ctx.get("attacker")
+        mold = attacker and attacker.ability == "mold_breaker"
+        # Thick Fat: halve fire/ice damage
+        if ability == "thick_fat" and move_type in ("fire", "ice") and not mold:
+            return {"damage_mult": 0.5, "text": f"{pokemon.name}'s Thick Fat reduces the damage!"}
+        # Levitate: immune to ground
+        if ability == "levitate" and move_type == "ground" and not mold:
+            return {"immune": True, "text": f"{pokemon.name} floats with Levitate!"}
+        # Flash Fire: absorb fire, become immune
+        if ability == "flash_fire" and move_type == "fire" and not mold:
+            pokemon._flash_fire_active = True
+            return {"immune": True, "text": f"{pokemon.name}'s Flash Fire absorbed the attack!"}
+        # Sturdy: survive at 1 HP from full
+        if ability == "sturdy" and pokemon.current_hp == pokemon.max_hp and not mold:
+            return {"sturdy": True}
+        # Multiscale: halve damage at full HP
+        if ability == "multiscale" and pokemon.current_hp == pokemon.max_hp and not mold:
+            return {"damage_mult": 0.5, "text": f"{pokemon.name}'s Multiscale halves the damage!"}
+        return None
+
+    if trigger == "on_status_apply":
+        status = ctx.get("status", "")
+        if ability in _STATUS_IMMUNITY and _STATUS_IMMUNITY[ability] == status:
+            name = pokemon_data.ABILITIES.get(ability, {}).get("name", ability)
+            return {"immune": True, "text": f"{pokemon.name}'s {name} prevents {status}!"}
+        return None
+
+    if trigger == "on_hit_received":
+        move = ctx.get("move", {})
+        attacker = ctx.get("attacker")
+        # Only trigger on physical (contact) moves
+        if move.get("type") not in PHYSICAL_TYPES:
+            return None
+        if ability == "static" and attacker and not attacker.status:
+            if random.random() < 0.30:
+                return {"inflict_status": "paralyze", "text": f"{pokemon.name}'s Static paralyzed {attacker.name}!"}
+        if ability == "flame_body" and attacker and not attacker.status:
+            if random.random() < 0.30:
+                return {"inflict_status": "burn", "text": f"{pokemon.name}'s Flame Body burned {attacker.name}!"}
+        return None
+
+    if trigger == "on_switch_in":
+        opponent = ctx.get("opponent")
+        if ability == "intimidate" and opponent and not opponent.is_fainted:
+            return {"stat_change": "attack_stage", "stages": -1,
+                    "text": f"{pokemon.name}'s Intimidate lowers {opponent.name}'s Attack!"}
+        return None
+
+    if trigger == "end_of_turn":
+        if ability == "speed_boost":
+            if pokemon.speed_stage < 6:
+                return {"speed_boost": True, "text": f"{pokemon.name}'s Speed Boost raises its Speed!"}
+        if ability == "poison_heal" and pokemon.status == "poison":
+            return {"poison_heal": True}
+        return None
+
+    return None
+
+
+def apply_switch_in_ability(pokemon, opponent, events):
+    """Apply on-switch-in ability effects. Call when a Pokemon enters battle."""
+    result = check_ability("on_switch_in", pokemon, {"opponent": opponent})
+    if result:
+        if result.get("stat_change") and opponent:
+            stat = result["stat_change"]
+            stages = result["stages"]
+            current = getattr(opponent, stat, 0)
+            new_val = max(-6, min(6, current + stages))
+            setattr(opponent, stat, new_val)
+            events.append({
+                "event": "ability_activate",
+                "pokemon": pokemon.name,
+                "text": result["text"],
+            })
+
+
+def apply_switch_out_ability(pokemon):
+    """Apply on-switch-out ability effects. Call before a Pokemon leaves battle."""
+    if not pokemon or pokemon.is_fainted:
+        return
+    if pokemon.ability == "regenerator":
+        heal = pokemon.max_hp // 3
+        pokemon.current_hp = min(pokemon.max_hp, pokemon.current_hp + heal)
+
+
+def calculate_damage(attacker, defender, move, dodge_multiplier=1.0, events=None):
     """Calculate damage using Gen 1 formula.
 
     dodge_multiplier: 1.0 = no dodge (full damage), 0.8 = successful dodge (20% reduction).
@@ -297,17 +435,32 @@ def calculate_damage(attacker, defender, move, dodge_multiplier=1.0):
         # OHKO: if it hits, it's an instant KO
         return defender.current_hp, 1.0, False
 
+    # Ability pre-checks
+    atk_ability = check_ability("damage_calc_attacker", attacker, {"move": move})
+    def_ability = check_ability("damage_calc_defender", defender, {"move": move, "attacker": attacker})
+
+    # Defender immunity (Levitate, Flash Fire)
+    if def_ability and def_ability.get("immune"):
+        if events is not None and def_ability.get("text"):
+            events.append({"event": "ability_activate", "pokemon": defender.name, "text": def_ability["text"]})
+        return 0, 0.0, False
+
     # Determine physical or special
     move_type = move["type"]
+    ignore_burn = atk_ability and atk_ability.get("ignore_burn")
     if move_type in PHYSICAL_TYPES:
         atk_stat = attacker.get_effective_stat("attack")
         def_stat = defender.get_effective_stat("defense")
-        # Burn halves physical attack
-        if attacker.status == "burn":
+        # Burn halves physical attack (unless Guts)
+        if attacker.status == "burn" and not ignore_burn:
             atk_stat = atk_stat // 2
     else:
         atk_stat = attacker.get_effective_stat("special")
         def_stat = defender.get_effective_stat("special")
+
+    # Attacker ability: attack multiplier (Huge Power, Guts)
+    if atk_ability and atk_ability.get("atk_mult"):
+        atk_stat = int(atk_stat * atk_ability["atk_mult"])
 
     # Critical hit check (Gen 1: base_speed / 512)
     crit_rate = attacker.base_speed / 512.0
@@ -320,8 +473,10 @@ def calculate_damage(attacker, defender, move, dodge_multiplier=1.0):
         if move_type in PHYSICAL_TYPES:
             atk_stat = attacker.attack
             def_stat = defender.defense
-            if attacker.status == "burn":
+            if attacker.status == "burn" and not ignore_burn:
                 atk_stat = atk_stat // 2
+            if atk_ability and atk_ability.get("atk_mult"):
+                atk_stat = int(atk_stat * atk_ability["atk_mult"])
         else:
             atk_stat = attacker.special
             def_stat = defender.special
@@ -332,8 +487,11 @@ def calculate_damage(attacker, defender, move, dodge_multiplier=1.0):
     # Base damage formula
     base = ((2 * effective_level / 5 + 2) * power * atk_stat / def_stat) / 50 + 2
 
-    # STAB
-    stab = 1.5 if move_type in attacker.types else 1.0
+    # STAB (Adaptability overrides to 2.0x)
+    if atk_ability and atk_ability.get("stab_override"):
+        stab = atk_ability["stab_override"] if move_type in attacker.types else 1.0
+    else:
+        stab = 1.5 if move_type in attacker.types else 1.0
 
     # Type effectiveness
     effectiveness = 1.0
@@ -348,10 +506,30 @@ def calculate_damage(attacker, defender, move, dodge_multiplier=1.0):
 
     damage = int(base * stab * effectiveness * rand_factor * dodge_mult)
 
+    # Attacker ability: damage multiplier (Blaze/Torrent/Overgrow/Swarm, Flash Fire)
+    if atk_ability and atk_ability.get("damage_mult"):
+        damage = int(damage * atk_ability["damage_mult"])
+        if events is not None and atk_ability.get("text"):
+            events.append({"event": "ability_activate", "pokemon": attacker.name, "text": atk_ability["text"]})
+
+    # Defender ability: damage multiplier (Thick Fat, Multiscale)
+    if def_ability and def_ability.get("damage_mult"):
+        damage = int(damage * def_ability["damage_mult"])
+        if events is not None and def_ability.get("text"):
+            events.append({"event": "ability_activate", "pokemon": defender.name, "text": def_ability["text"]})
+
     if effectiveness == 0:
         damage = 0
     else:
         damage = max(1, damage)
+
+    # Sturdy: survive at 1 HP from full
+    if def_ability and def_ability.get("sturdy"):
+        if damage >= defender.current_hp and defender.current_hp == defender.max_hp:
+            damage = defender.current_hp - 1
+            if events is not None:
+                events.append({"event": "ability_activate", "pokemon": defender.name,
+                               "text": f"{defender.name} hung on with Sturdy!"})
 
     return damage, effectiveness, is_critical
 
@@ -521,6 +699,13 @@ def apply_status_effect(move, target, events):
 
     # Can't apply if target is fainted
     if target.is_fainted:
+        return
+
+    # Ability-based status immunity
+    ability_result = check_ability("on_status_apply", target, {"status": effect})
+    if ability_result and ability_result.get("immune"):
+        if ability_result.get("text"):
+            events.append({"event": "ability_activate", "pokemon": target.name, "text": ability_result["text"]})
         return
 
     # Type immunities for status
@@ -745,7 +930,7 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, dodge_mult, events,
 
     # Calculate damage
     damage, effectiveness, is_critical = calculate_damage(
-        attacker_pokemon, defender_pokemon, move, dodge_mult
+        attacker_pokemon, defender_pokemon, move, dodge_mult, events=events
     )
 
     # Type effectiveness message
@@ -830,6 +1015,15 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, dodge_mult, events,
     # Apply secondary status effect (burn chance from Flamethrower, etc.)
     if not defender_pokemon.is_fainted:
         apply_status_effect(move, defender_pokemon, events)
+
+    # On-hit-received ability (Static, Flame Body)
+    if not defender_pokemon.is_fainted and not attacker_pokemon.is_fainted and damage > 0:
+        hit_result = check_ability("on_hit_received", defender_pokemon, {"move": move, "attacker": attacker_pokemon})
+        if hit_result and hit_result.get("inflict_status") and not attacker_pokemon.status:
+            attacker_pokemon.status = hit_result["inflict_status"]
+            if hit_result["inflict_status"] == "sleep":
+                attacker_pokemon.sleep_turns = random.randint(1, 7)
+            events.append({"event": "ability_activate", "pokemon": defender_pokemon.name, "text": hit_result["text"]})
 
     _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
 
@@ -930,26 +1124,52 @@ def resolve_turn(p1_pokemon, p2_pokemon, p1_action, p2_action, p1_dodge, p2_dodg
                 })
 
         elif pokemon.status == "poison":
-            dot = max(1, pokemon.max_hp // 16)
-            pokemon.current_hp = max(0, pokemon.current_hp - dot)
-            events.append({
-                "event": "dot_damage",
-                "player_index": pid,
-                "pokemon": pokemon.name,
-                "status": "poison",
-                "damage": dot,
-                "new_hp": pokemon.current_hp,
-                "max_hp": pokemon.max_hp,
-                "text": f"{pokemon.name} is hurt by poison!"
-            })
-            if pokemon.current_hp <= 0:
-                pokemon.is_fainted = True
+            # Poison Heal: heal instead of taking damage
+            eot = check_ability("end_of_turn", pokemon)
+            if eot and eot.get("poison_heal"):
+                heal = max(1, pokemon.max_hp // 8)
+                pokemon.current_hp = min(pokemon.max_hp, pokemon.current_hp + heal)
                 events.append({
-                    "event": "faint",
+                    "event": "ability_activate",
                     "player_index": pid,
                     "pokemon": pokemon.name,
-                    "text": f"{pokemon.name} fainted!"
+                    "text": f"{pokemon.name}'s Poison Heal restores HP!"
                 })
+            else:
+                dot = max(1, pokemon.max_hp // 16)
+                pokemon.current_hp = max(0, pokemon.current_hp - dot)
+                events.append({
+                    "event": "dot_damage",
+                    "player_index": pid,
+                    "pokemon": pokemon.name,
+                    "status": "poison",
+                    "damage": dot,
+                    "new_hp": pokemon.current_hp,
+                    "max_hp": pokemon.max_hp,
+                    "text": f"{pokemon.name} is hurt by poison!"
+                })
+                if pokemon.current_hp <= 0:
+                    pokemon.is_fainted = True
+                    events.append({
+                        "event": "faint",
+                        "player_index": pid,
+                        "pokemon": pokemon.name,
+                        "text": f"{pokemon.name} fainted!"
+                    })
+
+    # End-of-turn abilities (Speed Boost)
+    for pid, pokemon in enumerate([p1_pokemon, p2_pokemon]):
+        if pokemon.is_fainted:
+            continue
+        eot = check_ability("end_of_turn", pokemon)
+        if eot and eot.get("speed_boost"):
+            pokemon.speed_stage = min(6, pokemon.speed_stage + 1)
+            events.append({
+                "event": "ability_activate",
+                "player_index": pid,
+                "pokemon": pokemon.name,
+                "text": eot["text"],
+            })
 
     # Determine who needs to switch
     if p1_pokemon.is_fainted:

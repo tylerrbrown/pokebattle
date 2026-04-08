@@ -528,6 +528,7 @@ input.invalid { border-color: var(--red); }
 .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .move-btn .move-name { font-size: var(--fs-sm); display: block; }
 .move-btn .move-meta { font-size: var(--fs-xs); color: var(--text-dim); margin-top: 3px; display: flex; justify-content: center; gap: 8px; }
+.ability-badge { font-size:10px; color:#c084fc; font-style:italic; }
 .move-type-badge {
   display: inline-block;
   padding: 1px 5px;
@@ -2021,6 +2022,7 @@ function handleMessage(msg) {
       if (msg.evolutions) S._evoData = msg.evolutions;
       if (msg.mega_evolutions) S._megaData = msg.mega_evolutions;
       if (msg.dynamax) S._dynamaxData = msg.dynamax;
+      if (msg.abilities) S._abilities = msg.abilities;
       // Build move lookup for learn-move overlays
       msg.pokemon_list.forEach(function(pk) {
         if (pk.moves) pk.moves.forEach(function(m) { S._moveLookup[m.id] = m; });
@@ -3695,6 +3697,7 @@ function renderMyTeam(team, allPokemon) {
         '<div class="ptypes">' + types.map(function(t) {
           return '<span class="move-type-badge" style="background:var(--type-' + t + ')">' + t + '</span>';
         }).join(' ') + '</div>' +
+        (pokeData && pokeData.ability_name ? '<div class="ability-badge">' + pokeData.ability_name + '</div>' : '') +
         '<div class="myteam-moves">' + displayMoves + '</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:4px;flex:none">' +
@@ -4431,6 +4434,7 @@ function renderJourneyBattle() {
     if (myPoke.is_shiny) nh += ' <span class="shiny-star">\u2605</span>';
     if (myPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + myPoke.dynamax_turns_left + ' turns]</span>';
     if (myPoke.status) nh += ' <span class="poke-status-badge status-' + myPoke.status + '">' + myPoke.status.toUpperCase().slice(0,3) + '</span>';
+    if (myPoke.ability_name) nh += ' <span class="ability-badge">' + myPoke.ability_name + '</span>';
     document.getElementById('player-name-battle').innerHTML = nh;
     setHpBar('player-hp-bar', 'player-hp-text', myPoke.current_hp, myPoke.max_hp, true);
     // XP bar in battle (journey mode)
@@ -4466,6 +4470,7 @@ function renderJourneyBattle() {
     if (S.encounterType === 'training') nh += ' <span class="training-badge">TRAINING</span>';
     if (oppPoke.is_dynamaxed) nh += ' <span class="dynamax-turns">[' + oppPoke.dynamax_turns_left + ' turns]</span>';
     if (oppPoke.status) nh += ' <span class="poke-status-badge status-' + oppPoke.status + '">' + oppPoke.status.toUpperCase().slice(0,3) + '</span>';
+    if (oppPoke.ability_name) nh += ' <span class="ability-badge">' + oppPoke.ability_name + '</span>';
     document.getElementById('opp-name').innerHTML = nh;
     setHpBar('opp-hp-bar', 'opp-hp-text', oppPoke.current_hp, oppPoke.max_hp, false);
   }
@@ -4849,6 +4854,11 @@ async function playJourneyEvents(events) {
         break;
       case 'dynamax_end':
         setBattleText(evt.pokemon + "'s Dynamax ended!");
+        renderJourneyBattle();
+        await delay(1000);
+        break;
+      case 'ability_activate':
+        setBattleText(evt.text || evt.pokemon + "'s ability activated!");
         renderJourneyBattle();
         await delay(1000);
         break;

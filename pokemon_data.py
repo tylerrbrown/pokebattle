@@ -15,13 +15,14 @@ ZMOVES = {}       # type (str) -> {name, power_mult}
 MEGA_EVOLUTIONS = {}  # str(dex_id) -> mega form data (or list for dual megas)
 DYNAMAX = {}      # dynamax data: max_move_powers, max_move_names, gigantamax
 REGIONS = []      # region data from regions.json
+ABILITIES = {}    # ability_id (str) -> ability definition dict
 POKEMON_LIST = [] # ordered list for client
 _NAME_TO_ID = {}  # lowercase name -> dex_id (built during load)
 
 
 def load_data():
     """Load all JSON data files. Call once at startup."""
-    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, ZMOVES, MEGA_EVOLUTIONS, DYNAMAX, REGIONS, POKEMON_LIST, _NAME_TO_ID
+    global POKEMON, MOVES, TYPE_CHART, LEARNSETS, EVOLUTIONS, ZMOVES, MEGA_EVOLUTIONS, DYNAMAX, REGIONS, ABILITIES, POKEMON_LIST, _NAME_TO_ID
 
     with open(os.path.join(DATA_DIR, "pokemon.json")) as f:
         pokemon_list = json.load(f)
@@ -62,6 +63,11 @@ def load_data():
         with open(regions_path) as f:
             REGIONS = json.load(f)
 
+    abilities_path = os.path.join(DATA_DIR, "abilities.json")
+    if os.path.exists(abilities_path):
+        with open(abilities_path) as f:
+            ABILITIES = json.load(f)
+
     # Index by dex ID
     POKEMON = {p["id"]: p for p in pokemon_list}
 
@@ -71,11 +77,14 @@ def load_data():
     # Build client-safe list (no need to hide anything, but ensure structure)
     POKEMON_LIST = []
     for p in pokemon_list:
+        ab = p.get("ability")
         POKEMON_LIST.append({
             "id": p["id"],
             "name": p["name"],
             "types": p["types"],
             "base_stats": p["base_stats"],
+            "ability": ab,
+            "ability_name": ABILITIES.get(ab, {}).get("name", "") if ab else "",
             "moves": [
                 {"id": mid, **MOVES[mid]}
                 for mid in p["moves"]

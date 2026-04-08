@@ -278,7 +278,7 @@ python tests/test_battle_engine.py
 
 ### Feature Requests (4/6/2026 - from Liam, "Round 5")
 - ~~**Shop-gated Mega/Dynamax/Z-Moves**: Z-Crystals ($5K) and Mega Stones ($10K) were already shop-gated; added Dynamax Band ($8K) to gate Dynamax. All three mechanics now require shop purchases.~~ (DONE 4/6/2026)
-- **Pokemon abilities**: Every Pokemon gets a passive ability (Blaze, Overgrow, Intimidate, etc.)
+- ~~**Pokemon abilities**: 29 abilities implemented (Blaze, Torrent, Overgrow, Intimidate, Levitate, Sturdy, etc.). All 1025 Pokemon assigned via type defaults + specific overrides. Central `check_ability()` dispatch in battle_engine.py.~~ (DONE 4/8/2026)
 - ~~**Rival system**: Blue appears at 6 scripted points (after badges 2/4/6/8, post-Champion, Masters). Blocks progression until defeated. Team counters player's starter.~~ (DONE 4/6/2026)
 - ~~**Random trainer battles**: 18% chance on wild encounter. Can't run. Scales with badges (2-4 Pokemon). $200-400 reward, 25% rare candy drop.~~ (DONE 4/6/2026)
 - **Eviolite/Everstone**: Items to prevent evolution or boost unevolved Pokemon
