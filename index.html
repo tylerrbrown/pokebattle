@@ -1316,6 +1316,11 @@ input.invalid { border-color: var(--red); }
 @keyframes dynamax-pulse { 0%,100%{filter:drop-shadow(0 0 10px rgba(239,68,68,0.5))} 50%{filter:drop-shadow(0 0 20px rgba(239,68,68,0.9))} }
 .dynamaxed-sprite { animation:dynamax-pulse 2s ease-in-out infinite; }
 
+/* ─── Mega Evolution ──────────────────────────── */
+.mega-sprite { transform:scale(1.15); filter:brightness(1.2) drop-shadow(0 0 8px #c084fc); transition:transform 0.4s, filter 0.4s; }
+@keyframes mega-pulse { 0%,100%{filter:brightness(1.2) drop-shadow(0 0 8px #c084fc)} 50%{filter:brightness(1.3) drop-shadow(0 0 16px #e879f9)} }
+.mega-sprite { animation:mega-pulse 2.4s ease-in-out infinite; }
+
 /* ─── Shiny Pokemon ──────────────────────────── */
 .shiny-sprite { filter: hue-rotate(180deg) saturate(1.3); }
 .shiny-star { color: #ffd700; font-size: var(--fs-sm); margin-left: 4px;
@@ -4428,6 +4433,8 @@ function renderJourneyBattle() {
     ps.style.display = myPoke.is_fainted ? 'none' : '';
     // Dynamax sprite effect
     if (myPoke.is_dynamaxed) { ps.classList.add('dynamaxed-sprite'); } else { ps.classList.remove('dynamaxed-sprite'); }
+    // Mega Evolution sprite effect
+    if (myPoke.is_mega) { ps.classList.add('mega-sprite'); } else { ps.classList.remove('mega-sprite'); }
     // Shiny sprite effect
     if (myPoke.is_shiny) { ps.classList.add('shiny-sprite'); } else { ps.classList.remove('shiny-sprite'); }
     let nh = myPoke.name + ' <span class="journey-level">Lv.' + (myPoke.level || '?') + '</span>';
@@ -4459,9 +4466,11 @@ function renderJourneyBattle() {
     os.src = '/sprites/front/' + String(oppPoke.dex_id).padStart(3,'0') + '.png';
     os.classList.remove('faint');
     os.classList.remove('dynamaxed-sprite');
+    os.classList.remove('mega-sprite');
     os.classList.remove('shiny-sprite');
     os.style.display = (oppPoke.is_fainted || oppPoke.current_hp <= 0) ? 'none' : '';
     if (oppPoke.is_dynamaxed) os.classList.add('dynamaxed-sprite');
+    if (oppPoke.is_mega) os.classList.add('mega-sprite');
     if (oppPoke.is_shiny) os.classList.add('shiny-sprite');
     const prefix = S.encounterType === 'gym' ? (S.gymData ? S.gymData.name + "'s " : '') : (S.encounterType === 'training' ? '' : 'Wild ');
     const isLegendary = S.encounterType === 'wild' && oppPoke.rarity === 'legendary';
@@ -4811,10 +4820,15 @@ async function playJourneyEvents(events) {
         break;
       case 'damage': {
         playSound('hit');
-        const isOpp = evt.side ? evt.side !== 'player' : (S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon);
+        // Prefer player_index (PvP/battle_engine), fall back to side (journey),
+        // then to name matching as a last resort. Name matching can fail when
+        // updateJourneyState already swapped in the next opponent Pokemon.
+        const isOpp = evt.player_index !== undefined ? evt.player_index === 1 :
+                      (evt.side ? evt.side !== 'player' : (S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon));
         const sId = isOpp ? 'opp-sprite' : 'player-sprite';
         document.getElementById(sId).classList.add('hit-flash');
-        setHpBar(isOpp ? 'opp-hp-bar' : 'player-hp-bar', isOpp ? 'opp-hp-text' : 'player-hp-text', evt.hp, evt.max_hp, !isOpp);
+        const hpVal = (evt.hp !== undefined) ? evt.hp : evt.new_hp;
+        setHpBar(isOpp ? 'opp-hp-bar' : 'player-hp-bar', isOpp ? 'opp-hp-text' : 'player-hp-text', hpVal, evt.max_hp, !isOpp);
         await delay(900);
         document.getElementById(sId).classList.remove('hit-flash');
         break;
@@ -4826,7 +4840,8 @@ async function playJourneyEvents(events) {
       case 'faint': {
         setBattleText(evt.pokemon + ' fainted!');
         playSound('faint');
-        const isOppF = evt.side ? evt.side !== 'player' : (S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon);
+        const isOppF = evt.player_index !== undefined ? evt.player_index === 1 :
+                       (evt.side ? evt.side !== 'player' : (S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon));
         document.getElementById(isOppF ? 'opp-sprite' : 'player-sprite').classList.add('faint');
         await delay(1200);
         break;
@@ -4861,6 +4876,36 @@ async function playJourneyEvents(events) {
         setBattleText(evt.text || evt.pokemon + "'s ability activated!");
         renderJourneyBattle();
         await delay(1000);
+        break;
+      case 'stat_change':
+        setBattleText(evt.text);
+        await delay(700);
+        break;
+      case 'heal': {
+        setBattleText(evt.text || (evt.pokemon + ' recovered health!'));
+        playSound('select');
+        // Determine which side is healing: prefer side, then player_index, then name match
+        const isOppH = evt.side ? evt.side !== 'player' :
+                       (evt.player_index !== undefined ? evt.player_index === 1 :
+                        (S.oppTeam[0] && S.oppTeam[0].name === evt.pokemon));
+        const healHpVal = (evt.hp !== undefined) ? evt.hp : evt.new_hp;
+        setHpBar(isOppH ? 'opp-hp-bar' : 'player-hp-bar',
+                 isOppH ? 'opp-hp-text' : 'player-hp-text',
+                 healHpVal, evt.max_hp, !isOppH);
+        // Heal flash on the right sprite
+        const healSprite2 = document.getElementById(isOppH ? 'opp-sprite' : 'player-sprite');
+        healSprite2.classList.add('item-heal-flash');
+        await delay(1000);
+        healSprite2.classList.remove('item-heal-flash');
+        break;
+      }
+      case 'status_cure':
+        setBattleText(evt.text || (evt.pokemon + "'s status was cured!"));
+        await delay(700);
+        break;
+      case 'no_effect':
+        setBattleText(evt.text || 'But nothing happened!');
+        await delay(700);
         break;
     }
   }

@@ -618,35 +618,74 @@ def check_status_prevents_action(pokemon):
 
 
 def apply_stat_effect(move, target, attacker, events):
-    """Apply stat-changing effects from moves like Growl, Leer, etc."""
+    """Apply stat-changing effects from moves like Growl, Leer, etc.
+
+    Each move maps to a list of (stat_attr, delta, pokemon, stat_name) tuples
+    so that multi-stat moves like Bulk Up and Shell Smash can be expressed
+    as a single entry. Single-stat moves use a list with one element.
+    """
     move_id = move.get("id", "")
 
     stat_changes = {
-        "growl": ("attack_stage", -1, target, "Attack"),
-        "leer": ("defense_stage", -1, target, "Defense"),
-        "tail-whip": ("defense_stage", -1, target, "Defense"),
-        "screech": ("defense_stage", -2, target, "Defense"),
-        "sand-attack": ("accuracy_stage", -1, target, "accuracy"),
-        "smokescreen": ("accuracy_stage", -1, target, "accuracy"),
-        "string-shot": ("speed_stage", -1, target, "Speed"),
-        "double-team": ("evasion_stage", 1, attacker, "evasion"),
-        "minimize": ("evasion_stage", 1, attacker, "evasion"),
-        "harden": ("defense_stage", 1, attacker, "Defense"),
-        "withdraw": ("defense_stage", 1, attacker, "Defense"),
-        "defense-curl": ("defense_stage", 1, attacker, "Defense"),
-        "barrier": ("defense_stage", 2, attacker, "Defense"),
-        "light-screen": ("special_stage", 1, attacker, "Special"),
-        "reflect": ("defense_stage", 1, attacker, "Defense"),
-        "sharpen": ("attack_stage", 1, attacker, "Attack"),
-        "meditate": ("attack_stage", 1, attacker, "Attack"),
-        "growth": ("special_stage", 1, attacker, "Special"),
-        "agility": ("speed_stage", 2, attacker, "Speed"),
-        "amnesia": ("special_stage", 2, attacker, "Special"),
-        "focus-energy": ("attack_stage", 1, attacker, "Attack"),  # Simplified
+        # Single-stat opponent debuffs
+        "growl":         [("attack_stage", -1, target, "Attack")],
+        "leer":          [("defense_stage", -1, target, "Defense")],
+        "tail-whip":     [("defense_stage", -1, target, "Defense")],
+        "screech":       [("defense_stage", -2, target, "Defense")],
+        "sand-attack":   [("accuracy_stage", -1, target, "accuracy")],
+        "smokescreen":   [("accuracy_stage", -1, target, "accuracy")],
+        "flash":         [("accuracy_stage", -1, target, "accuracy")],
+        "string-shot":   [("speed_stage", -1, target, "Speed")],
+        "scary-face":    [("speed_stage", -2, target, "Speed")],
+        "cotton-spore":  [("speed_stage", -2, target, "Speed")],
+        "sweet-scent":   [("evasion_stage", -1, target, "evasion")],
+        "charm":         [("attack_stage", -2, target, "Attack")],
+        "feather-dance": [("attack_stage", -2, target, "Attack")],
+        "metal-sound":   [("special_stage", -2, target, "Special")],
+        # Single-stat self buffs
+        "double-team":   [("evasion_stage", 1, attacker, "evasion")],
+        "minimize":      [("evasion_stage", 1, attacker, "evasion")],
+        "harden":        [("defense_stage", 1, attacker, "Defense")],
+        "withdraw":      [("defense_stage", 1, attacker, "Defense")],
+        "defense-curl":  [("defense_stage", 1, attacker, "Defense")],
+        "barrier":       [("defense_stage", 2, attacker, "Defense")],
+        "light-screen":  [("special_stage", 1, attacker, "Special")],
+        "reflect":       [("defense_stage", 1, attacker, "Defense")],
+        "sharpen":       [("attack_stage", 1, attacker, "Attack")],
+        "meditate":      [("attack_stage", 1, attacker, "Attack")],
+        "growth":        [("special_stage", 1, attacker, "Special")],
+        "agility":       [("speed_stage", 2, attacker, "Speed")],
+        "amnesia":       [("special_stage", 2, attacker, "Special")],
+        "focus-energy":  [("attack_stage", 1, attacker, "Attack")],  # Simplified
+        "swords-dance":  [("attack_stage", 2, attacker, "Attack")],
+        "nasty-plot":    [("special_stage", 2, attacker, "Special")],
+        "iron-defense":  [("defense_stage", 2, attacker, "Defense")],
+        "acid-armor":    [("defense_stage", 2, attacker, "Defense")],
+        "rock-polish":   [("speed_stage", 2, attacker, "Speed")],
+        "howl":          [("attack_stage", 1, attacker, "Attack")],
+        "charge":        [("special_stage", 1, attacker, "Special")],
+        "calm-mind":     [("special_stage", 1, attacker, "Special")],
+        # Multi-stat moves
+        "cosmic-power":  [("defense_stage", 1, attacker, "Defense"),
+                          ("special_stage", 1, attacker, "Special")],
+        "bulk-up":       [("attack_stage", 1, attacker, "Attack"),
+                          ("defense_stage", 1, attacker, "Defense")],
+        "dragon-dance":  [("attack_stage", 1, attacker, "Attack"),
+                          ("speed_stage", 1, attacker, "Speed")],
+        "hone-claws":    [("attack_stage", 1, attacker, "Attack"),
+                          ("accuracy_stage", 1, attacker, "accuracy")],
+        "shell-smash":   [("attack_stage", 2, attacker, "Attack"),
+                          ("special_stage", 2, attacker, "Special"),
+                          ("speed_stage", 2, attacker, "Speed"),
+                          ("defense_stage", -1, attacker, "Defense")],
+        "tickle":        [("attack_stage", -1, target, "Attack"),
+                          ("defense_stage", -1, target, "Defense")],
     }
 
-    if move_id in stat_changes:
-        stat_attr, delta, pokemon, stat_name = stat_changes[move_id]
+    if move_id not in stat_changes:
+        return False
+
+    for stat_attr, delta, pokemon, stat_name in stat_changes[move_id]:
         old_val = getattr(pokemon, stat_attr)
         new_val = max(-6, min(6, old_val + delta))
 
@@ -676,9 +715,7 @@ def apply_stat_effect(move, target, attacker, events):
                 "stages": delta,
                 "text": text
             })
-        return True
-
-    return False
+    return True
 
 
 def apply_status_effect(move, target, events):
@@ -883,10 +920,22 @@ def resolve_move(attacker_pokemon, defender_pokemon, move, dodge_mult, events,
             _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 
-        if move_id == "recover":
+        if move_id in ("recover", "milk-drink", "slack-off", "roost",
+                       "synthesis", "moonlight", "morning-sun", "soft-boiled"):
             heal = attacker_pokemon.max_hp // 2
             attacker_pokemon.current_hp = min(attacker_pokemon.max_hp, attacker_pokemon.current_hp + heal)
             events.append({"event": "heal", "pokemon": attacker_pokemon.name, "new_hp": attacker_pokemon.current_hp, "max_hp": attacker_pokemon.max_hp, "text": f"{attacker_pokemon.name} recovered health!"})
+            _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
+            return
+
+        if move_id in ("refresh", "heal-bell", "aromatherapy"):
+            if attacker_pokemon.status:
+                attacker_pokemon.status = None
+                attacker_pokemon.sleep_turns = 0
+                events.append({"event": "status_cure", "pokemon": attacker_pokemon.name,
+                               "text": f"{attacker_pokemon.name}'s status was cured!"})
+            else:
+                events.append({"event": "no_effect", "text": "But nothing happened!"})
             _tag_move_events(events, _ev_start, attacker_pokemon, defender_pokemon, attacker_idx, defender_idx)
             return
 

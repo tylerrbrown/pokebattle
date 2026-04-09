@@ -38,7 +38,7 @@ from journey import (
 )
 from battle_engine import (
     PokemonInstance, build_journey_team, resolve_turn, calculate_damage, STRUGGLE,
-    apply_switch_in_ability, apply_switch_out_ability,
+    apply_switch_in_ability, apply_switch_out_ability, apply_stat_effect,
 )
 
 APP_DIR = pathlib.Path(__file__).parent
@@ -2924,8 +2924,58 @@ def _resolve_single_move(attacker, defender, move, dodge_mult, side):
                    "move_type": move.get("type", "normal"), "is_damage_move": move.get("power", 0) > 0,
                    "dodged": dodge_mult < 1.0})
 
+    move_id = move.get("id", "")
     power = move.get("power", 0)
     if power == 0:
+        # Stat-changing moves (Swords Dance, Bulk Up, Tickle, etc.)
+        stat_events = []
+        if apply_stat_effect(move, defender, attacker, stat_events):
+            for sevt in stat_events:
+                # Tag with side based on which Pokemon the event references
+                sevt_side = side if sevt.get("pokemon") == attacker.name else defender_side
+                sevt["side"] = sevt_side
+                events.append(sevt)
+            if move.get("id") != "struggle":
+                move["current_pp"] = max(0, move["current_pp"] - 1)
+            return events
+
+        # Healing moves: 50% max HP recovery
+        if move_id in ("recover", "milk-drink", "slack-off", "roost",
+                       "synthesis", "moonlight", "morning-sun", "soft-boiled"):
+            heal = attacker.max_hp // 2
+            attacker.current_hp = min(attacker.max_hp, attacker.current_hp + heal)
+            events.append({"type": "heal", "side": side, "pokemon": attacker.name,
+                           "hp": attacker.current_hp, "max_hp": attacker.max_hp,
+                           "text": f"{attacker.name} recovered health!"})
+            if move.get("id") != "struggle":
+                move["current_pp"] = max(0, move["current_pp"] - 1)
+            return events
+
+        # Status cure moves
+        if move_id in ("refresh", "heal-bell", "aromatherapy"):
+            if attacker.status:
+                attacker.status = None
+                attacker.sleep_turns = 0
+                events.append({"type": "status_cure", "side": side, "pokemon": attacker.name,
+                               "text": f"{attacker.name}'s status was cured!"})
+            else:
+                events.append({"type": "no_effect", "text": "But nothing happened!"})
+            if move.get("id") != "struggle":
+                move["current_pp"] = max(0, move["current_pp"] - 1)
+            return events
+
+        # Rest: full heal + sleep
+        if move_id == "rest":
+            attacker.current_hp = attacker.max_hp
+            attacker.status = "sleep"
+            attacker.sleep_turns = 2
+            events.append({"type": "heal", "side": side, "pokemon": attacker.name,
+                           "hp": attacker.current_hp, "max_hp": attacker.max_hp,
+                           "text": f"{attacker.name} went to sleep and became healthy!"})
+            if move.get("id") != "struggle":
+                move["current_pp"] = max(0, move["current_pp"] - 1)
+            return events
+
         # Status move — simplified handling
         effect = move.get("effect")
         if effect and "status" in str(effect) and defender.status is None:
