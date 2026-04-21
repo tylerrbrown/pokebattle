@@ -243,7 +243,7 @@ python tests/test_battle_engine.py
 
 - **iCloud email**: liam4now@icloud.com (this is how his messages appear in iMessage DB)
 - **Phone**: (785) 761-6790 — but messages come through iCloud, not phone number
-- **To pull his messages**: Use `mcp__imessage__tool_get_recent_messages` with NO contact filter (omit the contact param), then visually scan for `liam4now@icloud.com` entries. Do NOT filter by contact name or phone number — his messages route through iCloud, not his phone number, so contact-filtered queries miss them. Do NOT rely on `fuzzy_search_messages` alone — it only finds messages matching a keyword and will miss messages on other topics.
+- **To pull his messages**: Call `mcp__apple-tyler-messages__get_chat_messages` with `chat_id="liam4now@icloud.com"`. The new MCP accepts phone numbers, iCloud emails, and group chat IDs as `chat_id`, so the old "no contact filter" workaround is obsolete.
 
 ## Feature Request Tracker (from Liam, 3/17–3/18/2026)
 
